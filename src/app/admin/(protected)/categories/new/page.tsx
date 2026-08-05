@@ -6,6 +6,12 @@ import { useCreateCategory } from "@/hooks/categories/useCategoryMutations";
 import { ApiError } from "@/lib/api-client";
 import { toast } from "@/lib/toast";
 
+// Route protection for /admin/* is enforced in src/proxy.ts (edge
+// middleware), not by a dynamic API call in this Server Component itself —
+// without forcing dynamic rendering, Next tries to statically prerender this
+// admin page at build time and fails.
+export const dynamic = "force-dynamic";
+
 export default function NewCategoryPage() {
   const router = useRouter();
   const { mutate, isPending, error } = useCreateCategory();

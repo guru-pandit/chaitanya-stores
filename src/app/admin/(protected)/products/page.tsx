@@ -17,6 +17,12 @@ import { RowActions } from "@/components/admin/RowActions";
 import { Select } from "@/components/ui/Select";
 import type { ProductWithCategory } from "@/hooks/products/useProducts";
 
+// Route protection for /admin/* is enforced in src/proxy.ts (edge
+// middleware), not by a dynamic API call in this Server Component itself —
+// without forcing dynamic rendering, Next tries to statically prerender this
+// admin page at build time and fails.
+export const dynamic = "force-dynamic";
+
 const PAGE_SIZE = 20;
 
 export default function AdminProductsPage() {

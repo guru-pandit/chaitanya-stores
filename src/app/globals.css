@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+:root {
+  --color-cream: #fbf3e7;
+  --color-cream-dark: #f2e4cd;
+  --color-terracotta: #c1622d;
+  --color-terracotta-dark: #a34f22;
+  --color-maroon: #6b1e23;
+  --color-maroon-dark: #4a1418;
+  --color-gold: #c99a2e;
+  --color-gold-light: #e4c877;
+  --color-charcoal: #2a211c;
+}
+
+@theme inline {
+  --color-cream: var(--color-cream);
+  --color-cream-dark: var(--color-cream-dark);
+  --color-terracotta: var(--color-terracotta);
+  --color-terracotta-dark: var(--color-terracotta-dark);
+  --color-maroon: var(--color-maroon);
+  --color-maroon-dark: var(--color-maroon-dark);
+  --color-gold: var(--color-gold);
+  --color-gold-light: var(--color-gold-light);
+  --color-charcoal: var(--color-charcoal);
+  --font-display: var(--font-playfair);
+  --font-sans: var(--font-worksans);
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-charcoal);
+}
+
+@keyframes hero-zoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+.animate-hero-zoom {
+  animation: hero-zoom 7s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-zoom {
+    animation: none;
+  }
+}
+
+/* Keeps hero text legible over an arbitrary background photo (see
+   HeroSlideshow) — a soft cream glow rather than a hard drop shadow, so it
+   reads naturally on the plain gradient background too. */
+.hero-text-glow {
+  text-shadow:
+    0 1px 16px var(--color-cream),
+    0 1px 4px var(--color-cream);
+}

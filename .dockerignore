@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.env
+.env.*
+!.env.example
+public/uploads/*
+!public/uploads/.gitkeep
+npm-debug.log*
+coverage
+*.tsbuildinfo
+dev.db
+.vscode
+.DS_Store

@@ -1,0 +1,129 @@
+# Rendered by the official nginx image's docker-entrypoint envsubst step:
+# every `${VAR}` below is replaced with the nginx service's own environment
+# (see docker-compose.yml) before being written to /etc/nginx/conf.d/default.conf.
+# nginx's own runtime variables (single-dollar, e.g. $remote_addr) are left
+# untouched since they aren't set shell env vars.
+
+# Per-IP request-rate limits — generous for normal browsing/API use, much
+# stricter for auth endpoints (login brute-force resistance).
+limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
+limit_req_zone $binary_remote_addr zone=auth_limit:10m rate=5r/m;
+# Per-IP concurrent connection cap — blunts slow-loris style connection floods.
+limit_conn_zone $binary_remote_addr zone=conn_limit:10m;
+
+# Hide the nginx version from Server response headers and default error pages.
+server_tokens off;
+
+gzip on;
+gzip_vary on;
+gzip_comp_level 5;
+gzip_min_length 256;
+gzip_types text/plain text/css text/xml application/json application/javascript application/xml+rss image/svg+xml;
+
+# ---- HTTP: redirect everything to HTTPS, except the ACME HTTP-01 challenge ----
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${DOMAIN_NAME};
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# ---- HTTPS: the real application ----
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name ${DOMAIN_NAME};
+
+    ssl_certificate     /etc/letsencrypt/live/${DOMAIN_NAME}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN_NAME}/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/${DOMAIN_NAME}/chain.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
+
+    # OCSP stapling
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    resolver 1.1.1.1 1.0.0.1 valid=300s;
+    resolver_timeout 5s;
+
+    # Security headers
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()" always;
+    add_header Content-Security-Policy "default-src 'self'; img-src 'self' data: blob:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'" always;
+
+    client_max_body_size 15m;
+
+    proxy_read_timeout 30s;
+    proxy_connect_timeout 10s;
+    proxy_send_timeout 30s;
+    send_timeout 30s;
+    keepalive_timeout 65s;
+
+    limit_conn conn_limit 20;
+
+    # Strip/normalize any client-supplied forwarding headers so they can't be
+    # spoofed to fake the caller's origin — only nginx's own computed values
+    # for the real client IP/proto are ever forwarded to the app.
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+
+    # Uploaded product images — served directly from the shared volume,
+    # bypassing the Node process entirely. Read-only mount (see
+    # docker-compose.yml); no directory listing, no script execution.
+    location /uploads/ {
+        alias /var/www/uploads/;
+        autoindex off;
+        add_header Cache-Control "public, max-age=2592000, immutable";
+        location ~* \.(php|jsp|cgi|pl|py|sh)$ {
+            deny all;
+        }
+    }
+
+    # Next.js build assets are content-hashed — safe to cache for a long time.
+    location /_next/static/ {
+        limit_req zone=api_limit burst=40 nodelay;
+        proxy_pass http://web:3000;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+
+    # Auth endpoints get a much tighter rate limit than general API traffic.
+    location /api/auth/ {
+        limit_req zone=auth_limit burst=5 nodelay;
+        proxy_pass http://web:3000;
+    }
+
+    location /admin/login {
+        limit_req zone=auth_limit burst=5 nodelay;
+        proxy_pass http://web:3000;
+    }
+
+    location /api/ {
+        limit_req zone=api_limit burst=20 nodelay;
+        proxy_pass http://web:3000;
+    }
+
+    location / {
+        limit_req zone=api_limit burst=20 nodelay;
+        proxy_pass http://web:3000;
+    }
+}

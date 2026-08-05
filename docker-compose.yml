@@ -1,0 +1,167 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - internal
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+      - DAC_OVERRIDE
+      - FOWNER
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    # Intentionally no `ports:` — only reachable from other containers on the
+    # `internal` network, never from the host or the public internet.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_BUSINESS_PHONE: ${NEXT_PUBLIC_BUSINESS_PHONE}
+        NEXT_PUBLIC_BUSINESS_WHATSAPP: ${NEXT_PUBLIC_BUSINESS_WHATSAPP}
+        NEXT_PUBLIC_BUSINESS_EMAIL: ${NEXT_PUBLIC_BUSINESS_EMAIL}
+        NEXT_PUBLIC_BUSINESS_ADDRESS: ${NEXT_PUBLIC_BUSINESS_ADDRESS}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXT_PUBLIC_BUSINESS_PHONE: ${NEXT_PUBLIC_BUSINESS_PHONE}
+      NEXT_PUBLIC_BUSINESS_WHATSAPP: ${NEXT_PUBLIC_BUSINESS_WHATSAPP}
+      NEXT_PUBLIC_BUSINESS_EMAIL: ${NEXT_PUBLIC_BUSINESS_EMAIL}
+      NEXT_PUBLIC_BUSINESS_ADDRESS: ${NEXT_PUBLIC_BUSINESS_ADDRESS}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+    volumes:
+      - uploads:/app/public/uploads
+    networks:
+      - internal
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    # Intentionally no `ports:` — only nginx talks to this over the internal
+    # network; nothing binds it to the host or the public internet.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nginx:
+    image: nginx:stable
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    environment:
+      DOMAIN_NAME: ${DOMAIN_NAME}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates:ro
+      - uploads:/var/www/uploads:ro
+      - certbot_etc:/etc/letsencrypt:ro
+      - certbot_webroot:/var/www/certbot:ro
+    networks:
+      - internal
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+      - NET_BIND_SERVICE
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Runs `prisma migrate deploy` before/after each release. Deliberately
+  # built from the dedicated `migrator` stage, not the slim `web` runtime
+  # image: `output: "standalone"` prunes the Next.js server's own dependency
+  # tree, which excludes the `prisma` CLI package (a devDependency, never
+  # imported by app code) and the schema-engine binary it needs. `migrator`
+  # has the full `npm ci` install plus prisma/migrations but skips the
+  # Next.js build entirely, so the exact pinned CLI version runs
+  # deterministically and doesn't need any NEXT_PUBLIC_* build args. Not
+  # part of the default `up`.
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrator
+    profiles: ["tools"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    networks:
+      - internal
+
+  # One-off certificate issuance/renewal — not part of the default `up`.
+  # Run explicitly: `docker compose run --rm certbot certonly ...` (see
+  # README's "Issue the first TLS certificate" step) and renew via a cron
+  # job that runs `docker compose run --rm certbot renew` + reloads nginx.
+  certbot:
+    image: certbot/certbot:v5.7.0
+    profiles: ["certbot"]
+    volumes:
+      - certbot_etc:/etc/letsencrypt
+      - certbot_webroot:/var/www/certbot
+    networks:
+      - internal
+
+  # One-off utility for scripts/backup.sh — mounts the uploads volume
+  # read-only so a backup run can never itself corrupt live data. Not
+  # started by `docker compose up`.
+  backup:
+    image: alpine:3.20
+    profiles: ["tools"]
+    volumes:
+      - uploads:/data:ro
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  pgdata:
+  uploads:
+  certbot_etc:
+  certbot_webroot:

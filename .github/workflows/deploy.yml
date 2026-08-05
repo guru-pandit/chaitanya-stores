@@ -1,0 +1,79 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+# Least-privilege default — this workflow only needs to read the repo to
+# check it out; it deploys over SSH, not via any GitHub API write.
+permissions:
+  contents: read
+
+# A second push mid-deploy should queue behind the first, never run
+# concurrently against the same VPS.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
+        env:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          NEXT_PUBLIC_BUSINESS_PHONE: ${{ secrets.NEXT_PUBLIC_BUSINESS_PHONE }}
+          NEXT_PUBLIC_BUSINESS_WHATSAPP: ${{ secrets.NEXT_PUBLIC_BUSINESS_WHATSAPP }}
+          NEXT_PUBLIC_BUSINESS_EMAIL: ${{ secrets.NEXT_PUBLIC_BUSINESS_EMAIL }}
+          NEXT_PUBLIC_BUSINESS_ADDRESS: ${{ secrets.NEXT_PUBLIC_BUSINESS_ADDRESS }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          # appleboy/ssh-action exports exactly these names into the remote
+          # shell below — nothing else from this job's env leaks over SSH,
+          # and nothing here is ever printed (no `echo`/`set -x` on secrets).
+          envs: POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB,NEXTAUTH_SECRET,NEXTAUTH_URL,NEXT_PUBLIC_BUSINESS_PHONE,NEXT_PUBLIC_BUSINESS_WHATSAPP,NEXT_PUBLIC_BUSINESS_EMAIL,NEXT_PUBLIC_BUSINESS_ADDRESS,NEXT_PUBLIC_SITE_URL,DOMAIN_NAME,DEPLOY_PATH
+          script: |
+            set -euo pipefail
+            cd "${DEPLOY_PATH:-/opt/chaitanya-stores}"
+
+            git pull --ff-only origin main
+
+            umask 077
+            cat > .env <<ENVEOF
+            POSTGRES_USER=${POSTGRES_USER}
+            POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            POSTGRES_DB=${POSTGRES_DB}
+            NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+            NEXTAUTH_URL=${NEXTAUTH_URL}
+            NEXT_PUBLIC_BUSINESS_PHONE=${NEXT_PUBLIC_BUSINESS_PHONE}
+            NEXT_PUBLIC_BUSINESS_WHATSAPP=${NEXT_PUBLIC_BUSINESS_WHATSAPP}
+            NEXT_PUBLIC_BUSINESS_EMAIL=${NEXT_PUBLIC_BUSINESS_EMAIL}
+            NEXT_PUBLIC_BUSINESS_ADDRESS=${NEXT_PUBLIC_BUSINESS_ADDRESS}
+            NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
+            DOMAIN_NAME=${DOMAIN_NAME}
+            ENVEOF
+            chmod 600 .env
+
+            # Build+recreate the app; db/nginx are only touched if their own
+            # config changed. Never `-v`, never `down` — volumes are untouched.
+            docker compose up -d --build db web nginx
+
+            # Forward-only schema migrations, run from the full `builder`
+            # image (see docker-compose.yml's `migrate` service comment) —
+            # never `migrate reset`, never a destructive command here.
+            docker compose --profile tools run --rm migrate
+
+            docker image prune -f

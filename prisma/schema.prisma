@@ -1,0 +1,127 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  image       String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id          String           @id @default(cuid())
+  name        String
+  slug        String           @unique
+  description String?
+  brand       String
+  weight      String?
+  productType String?
+  sku         String           @unique
+  price       Int?
+  images      String           @default("[]")
+  inStock     Boolean          @default(true)
+  featured    Boolean          @default(false)
+  category    Category         @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  variants    ProductVariant[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([categoryId])
+  @@index([brand])
+}
+
+model ProductVariant {
+  id        String   @id @default(cuid())
+  label     String
+  price     Int
+  inStock   Boolean  @default(true)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+}
+
+model AdminUser {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  hashedPassword String
+  createdAt      DateTime @default(now())
+}
+
+model Enquiry {
+  id            String   @id @default(cuid())
+  productId     String?
+  name          String
+  contactMethod String
+  message       String
+  isCompleted   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  @@index([isCompleted])
+}
+
+// Singleton row (always fetched via findFirst) — holds sitewide config that
+// isn't tied to a specific Product/Category, starting with the homepage hero
+// carousel images.
+model SiteSettings {
+  id         String   @id @default(cuid())
+  heroImages String   @default("[]")
+  updatedAt  DateTime @updatedAt
+}
+
+// One business, multiple physical shops. Exactly one row should have
+// isPrimary = true at any time — enforced at the API layer (src/app/api/
+// shop-locations), not by a DB constraint, since a partial unique index
+// isn't portable across every datasource this schema targets.
+model ShopLocation {
+  id             String   @id @default(cuid())
+  name           String
+  address        String
+  phone          String
+  whatsappNumber String
+  email          String
+  isPrimary      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+enum FestivalBannerMediaType {
+  IMAGE
+  VIDEO
+}
+
+// A small list of festival greeting banners (Diwali, Ganpati, etc.) — at
+// most one is shown to visitors at a time. Unlike ShopLocation.isPrimary,
+// zero active rows is a perfectly normal state (between festivals), so
+// there's no "at least one must stay active" invariant here. A banner is
+// either an image or a video, not both — mediaType says which, mediaPath
+// points at whichever file was uploaded.
+model FestivalBanner {
+  id        String                  @id @default(cuid())
+  label     String
+  mediaType FestivalBannerMediaType @default(IMAGE)
+  mediaPath String
+  isActive  Boolean                 @default(false)
+  startDate DateTime?
+  endDate   DateTime?
+  createdAt DateTime                @default(now())
+  updatedAt DateTime                @updatedAt
+}

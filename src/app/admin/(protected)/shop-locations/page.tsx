@@ -15,6 +15,12 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Pagination } from "@/components/ui/Pagination";
 import { RowActions } from "@/components/admin/RowActions";
 
+// Route protection for /admin/* is enforced in src/proxy.ts (edge
+// middleware), not by a dynamic API call in this Server Component itself —
+// without forcing dynamic rendering, Next tries to statically prerender this
+// admin page at build time and fails.
+export const dynamic = "force-dynamic";
+
 const PAGE_SIZE = 20;
 
 export default function AdminShopLocationsPage() {

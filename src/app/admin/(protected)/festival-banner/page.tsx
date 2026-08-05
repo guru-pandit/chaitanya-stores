@@ -30,6 +30,12 @@ function formatDate(date: Date | null): string | null {
     : null;
 }
 
+// Route protection for /admin/* is enforced in src/proxy.ts (edge
+// middleware), not by a dynamic API call in this Server Component itself —
+// without forcing dynamic rendering, Next tries to statically prerender this
+// admin page at build time and fails.
+export const dynamic = "force-dynamic";
+
 export default function AdminFestivalBannerPage() {
   const [page, setPage] = useState(1);
   const { data, isLoading } = useFestivalBanners({ page, limit: PAGE_SIZE });

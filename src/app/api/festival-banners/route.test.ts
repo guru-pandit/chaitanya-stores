@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { GET, POST } from "./route";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma/client";
 
 vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 vi.mock("@/lib/prisma", () => ({
@@ -135,5 +136,41 @@ describe("POST /api/festival-banners", () => {
         endDate: null,
       },
     });
+  });
+
+  // Phase 4 audit findings #12/#13: "at most one active" is now also
+  // enforced by a Postgres partial unique index (see prisma/schema.prisma's
+  // FestivalBanner comment) — a concurrent request that wins the race
+  // surfaces here as P2002 (unique violation) or P2034 (transaction write
+  // conflict), which must translate to a clean 409, not a raw 500.
+  it.each(["P2002", "P2034"] as const)(
+    "translates a %s race inside the activation transaction into a clean 409",
+    async (code) => {
+      mockAuth.mockResolvedValueOnce({ user: { id: "admin-1" } } as never);
+      mockPrisma.$transaction.mockImplementationOnce(async () => {
+        throw new Prisma.PrismaClientKnownRequestError("conflict", {
+          code,
+          clientVersion: "test",
+        });
+      });
+
+      const res = await POST(postRequest({ ...validBody, isActive: true }));
+
+      expect(res.status).toBe(409);
+      const body = await res.json();
+      expect(body.error).toMatch(/Another banner was set as active/);
+    }
+  );
+
+  it("re-throws an unrelated Prisma error instead of swallowing it into a 409", async () => {
+    mockAuth.mockResolvedValueOnce({ user: { id: "admin-1" } } as never);
+    mockPrisma.$transaction.mockImplementationOnce(async () => {
+      throw new Prisma.PrismaClientKnownRequestError("required field missing", {
+        code: "P2011",
+        clientVersion: "test",
+      });
+    });
+
+    await expect(POST(postRequest({ ...validBody, isActive: true }))).rejects.toThrow();
   });
 });

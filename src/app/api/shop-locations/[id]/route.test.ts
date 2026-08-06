@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { GET, PATCH, DELETE } from "./route";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma/client";
 
 vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 vi.mock("@/lib/prisma", () => ({
@@ -136,6 +137,28 @@ describe("PATCH /api/shop-locations/[id]", () => {
     expect(updateMany).toHaveBeenCalledWith({ data: { isPrimary: false } });
     expect(update).toHaveBeenCalledWith({ where: { id: "loc-1" }, data: validBody });
   });
+
+  // Phase 4 audit findings #12/#13 — same DB-level "exactly one primary"
+  // enforcement as POST /api/shop-locations; see that route's test file.
+  it.each(["P2002", "P2034"] as const)(
+    "translates a %s race inside the promote-to-primary transaction into a clean 409",
+    async (code) => {
+      authed();
+      mockPrisma.shopLocation.findUnique.mockResolvedValueOnce({ id: "loc-1", isPrimary: false });
+      mockPrisma.$transaction.mockImplementationOnce(async () => {
+        throw new Prisma.PrismaClientKnownRequestError("conflict", {
+          code,
+          clientVersion: "test",
+        });
+      });
+
+      const res = await PATCH(patchRequest(validBody), { params });
+
+      expect(res.status).toBe(409);
+      const body = await res.json();
+      expect(body.error).toMatch(/Another location was set as primary/);
+    }
+  );
 });
 
 describe("DELETE /api/shop-locations/[id]", () => {

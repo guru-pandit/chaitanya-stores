@@ -82,6 +82,19 @@ const UPLOAD_LIMIT = 15;
 const UPLOAD_WINDOW_MS = 15 * 60_000;
 export const uploadRateLimiter = new RateLimiter(UPLOAD_LIMIT, UPLOAD_WINDOW_MS);
 
+// POST /api/log-client-error — IP-keyed, public/unauthenticated, no DB
+// write (just forwards into the server log stream — see that route's own
+// comment). Security review finding (Phase 4 review, not the original
+// audit): this route was missed by the initial #5/#6 rollout despite being
+// a public mutating endpoint. 30 requests per 10-minute window: a genuinely
+// buggy release can legitimately fire more client-side error reports per
+// visitor than a contact-form submission ever would (e.g. a render loop
+// re-throwing on every re-render), so this is deliberately looser than
+// contactRateLimiter rather than reusing it outright.
+const CLIENT_ERROR_LIMIT = 30;
+const CLIENT_ERROR_WINDOW_MS = 10 * 60_000;
+export const clientErrorRateLimiter = new RateLimiter(CLIENT_ERROR_LIMIT, CLIENT_ERROR_WINDOW_MS);
+
 /** Best-effort client IP extraction behind nginx (see architecture.md's deployment target). */
 export function getClientIp(req: NextRequest): string {
   const forwardedFor = req.headers.get("x-forwarded-for");

@@ -81,8 +81,11 @@ No enveloping `data`/`meta` wrapper needed at this scale — keep responses flat
 `src/lib/rate-limit.ts` provides in-memory, fixed-window rate limiters (same "in-memory is fine at this scale" stance as `src/lib/login-throttle.ts`):
 - `contactRateLimiter` — IP-keyed (via `getClientIp(req)`), 20 requests / 10 minutes, applied to `POST /api/contact`.
 - `uploadRateLimiter` — session-user-keyed, 15 requests / 15 minutes, shared between `POST /api/upload` and `POST /api/upload/video` (one combined budget, since both write to the same disk).
+- `clientErrorRateLimiter` — IP-keyed, 30 requests / 10 minutes, applied to `POST /api/log-client-error`.
 
-Both return `{ allowed, retryAfterSeconds }` from `.check(key)`; on `allowed: false`, return `rateLimitResponse(retryAfterSeconds)` (a `429` with a `Retry-After` header and a generic body). Set `RATE_LIMIT_DISABLED=true` to bypass both limiters entirely — **test-only**, see `.env.example`'s warning; never set it in production.
+Every public mutating route needs its own entry here — `log-client-error` was originally missed. Both `verifyCsrf` and a rate limiter are required on every new mutating route, public or admin (see the PR checklist in `security-baseline.md`).
+
+All limiters return `{ allowed, retryAfterSeconds }` from `.check(key)`; on `allowed: false`, return `rateLimitResponse(retryAfterSeconds)` (a `429` with a `Retry-After` header and a generic body). Set `RATE_LIMIT_DISABLED=true` to bypass every limiter entirely — **test-only**, see `.env.example`'s warning; never set it in production.
 
 ## API Domain Routes
 | Route | Purpose |

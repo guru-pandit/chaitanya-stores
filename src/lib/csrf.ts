@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 // Phase 4 audit finding #4: no server-side CSRF backstop on any mutating
 // API route — a cross-origin POST/PATCH/DELETE with a valid session cookie
@@ -19,9 +20,14 @@ import { NextRequest, NextResponse } from "next/server";
 function buildAllowedHosts(req: NextRequest): Set<string> {
   const hosts = new Set<string>();
 
-  // The host the request actually arrived on (reflects the real Host
-  // header once behind nginx in production).
-  const requestHost = req.nextUrl.host;
+  // The host the request actually arrived on. Deliberately read straight
+  // from the Host header (nginx pins this via `proxy_set_header Host
+  // $host`) rather than `req.nextUrl.host` — in the standalone Docker
+  // build, Next derives `nextUrl` from HOSTNAME/PORT (e.g. "0.0.0.0:3000"),
+  // not from the inbound Host header, so `req.nextUrl.host` never matches
+  // the real public hostname in production and this entry would silently
+  // be dead weight.
+  const requestHost = req.headers.get("host");
   if (requestHost) hosts.add(requestHost);
 
   // The configured public site URL, plus its www/bare counterpart, so a
@@ -58,12 +64,21 @@ export function verifyCsrf(req: NextRequest): NextResponse | null {
   try {
     sourceHost = new URL(source).host;
   } catch {
+    logger.warn("csrf: unparsable Origin/Referer", { path: req.nextUrl.pathname });
     return csrfRejection();
   }
 
   const allowedHosts = buildAllowedHosts(req);
   if (allowedHosts.has(sourceHost)) return null;
 
+  // Logged server-side only (never in the response body) — a
+  // misconfigured NEXT_PUBLIC_SITE_URL would otherwise silently 403 every
+  // admin write and the public contact form with no way to tell why.
+  logger.warn("csrf: rejected cross-origin request", {
+    path: req.nextUrl.pathname,
+    sourceHost,
+    allowedHosts: [...allowedHosts],
+  });
   return csrfRejection();
 }
 

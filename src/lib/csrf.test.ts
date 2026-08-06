@@ -9,9 +9,15 @@ afterEach(() => {
 });
 
 function requestWith(headers: Record<string, string>) {
+  // A real incoming request always carries a Host header (nginx pins it via
+  // `proxy_set_header Host $host`) — verifyCsrf reads that directly rather
+  // than `req.nextUrl.host` (see csrf.ts's comment on why), so the test
+  // fixture must include one too, or every "same-origin" case below would
+  // only pass via the NEXT_PUBLIC_SITE_URL fallback instead of exercising
+  // the request-derived path.
   return new NextRequest("http://localhost:3000/api/products", {
     method: "POST",
-    headers,
+    headers: { host: "localhost:3000", ...headers },
   });
 }
 
@@ -74,5 +80,19 @@ describe("verifyCsrf", () => {
     const res = verifyCsrf(requestWith({ origin: "https://attacker.example" }));
     expect(res).not.toBeNull();
     expect(res!.status).toBe(403);
+  });
+
+  // Regression test for the standalone-Docker-build bug: `req.nextUrl.host`
+  // is derived from HOSTNAME/PORT there ("0.0.0.0:3000"), not the real
+  // inbound Host header, so a request-derived allow-list entry built from
+  // `nextUrl.host` would never match the real public hostname in
+  // production. The Host header itself (which nginx pins) must be what's
+  // trusted instead.
+  it("trusts the Host header even when the request URL's own host would be wrong (standalone-build shape)", () => {
+    const req = new NextRequest("http://0.0.0.0:3000/api/products", {
+      method: "POST",
+      headers: { host: "chaitanyastores.com", origin: "https://chaitanyastores.com" },
+    });
+    expect(verifyCsrf(req)).toBeNull();
   });
 });

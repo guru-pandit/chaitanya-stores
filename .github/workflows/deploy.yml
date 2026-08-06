@@ -16,7 +16,26 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm test
+
   deploy:
+    needs: verify
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -67,13 +86,24 @@ jobs:
             ENVEOF
             chmod 600 .env
 
+            # Forward-only schema migrations, run from the full `builder`
+            # image (see docker-compose.yml's `migrate` service comment) —
+            # never `migrate reset`, never a destructive command here.
+            # Runs BEFORE the app is recreated so new code never queries a
+            # schema that isn't there yet. This only fully covers additive
+            # migrations (new column/table old code ignores) — for anything
+            # that drops or renames something the live code still
+            # references, use the two-deploy pattern from the deployment
+            # guide's Section 8.4 instead.
+            docker compose --profile tools run --rm migrate
+
             # Build+recreate the app; db/nginx are only touched if their own
             # config changed. Never `-v`, never `down` — volumes are untouched.
             docker compose up -d --build db web nginx
 
-            # Forward-only schema migrations, run from the full `builder`
-            # image (see docker-compose.yml's `migrate` service comment) —
-            # never `migrate reset`, never a destructive command here.
-            docker compose --profile tools run --rm migrate
+            # nginx caches the `web` hostname's resolved IP for the life of
+            # the worker process, so it keeps proxying to the old container
+            # after `web` is recreated above until reloaded.
+            docker compose exec nginx nginx -s reload
 
             docker image prune -f

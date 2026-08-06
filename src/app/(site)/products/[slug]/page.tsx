@@ -95,6 +95,7 @@ export default async function ProductDetailPage({
               className="object-cover"
               sizes="(min-width: 640px) 50vw, 100vw"
               priority
+              unoptimized
             />
           ) : (
             <div className="flex h-full items-center justify-center text-charcoal/40">

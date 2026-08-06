@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireAdminSession } from "@/lib/api-auth";
+import { verifyCsrf } from "@/lib/csrf";
 import { prisma } from "@/lib/prisma";
 import { updateEnquirySchema } from "@/lib/validations/enquiry";
 import { parseJsonBody } from "@/lib/parseJsonBody";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const guard = await requireAdminSession();
+  if ("response" in guard) return guard.response;
+
+  const csrfError = verifyCsrf(req);
+  if (csrfError) return csrfError;
 
   const { id } = await params;
   const parsed = await parseJsonBody(req, updateEnquirySchema);

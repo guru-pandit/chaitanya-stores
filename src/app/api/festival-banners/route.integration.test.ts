@@ -61,19 +61,17 @@ describe("POST /api/festival-banners (integration)", () => {
     expect(body.isActive).toBe(false);
   });
 
-  // Zod gap flagged in phase0-attack-surface.md §4/§6:
-  // festivalBannerSchema.mediaPath is "any non-empty string", not
-  // constrained to /uploads/... — confirmed exploitable: an off-site URL is
-  // accepted and persisted as-is.
-  it("BUG: accepts a mediaPath that isn't under /uploads/ (off-site URL)", async () => {
+  // Finding #7 fix: festivalBannerSchema.mediaPath is now constrained via
+  // uploadPathSchema to /uploads/... — an off-site URL is rejected with a
+  // clean 400 instead of being persisted as-is.
+  it("rejects a mediaPath that isn't under /uploads/ (off-site URL)", async () => {
     const res = await apiJson(
       "/api/festival-banners",
       validBannerBody({ mediaPath: "https://evil.example.com/tracker.png" })
     );
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(400);
     const body = await res.json();
-    createdIds.push(body.id);
-    expect(body.mediaPath).toBe("https://evil.example.com/tracker.png");
+    expect(body.error.fieldErrors.mediaPath).toBeDefined();
   });
 });
 

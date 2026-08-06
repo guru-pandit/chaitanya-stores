@@ -50,10 +50,12 @@
 | Restricted | Admin password (hash) | Never leaves the database layer |
 
 ## PR Security Checklist
-- [ ] Every new/changed admin route and mutating API route checks `auth()` server-side
+- [ ] Every new/changed admin route and mutating API route checks the session via `requireAdminSession()` (`src/lib/api-auth.ts`), not an inline `if (!session)`
+- [ ] Every mutating route (including public ones like `/api/contact`) calls `verifyCsrf(req)` (`src/lib/csrf.ts`) and returns its result if non-null
 - [ ] Every API route validates its body with a Zod schema (`safeParse`)
 - [ ] No raw SQL string concatenation — Prisma query builder only
 - [ ] No secrets or tokens in code, logs, or committed files
 - [ ] New env vars added to `.env.example`, not hardcoded
 - [ ] File upload validates MIME type + size before writing
+- [ ] Public/abuse-prone routes and anything writing to disk are rate/quota-limited via `src/lib/rate-limit.ts` where appropriate
 - [ ] `npm audit` — no new critical/high vulnerabilities from added dependencies

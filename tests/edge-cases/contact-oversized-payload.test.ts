@@ -1,16 +1,17 @@
 // @vitest-environment node
 //
-// Phase 1D — contactSchema.contactMethod has no max length (the only
-// unbounded field in the app, per Phase 0 §4). This is a public,
-// unauthenticated endpoint (POST /api/contact), so an unbounded field
-// here is a more attractive abuse target than an admin-only one. Testing
-// what actually happens with a very large value: accepted silently,
-// rejected, or slow/failed.
+// Phase 1D originally found contactSchema.contactMethod had no max length
+// (the only unbounded field in the app, per Phase 0 §4) — a public,
+// unauthenticated endpoint (POST /api/contact) accepting a public 100k/1M
+// char field is a cheap DB-bloat vector. Phase 4 (finding #9) added
+// .max(500) to contactSchema.contactMethod. These tests now confirm an
+// oversized payload is rejected cleanly — never accepted, never a raw 500,
+// never slow — rather than documenting the old unbounded behavior.
 import { describe, it, expect } from "vitest";
 import { BASE_URL } from "./helpers";
 
-describe("POST /api/contact — contactMethod has no Zod max length", () => {
-  it("a 100,000-character contactMethod is accepted (documents current unbounded behavior)", async () => {
+describe("POST /api/contact — oversized contactMethod is rejected cleanly", () => {
+  it("a 100,000-character contactMethod is rejected with a clean 400", async () => {
     const hugeValue = "9".repeat(100_000);
     const payload = {
       name: "Edge Case Tester",
@@ -26,28 +27,17 @@ describe("POST /api/contact — contactMethod has no Zod max length", () => {
     });
     const elapsedMs = Date.now() - start;
 
-     
     console.log(`[contactMethod oversized] status=${res.status} elapsed=${elapsedMs}ms len=${hugeValue.length}`);
 
-    // Document whatever actually happens rather than assuming — this is
-    // the point of the test. As of this Phase 1D run: contactSchema has
-    // no .max() on contactMethod, so a well-formed 100k-char string is
-    // expected to pass Zod validation and be written to Postgres
-    // (`Enquiry.contactMethod` — check prisma/schema.prisma column type
-    // for any DB-level truncation risk if it's ever migrated to a
-    // fixed-length type).
-    if (res.status === 201) {
-      const body = await res.json();
-      expect(body.contactMethod.length).toBe(100_000);
-    }
-    // Whatever happens, it must not be a slow/hanging failure or a raw
-    // 500 — either a clean accept (201) or a clean reject (4xx), and
-    // reasonably fast.
-    expect(res.status).not.toBe(500);
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error.fieldErrors.contactMethod).toBeDefined();
+    // Never a slow/hanging failure — rejection happens at Zod validation,
+    // well before any DB write is attempted.
     expect(elapsedMs).toBeLessThan(15_000);
   });
 
-  it("a 1,000,000-character contactMethod — stress the upper end and confirm no server crash", async () => {
+  it("a 1,000,000-character contactMethod — stress the upper end and confirm a clean 400, no server crash", async () => {
     const hugeValue = "x".repeat(1_000_000);
     const payload = {
       name: "Edge Case Tester 2",
@@ -71,9 +61,8 @@ describe("POST /api/contact — contactMethod has no Zod max length", () => {
     }
     const elapsedMs = Date.now() - start;
 
-     
     console.log(`[contactMethod extreme] status=${res.status} elapsed=${elapsedMs}ms len=${hugeValue.length}`);
 
-    expect(res.status).not.toBe(500);
+    expect(res.status).toBe(400);
   });
 });

@@ -1,12 +1,13 @@
 import { z } from "zod";
 import { BUSINESS_UTC_OFFSET } from "@/lib/site-config";
+import { uploadPathSchema } from "@/lib/validations/uploadPath";
 
 export const festivalBannerMediaTypeSchema = z.enum(["IMAGE", "VIDEO"]);
 
 export const festivalBannerSchema = z.object({
   label: z.string().min(1, "Label is required").max(150),
   mediaType: festivalBannerMediaTypeSchema,
-  mediaPath: z.string().min(1, "Image or video is required"),
+  mediaPath: uploadPathSchema("Image or video is required"),
   isActive: z.boolean(),
   startDate: z.string().optional().or(z.literal("")),
   endDate: z.string().optional().or(z.literal("")),

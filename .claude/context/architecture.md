@@ -125,9 +125,15 @@ model SiteSettings {
 }
 
 // One business, multiple physical shops. Exactly one row has isPrimary =
-// true at any time, enforced at the API layer (src/app/api/shop-locations),
-// not a DB constraint — a partial unique index isn't portable across every
-// datasource this schema targets.
+// true at any time, enforced BOTH at the API layer (src/app/api/
+// shop-locations, updateMany-then-write $transaction) AND by a Postgres
+// partial unique index (`CREATE UNIQUE INDEX ... WHERE "isPrimary" = true`,
+// added by a hand-edited migration since schema.prisma can't express a
+// partial index) — the API layer alone couldn't serialize genuinely
+// concurrent writes (confirmed: 3-6 rows ended up primary under load before
+// this fix). The API routes catch the resulting P2002 and return a clean
+// 409. See schema.prisma's own comment for the migration-drift hazard this
+// creates.
 model ShopLocation {
   id             String   @id @default(cuid())
   name           String
@@ -147,7 +153,9 @@ enum FestivalBannerMediaType {
 
 // Seasonal greeting banners (Diwali, Ganpati, etc.), shown to visitors once
 // per session while active. Zero active rows is normal between festivals,
-// unlike ShopLocation.isPrimary which always has exactly one.
+// unlike ShopLocation.isPrimary which always has exactly one. "At most one
+// active" is enforced the same way as ShopLocation.isPrimary above — API-
+// layer $transaction plus a Postgres partial unique index on isActive.
 model FestivalBanner {
   id        String                  @id @default(cuid())
   label     String

@@ -61,12 +61,10 @@ describe("PATCH /api/products/[id] (integration)", () => {
     expect(res.status).toBe(400);
   });
 
-  // BUG repro — mirrors the categories/[id] finding: PATCH does a slug/sku
-  // conflict pre-check (findFirst, both no-op for a nonexistent id) and then
-  // calls prisma.product.update() inside a $transaction with no prior
-  // existence check. Prisma throws P2025 for the missing row, uncaught, so
-  // this escapes as a raw 500 instead of the 404 GET/DELETE-style routes use.
-  it("BUG: returns 500 (not 404) for a nonexistent id", async () => {
+  // Finding #15 fix: PATCH now does a findUnique existence check before
+  // the update, mirroring GET/DELETE, so a nonexistent id is a clean 404
+  // instead of a raw 500 from Prisma's P2025.
+  it("returns 404 for a nonexistent id", async () => {
     const res = await apiJson(
       "/api/products/does-not-exist-xyz",
       {
@@ -86,7 +84,8 @@ describe("PATCH /api/products/[id] (integration)", () => {
       },
       { method: "PATCH" }
     );
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: "Not found" });
   });
 });
 
@@ -96,10 +95,11 @@ describe("DELETE /api/products/[id] (integration)", () => {
     expect(res.status).toBe(401);
   });
 
-  // BUG repro: DELETE calls prisma.product.delete({ where: { id } })
-  // unconditionally, same missing-existence-check pattern as categories/[id].
-  it("BUG: returns 500 (not 404) for a nonexistent id", async () => {
+  // Finding #15 fix: DELETE now does a findUnique existence check before
+  // deleting, so a nonexistent id is a clean 404 instead of a raw 500.
+  it("returns 404 for a nonexistent id", async () => {
     const res = await apiFetch("/api/products/does-not-exist-xyz-delete", { method: "DELETE" });
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: "Not found" });
   });
 });

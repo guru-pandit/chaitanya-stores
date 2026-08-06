@@ -107,9 +107,20 @@ describe("concurrency: ShopLocation.isPrimary invariant", () => {
 
       const responses = await Promise.all(requests);
       const statuses = responses.map((r) => r.status);
-      // All should succeed at the HTTP layer — this is a data-integrity
-      // race, not something the API is expected to reject.
-      expect(statuses.every((s) => s === 201)).toBe(true);
+
+
+      console.log(`[concurrency] ShopLocation.isPrimary: ${N} concurrent creates -> statuses: ${statuses.join(", ")}`);
+
+      // Phase 4 fix (finding #12): "exactly one primary" is now enforced by
+      // a Postgres partial unique index (see the
+      // 20260806120000_enforce_single_primary_and_active migration), not
+      // just the application-level $transaction. A concurrent request that
+      // loses the race to the unique index gets a clean 409 (the API
+      // catches the P2002/P2034 and translates it), never a raw 500, and
+      // never silently succeeds into a second primary row.
+      expect(statuses).not.toContain(500);
+      expect(statuses.filter((s) => s === 201).length).toBe(1);
+      expect(statuses.filter((s) => s === 409).length).toBe(N - 1);
 
       const listRes = await fetch(`${BASE_URL}/api/shop-locations?limit=100`, {
         headers: authHeaders(cookie),
@@ -117,21 +128,14 @@ describe("concurrency: ShopLocation.isPrimary invariant", () => {
       const { items } = (await listRes.json()) as { items: { isPrimary: boolean }[] };
       const primaryCount = items.filter((i) => i.isPrimary).length;
 
-       
+
       console.log(
         `[concurrency] ShopLocation.isPrimary: ${N} concurrent creates -> ${primaryCount} rows ended up primary (expected exactly 1)`
       );
 
-      // This assertion documents the invariant the app *intends* to
-      // enforce. Per Phase 0, the "exactly one primary" rule is only
-      // enforced via an application-level $transaction (updateMany-then-
-      // create/update), not a DB constraint (e.g. a partial unique index).
-      // Under READ COMMITTED, two concurrent transactions can each run
-      // their unconditional `updateMany({isPrimary:false})` against the
-      // *pre-race* row set, then each insert their own row with
-      // isPrimary:true — neither update touches the other's newly
-      // inserted row, so both survive as primary. If this assertion
-      // fails, that's the confirmed bug — see the written report.
+      // The DB-level constraint makes this genuinely guaranteed now, not
+      // just intended — see the migration comment for why the app-level
+      // $transaction alone couldn't serialize this under READ COMMITTED.
       expect(primaryCount).toBe(1);
     },
     30_000
@@ -162,7 +166,17 @@ describe("concurrency: ShopLocation.isPrimary invariant", () => {
         })
       );
       const responses = await Promise.all(requests);
-      expect(responses.every((r) => r.status === 200)).toBe(true);
+      const statuses = responses.map((r) => r.status);
+
+
+      console.log(`[concurrency] ShopLocation.isPrimary via PATCH: ${N} concurrent updates -> statuses: ${statuses.join(", ")}`);
+
+      // Same DB-level enforcement as the POST test above (finding #12) —
+      // exactly one PATCH can win the race to be primary; the rest get a
+      // clean 409, never a raw 500.
+      expect(statuses).not.toContain(500);
+      expect(statuses.filter((s) => s === 200).length).toBe(1);
+      expect(statuses.filter((s) => s === 409).length).toBe(N - 1);
 
       const listRes = await fetch(`${BASE_URL}/api/shop-locations?limit=100`, {
         headers: authHeaders(cookie),
@@ -170,7 +184,7 @@ describe("concurrency: ShopLocation.isPrimary invariant", () => {
       const { items } = (await listRes.json()) as { items: { id: string; isPrimary: boolean }[] };
       const primaryCount = items.filter((i) => i.isPrimary).length;
 
-       
+
       console.log(
         `[concurrency] ShopLocation.isPrimary via PATCH: ${N} concurrent updates -> ${primaryCount} rows primary (expected exactly 1)`
       );
@@ -197,7 +211,17 @@ describe("concurrency: FestivalBanner.isActive invariant", () => {
       );
 
       const responses = await Promise.all(requests);
-      expect(responses.every((r) => r.status === 201)).toBe(true);
+      const statuses = responses.map((r) => r.status);
+
+
+      console.log(`[concurrency] FestivalBanner.isActive: ${N} concurrent creates -> statuses: ${statuses.join(", ")}`);
+
+      // Same DB-level enforcement as ShopLocation.isPrimary (finding #13) —
+      // a Postgres partial unique index on isActive means exactly one
+      // concurrent create can win; the rest get a clean 409.
+      expect(statuses).not.toContain(500);
+      expect(statuses.filter((s) => s === 201).length).toBe(1);
+      expect(statuses.filter((s) => s === 409).length).toBe(N - 1);
 
       const listRes = await fetch(`${BASE_URL}/api/festival-banners?limit=100`, {
         headers: authHeaders(cookie),
@@ -205,7 +229,7 @@ describe("concurrency: FestivalBanner.isActive invariant", () => {
       const { items } = (await listRes.json()) as { items: { isActive: boolean }[] };
       const activeCount = items.filter((i) => i.isActive).length;
 
-       
+
       console.log(
         `[concurrency] FestivalBanner.isActive: ${N} concurrent creates -> ${activeCount} rows ended up active (expected exactly 1)`
       );
@@ -309,7 +333,7 @@ describe("concurrency: products/generate-sku suffix race", () => {
   });
 });
 
-describe("concurrency: product PATCH slug/sku conflict (check-then-write, no try/catch on P2002)", () => {
+describe("concurrency: product PATCH slug/sku conflict (P2002 caught, mirrors POST)", () => {
   it("two concurrent PATCHes racing to claim the same new slug on different products", async () => {
     // Seed two distinct products first.
     const createA = await fetch(`${BASE_URL}/api/products`, {
@@ -343,30 +367,15 @@ describe("concurrency: product PATCH slug/sku conflict (check-then-write, no try
     ]);
 
     const statuses = [resA.status, resB.status].sort();
-     
+
     console.log(`[concurrency] concurrent PATCH-to-same-slug (different products) -> statuses: ${statuses.join(", ")}`);
 
-    // Unlike POST /api/products, the PATCH handler
-    // (src/app/api/products/[id]/route.ts) does a findFirst-then-update
-    // with NO try/catch around the final $transaction for P2002 — so if
-    // both requests pass the pre-check (both see no conflict) and then
-    // both attempt the update, the loser is expected to surface as a
-    // raw 500 rather than a clean 409. This assertion documents that
-    // expectation; if the API instead returns a clean 4xx here, that's
-    // good news (no regression to report), not a test bug.
-    const has500 = statuses.includes(500);
-    if (has500) {
-      console.log(
-        "[concurrency] CONFIRMED: PATCH /api/products/[id] leaks a raw 500 on a slug race (no P2002 handling on update, unlike POST)."
-      );
-    } else {
-      console.log(
-        "[concurrency] PATCH /api/products/[id] slug race did not surface a 500 this run (statuses above) — may still be a narrow window; see report."
-      );
-    }
-    // Not asserted strictly (this is exploratory/documentary — the
-    // Prisma unique constraint will still prevent silent data
-    // corruption either way; what's in question is response cleanliness).
-    expect(statuses.length).toBe(2);
+    // Phase 4 fix (finding #14): PATCH /api/products/[id] now wraps its
+    // update in the same P2002 try/catch POST already had — a slug race
+    // that slips past the pre-check surfaces as a clean field-scoped 409,
+    // never a raw 500.
+    expect(statuses).not.toContain(500);
+    expect(statuses.filter((s) => s === 200).length).toBe(1);
+    expect(statuses.filter((s) => s === 409).length).toBe(1);
   });
 });

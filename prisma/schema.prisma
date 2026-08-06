@@ -87,10 +87,16 @@ model SiteSettings {
   updatedAt  DateTime @updatedAt
 }
 
-// One business, multiple physical shops. Exactly one row should have
-// isPrimary = true at any time — enforced at the API layer (src/app/api/
-// shop-locations), not by a DB constraint, since a partial unique index
-// isn't portable across every datasource this schema targets.
+// One business, multiple physical shops. Exactly one row has
+// isPrimary = true at any time — enforced BOTH at the API layer
+// (src/app/api/shop-locations, via an updateMany-then-write $transaction)
+// AND, since migration 20260806120000_enforce_single_primary_and_active, by
+// a Postgres partial unique index (`CREATE UNIQUE INDEX ... WHERE
+// "isPrimary" = true`) that Prisma's schema language can't express here.
+// DRIFT HAZARD: because that index has no equivalent in this file, running
+// `prisma migrate dev` will see schema/DB disagree and propose a migration
+// that DROPs it to "reconcile" — never accept that diff without hand-review
+// (see the migration.sql's own comment and README's migrations note).
 model ShopLocation {
   id             String   @id @default(cuid())
   name           String
@@ -111,9 +117,14 @@ enum FestivalBannerMediaType {
 // A small list of festival greeting banners (Diwali, Ganpati, etc.) — at
 // most one is shown to visitors at a time. Unlike ShopLocation.isPrimary,
 // zero active rows is a perfectly normal state (between festivals), so
-// there's no "at least one must stay active" invariant here. A banner is
-// either an image or a video, not both — mediaType says which, mediaPath
-// points at whichever file was uploaded.
+// there's no "at least one must stay active" invariant here — only "at
+// most one". Enforced BOTH at the API layer (src/app/api/festival-banners,
+// via an updateMany-then-write $transaction) AND, since migration
+// 20260806120000_enforce_single_primary_and_active, by a Postgres partial
+// unique index (`CREATE UNIQUE INDEX ... WHERE "isActive" = true`) — same
+// drift hazard as ShopLocation.isPrimary above; see that comment. A banner
+// is either an image or a video, not both — mediaType says which,
+// mediaPath points at whichever file was uploaded.
 model FestivalBanner {
   id        String                  @id @default(cuid())
   label     String

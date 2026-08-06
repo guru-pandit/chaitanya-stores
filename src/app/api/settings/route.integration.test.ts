@@ -60,14 +60,13 @@ describe("PATCH /api/settings (integration)", () => {
     expect(JSON.parse(body.heroImages)).toEqual(paths);
   });
 
-  // Zod gap flagged in phase0-attack-surface.md §4: siteSettingsSchema.heroImages
-  // is `string[]` with no URL/format check and no array-length cap, same gap
-  // as productSchema.images.
-  it("BUG: accepts an oversized heroImages array of arbitrary, non-URL strings", async () => {
+  // Finding #7 fix: siteSettingsSchema.heroImages is now constrained via
+  // uploadPathSchema (/uploads/... only) with a MAX_HERO_IMAGES array cap —
+  // a large array of arbitrary, non-URL strings is rejected with a clean
+  // 400 instead of being persisted.
+  it("rejects an oversized heroImages array of arbitrary, non-URL strings", async () => {
     const junk = Array.from({ length: 500 }, (_, i) => `not-a-path-${i}`);
     const res = await apiJson("/api/settings", { heroImages: junk }, { method: "PATCH" });
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(JSON.parse(body.heroImages)).toHaveLength(500);
+    expect(res.status).toBe(400);
   });
 });

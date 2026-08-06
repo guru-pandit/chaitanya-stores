@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { productSchema, productVariantSchema, toProductData, type ProductInput } from "./product";
+import { MAX_PRODUCT_IMAGES } from "@/lib/validations/uploadPath";
 
 const valid: ProductInput = {
   name: "Sandalwood Agarbatti",
@@ -185,6 +186,40 @@ describe("productSchema — images", () => {
 
   it("rejects an images array with non-string elements", () => {
     expect(productSchema.safeParse({ ...valid, images: [123] }).success).toBe(false);
+  });
+
+  it("accepts an array of well-formed /uploads/ paths", () => {
+    const result = productSchema.safeParse({
+      ...valid,
+      images: ["/uploads/a.jpg", "/uploads/b.jpg"],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects a path not under /uploads/", () => {
+    const result = productSchema.safeParse({
+      ...valid,
+      images: ["https://evil.example.com/tracker.png"],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a path containing '..'", () => {
+    const result = productSchema.safeParse({
+      ...valid,
+      images: ["/uploads/../../../etc/passwd"],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it(`accepts exactly ${MAX_PRODUCT_IMAGES} images`, () => {
+    const images = Array.from({ length: MAX_PRODUCT_IMAGES }, (_, i) => `/uploads/img-${i}.jpg`);
+    expect(productSchema.safeParse({ ...valid, images }).success).toBe(true);
+  });
+
+  it(`rejects more than ${MAX_PRODUCT_IMAGES} images`, () => {
+    const images = Array.from({ length: MAX_PRODUCT_IMAGES + 1 }, (_, i) => `/uploads/img-${i}.jpg`);
+    expect(productSchema.safeParse({ ...valid, images }).success).toBe(false);
   });
 });
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireAdminSession } from "@/lib/api-auth";
+import { verifyCsrf } from "@/lib/csrf";
 import { prisma } from "@/lib/prisma";
 import { siteSettingsSchema } from "@/lib/validations/settings";
 import { parseJsonBody } from "@/lib/parseJsonBody";
@@ -12,16 +13,19 @@ async function getOrCreateSettings() {
 }
 
 export async function GET() {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const guard = await requireAdminSession();
+  if ("response" in guard) return guard.response;
 
   const settings = await getOrCreateSettings();
   return NextResponse.json(settings);
 }
 
 export async function PATCH(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const guard = await requireAdminSession();
+  if ("response" in guard) return guard.response;
+
+  const csrfError = verifyCsrf(req);
+  if (csrfError) return csrfError;
 
   const parsed = await parseJsonBody(req, siteSettingsSchema);
   if (!parsed.success) {

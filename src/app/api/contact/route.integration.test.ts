@@ -82,11 +82,10 @@ describe("POST /api/contact (integration)", () => {
     expect(res.status).toBe(400);
   });
 
-  // Zod gap flagged in docs/audit/phase0-attack-surface.md §4:
-  // contactSchema.contactMethod has no max length — this is the only
-  // unbounded field in the app. Confirmed exploitable: a 20,000-char value
-  // is accepted and persisted as 201, not rejected.
-  it("BUG: accepts an unbounded contactMethod (no max length in contactSchema)", async () => {
+  // Finding #9 fix: contactSchema.contactMethod now has a .max(500) — a
+  // 20,000-char value is rejected with a clean 400 field error, not
+  // persisted.
+  it("rejects an oversized contactMethod (over the 500-char cap)", async () => {
     const huge = "9".repeat(20_000);
     const res = await apiJson(
       "/api/contact",
@@ -94,10 +93,8 @@ describe("POST /api/contact (integration)", () => {
       {},
       { auth: false }
     );
-    // Documents current (buggy) behavior — flip to expect(res.status).toBe(400)
-    // once contactSchema.contactMethod gets a .max().
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(400);
     const body = await res.json();
-    expect(body.contactMethod.length).toBe(20_000);
+    expect(body.error.fieldErrors.contactMethod).toBeDefined();
   });
 });

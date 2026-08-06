@@ -16,7 +16,26 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - name: Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm test
+
   deploy:
+    needs: verify
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -67,13 +86,24 @@ jobs:
             ENVEOF
             chmod 600 .env
 
+            # Forward-only schema migrations, run from the full `builder`
+            # image (see docker-compose.yml's `migrate` service comment) —
+            # never `migrate reset`, never a destructive command here.
+            # Runs BEFORE the app is recreated so new code never queries a
+            # column/table that doesn't exist yet. This only fully covers
+            # purely additive migrations — a migration that drops/renames
+            # something the currently-live code still references needs the
+            # two-deploy pattern instead (see deployment guide Section 8.4).
+            docker compose --profile tools run --rm migrate
+
             # Build+recreate the app; db/nginx are only touched if their own
             # config changed. Never `-v`, never `down` — volumes are untouched.
             docker compose up -d --build db web nginx
 
-            # Forward-only schema migrations, run from the full `builder`
-            # image (see docker-compose.yml's `migrate` service comment) —
-            # never `migrate reset`, never a destructive command here.
-            docker compose --profile tools run --rm migrate
+            # nginx caches the `web` hostname's resolved IP at config load;
+            # recreating `web` above gives it a new IP on the Docker bridge
+            # network, so reload nginx or it keeps proxying to the stale IP
+            # and every deploy causes intermittent 502s.
+            docker compose exec nginx nginx -s reload
 
             docker image prune -f

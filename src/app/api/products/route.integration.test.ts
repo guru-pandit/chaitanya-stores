@@ -174,14 +174,14 @@ describe("POST /api/products (integration)", () => {
     expect(dupBody.error.fieldErrors.sku).toBeDefined();
   });
 
-  // BUG repro: productSchema.categoryId is only checked as a non-empty
-  // string (see docs/audit/phase0-attack-surface.md §4) — it's never
-  // validated as an existing Category id. Prisma then rejects the insert
-  // with a foreign-key constraint violation (P2002/P2003) that isn't caught
-  // anywhere in POST /api/products, so it escapes as a raw 500 instead of a
-  // clean 400/404.
-  it("BUG: returns 500 (not a clean 400/404) when categoryId does not exist", async () => {
+  // Finding #16 fix: POST now pre-checks the categoryId against
+  // prisma.category.findUnique before touching product.create(), returning
+  // a field-scoped 400 instead of letting the FK violation escape as a
+  // raw 500.
+  it("returns 400 with a field error when categoryId does not exist", async () => {
     const res = await apiJson("/api/products", validProductBody({ categoryId: "does-not-exist-xyz" }));
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error.fieldErrors.categoryId).toBeDefined();
   });
 });

@@ -347,6 +347,14 @@ What you still need to do as the operator:
 - [ ] Rotate `SSH_KEY` / `POSTGRES_PASSWORD` / `NEXTAUTH_SECRET` periodically
 - [ ] Consider tightening the CSP's `script-src`/`style-src` off `'unsafe-inline'` with nonces if the admin dashboard's needs allow it — the current policy is a sensible default, not a maximally strict one
 
+**Never ship a bare `.next/standalone` build.** Next's `output: "standalone"` mode copies whatever
+`.env` file exists at build time verbatim into `.next/standalone/.env`, so a plain `npm run build`
+run outside Docker embeds real secrets in that output directory. The actual deploy path above is
+unaffected — `.dockerignore` excludes `.env*` from the Docker build context, so the image never
+sees it — but if you ever build directly on a machine with a real `.env` present (e.g. for local
+debugging of the standalone output), do not copy or publish that `.next/standalone` directory
+anywhere.
+
 ## Known Limitations
 
 - **Single admin role.** No multi-user permissions are built in; adding them would need a real

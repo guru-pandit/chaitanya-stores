@@ -47,9 +47,18 @@ describe("contactSchema", () => {
     expect(contactSchema.safeParse({ ...valid, contactMethod: "" }).success).toBe(false);
   });
 
-  it("accepts an arbitrarily long contactMethod — no max length is enforced (see phase0 audit finding)", () => {
+  it("accepts a contactMethod at exactly the 500-char boundary", () => {
+    expect(contactSchema.safeParse({ ...valid, contactMethod: "a".repeat(500) }).success).toBe(true);
+  });
+
+  it("rejects a contactMethod over the 500-char boundary", () => {
+    const result = contactSchema.safeParse({ ...valid, contactMethod: "a".repeat(501) });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a wildly oversized contactMethod (cheap DB-bloat vector, closed in Phase 4)", () => {
     const result = contactSchema.safeParse({ ...valid, contactMethod: "a".repeat(50_000) });
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
   });
 
   it("rejects a missing message", () => {

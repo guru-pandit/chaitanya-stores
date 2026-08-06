@@ -13,6 +13,16 @@ import { z } from "zod";
 const MAX_UPLOAD_PATH_LENGTH = 300;
 
 /**
+ * The structural rule for "is this a real uploaded-file path" — shared
+ * between this Zod schema and src/lib/upload.ts's deleteUploadedImage()
+ * guard, which independently enforced the same two conditions before this
+ * was extracted. One rule, one place to change it.
+ */
+export function isValidUploadPath(value: string): boolean {
+  return value.startsWith("/uploads/") && !value.includes("..");
+}
+
+/**
  * Shared by product.images, festivalBanner.mediaPath, and
  * settings.heroImages. `requiredMessage` lets each domain keep its own
  * user-facing "required" copy (e.g. festivalBanner's "Image or video is

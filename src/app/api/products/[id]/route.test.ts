@@ -299,4 +299,20 @@ describe("DELETE /api/products/[id]", () => {
     expect(res.status).toBe(200);
     expect(mockPrisma.product.delete).toHaveBeenCalledWith({ where: { id: "prod-1" } });
   });
+
+  it("translates a P2025 race (deleted between the existence check and delete()) into a clean 404", async () => {
+    authed();
+    mockPrisma.product.findUnique.mockResolvedValueOnce({ id: "prod-1" });
+    mockPrisma.product.delete.mockRejectedValueOnce(
+      new Prisma.PrismaClientKnownRequestError("Record to delete does not exist", {
+        code: "P2025",
+        clientVersion: "test",
+      })
+    );
+
+    const res = await DELETE(deleteRequest(), { params });
+
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: "Not found" });
+  });
 });

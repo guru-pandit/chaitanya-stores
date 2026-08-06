@@ -6,6 +6,7 @@ import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X, Plus, RefreshCw } from "lucide-react";
 import { productSchema, type ProductInput } from "@/lib/validations/product";
+import { MAX_PRODUCT_IMAGES } from "@/lib/validations/uploadPath";
 import { buildSlug, parseImages } from "@/lib/format";
 import { useCategories } from "@/hooks/categories/useCategories";
 import { generateSku } from "@/hooks/products/useGenerateSku";
@@ -333,7 +334,11 @@ export function ProductForm({
 
       <div>
         <p className="mb-1 block text-sm font-medium text-charcoal">Images</p>
-        <ImageUploadField images={images} onChange={(next) => setValue("images", next)} />
+        <ImageUploadField
+          images={images}
+          onChange={(next) => setValue("images", next)}
+          maxImages={MAX_PRODUCT_IMAGES}
+        />
       </div>
 
       <div className="flex gap-6">

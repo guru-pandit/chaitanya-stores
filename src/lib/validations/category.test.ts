@@ -73,4 +73,20 @@ describe("categorySchema", () => {
   it("rejects a description over the 1000-char boundary", () => {
     expect(categorySchema.safeParse({ ...valid, description: "a".repeat(1001) }).success).toBe(false);
   });
+
+  // Phase 5 code-review finding: image was the one upload-path field left
+  // unconstrained while product.images/festivalBanner.mediaPath/
+  // settings.heroImages all moved to uploadPathSchema (finding #7).
+  it("rejects an image path not under /uploads/", () => {
+    const result = categorySchema.safeParse({
+      ...valid,
+      image: "https://evil.example.com/tracker.png",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects an image path containing '..'", () => {
+    const result = categorySchema.safeParse({ ...valid, image: "/uploads/../../../etc/passwd" });
+    expect(result.success).toBe(false);
+  });
 });

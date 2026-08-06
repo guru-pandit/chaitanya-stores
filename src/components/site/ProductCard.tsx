@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { Product, Category, ProductVariant } from "@/generated/prisma/client";
 import { formatPrice, formatVariantPrice, parseImages } from "@/lib/format";
+import { UploadedImage } from "@/components/ui/UploadedImage";
 
 export function ProductCard({
   product,
@@ -19,13 +19,11 @@ export function ProductCard({
     >
       <div className="relative aspect-square w-full overflow-hidden bg-cream-dark">
         {image ? (
-          <Image
+          <UploadedImage
             src={image}
             alt={product.name}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-            unoptimized
           />
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-charcoal/40">

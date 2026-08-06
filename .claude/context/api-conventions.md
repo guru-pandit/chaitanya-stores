@@ -83,7 +83,7 @@ No enveloping `data`/`meta` wrapper needed at this scale — keep responses flat
 - `uploadRateLimiter` — session-user-keyed, 15 requests / 15 minutes, shared between `POST /api/upload` and `POST /api/upload/video` (one combined budget, since both write to the same disk).
 - `clientErrorRateLimiter` — IP-keyed, 30 requests / 10 minutes, applied to `POST /api/log-client-error`.
 
-Every public mutating route needs its own entry here — `log-client-error` was originally missed. Both `verifyCsrf` and a rate limiter are required on every new mutating route, public or admin (see the PR checklist in `security-baseline.md`).
+`verifyCsrf` is required on every mutating route, public or admin. A rate limiter is not — only public/abuse-prone routes and anything writing to disk need one (matching `security-baseline.md`'s PR checklist); the admin CRUD routes (products/categories/settings/shop-locations/festival-banners/enquiries) rely on auth + CSRF alone, since abuse there requires a compromised admin session already. `log-client-error` was originally missed from the routes that *do* need one — check new public routes against this list.
 
 All limiters return `{ allowed, retryAfterSeconds }` from `.check(key)`; on `allowed: false`, return `rateLimitResponse(retryAfterSeconds)` (a `429` with a `Retry-After` header and a generic body). Set `RATE_LIMIT_DISABLED=true` to bypass every limiter entirely — **test-only**, see `.env.example`'s warning; never set it in production.
 

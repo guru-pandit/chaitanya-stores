@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -9,6 +8,7 @@ import { getPrimaryShopLocation } from "@/lib/shop-locations";
 import { EnquiryActions } from "@/components/site/EnquiryActions";
 import { ProductJsonLd } from "@/components/site/ProductJsonLd";
 import { BreadcrumbJsonLd } from "@/components/site/BreadcrumbJsonLd";
+import { UploadedImage } from "@/components/ui/UploadedImage";
 
 export async function generateMetadata({
   params,
@@ -88,14 +88,12 @@ export default async function ProductDetailPage({
       <div className="grid gap-10 sm:grid-cols-2">
         <div className="relative aspect-square overflow-hidden rounded-2xl bg-cream-dark">
           {images[0] ? (
-            <Image
+            <UploadedImage
               src={images[0]}
               alt={product.name}
               fill
               className="object-cover"
-              sizes="(min-width: 640px) 50vw, 100vw"
               priority
-              unoptimized
             />
           ) : (
             <div className="flex h-full items-center justify-center text-charcoal/40">

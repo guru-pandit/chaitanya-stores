@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { Plus, Video } from "lucide-react";
 import { useFestivalBanners } from "@/hooks/festivalBanners/useFestivalBanners";
 import {
@@ -16,6 +15,7 @@ import { LinkButton } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Pagination } from "@/components/ui/Pagination";
 import { RowActions } from "@/components/admin/RowActions";
+import { UploadedImage } from "@/components/ui/UploadedImage";
 
 const PAGE_SIZE = 20;
 
@@ -70,7 +70,7 @@ export default function AdminFestivalBannerPage() {
                       {banner.mediaType === "VIDEO" ? (
                         <Video size={20} className="text-maroon/50" aria-label="Video banner" />
                       ) : (
-                        <Image src={banner.mediaPath} alt={banner.label} fill sizes="48px" unoptimized className="object-cover" />
+                        <UploadedImage src={banner.mediaPath} alt={banner.label} fill className="object-cover" />
                       )}
                     </div>
                     <div>

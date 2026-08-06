@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { uploadPathSchema, MAX_PRODUCT_IMAGES, MAX_HERO_IMAGES } from "./uploadPath";
+import { uploadPathSchema, isValidUploadPath, MAX_PRODUCT_IMAGES, MAX_HERO_IMAGES } from "./uploadPath";
 
 describe("uploadPathSchema", () => {
   it("accepts a well-formed /uploads/ path", () => {
@@ -43,6 +43,22 @@ describe("uploadPathSchema", () => {
     expect(uploadPathSchema().safeParse("/uploads/9f2e1c3a-4b5d-4e6f-8a9b-0c1d2e3f4a5b.webp").success).toBe(
       true
     );
+  });
+});
+
+describe("isValidUploadPath", () => {
+  // Shared with src/lib/upload.ts's deleteUploadedImage() guard (Phase 5
+  // code-review finding: the same rule was duplicated in two places).
+  it("accepts a well-formed /uploads/ path", () => {
+    expect(isValidUploadPath("/uploads/a1b2c3.jpg")).toBe(true);
+  });
+
+  it("rejects a path not under /uploads/", () => {
+    expect(isValidUploadPath("/other/a1b2c3.jpg")).toBe(false);
+  });
+
+  it("rejects a path containing '..'", () => {
+    expect(isValidUploadPath("/uploads/../../../etc/passwd")).toBe(false);
   });
 });
 

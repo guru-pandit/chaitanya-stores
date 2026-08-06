@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { X } from "lucide-react";
+import { UploadedImage } from "@/components/ui/UploadedImage";
 
 const DISMISSED_KEY = "dismissedFestivalBannerId";
 const FADE_DURATION_MS = 300;
@@ -82,12 +82,11 @@ export function FestivalBannerModal({
             className="max-h-[80vh] max-w-[90vw] rounded-2xl shadow-xl"
           />
         ) : (
-          <Image
+          <UploadedImage
             src={banner.mediaPath}
             alt={banner.label}
             width={800}
             height={800}
-            unoptimized
             className="max-h-[80vh] max-w-[90vw] w-auto h-auto rounded-2xl object-contain shadow-xl"
           />
         )}

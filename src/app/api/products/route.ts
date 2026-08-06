@@ -50,10 +50,10 @@ export async function POST(req: NextRequest) {
   }
 
   // Pre-check the FK target exists — same pattern as the slug/sku
-  // conflict checks below, mirrored from POST's own convention. Without
-  // this, a nonexistent categoryId reaches Prisma as a raw FK violation
-  // (P2003), which the try/catch below now also backstops for the TOCTOU
-  // window between this check and the create() call.
+  // conflict checks below. Without this, a nonexistent categoryId reaches
+  // Prisma as a raw FK violation (P2003), which the try/catch below also
+  // backstops for the TOCTOU window between this check and the create()
+  // call.
   const category = await prisma.category.findUnique({ where: { id: parsed.data.categoryId } });
   if (!category) {
     return NextResponse.json(fieldError("categoryId", "Category not found"), { status: 400 });

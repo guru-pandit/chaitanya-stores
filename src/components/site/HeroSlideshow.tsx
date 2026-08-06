@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import { UploadedImage } from "@/components/ui/UploadedImage";
 
 const SLIDE_DURATION_MS = 5000;
 
@@ -30,13 +30,11 @@ export function HeroSlideshow({ images }: { images: string[] }) {
             i === index ? "opacity-100" : "opacity-0"
           }`}
         >
-          <Image
+          <UploadedImage
             src={src}
             alt=""
             fill
             priority={i === 0}
-            sizes="100vw"
-            unoptimized
             className={`object-cover ${i === index ? "animate-hero-zoom" : ""}`}
           />
         </div>

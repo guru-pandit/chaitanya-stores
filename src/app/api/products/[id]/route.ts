@@ -33,10 +33,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const existing = await prisma.product.findUnique({ where: { id } });
+  const existing = await prisma.product.findUnique({ where: { id }, select: { id: true } });
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const category = await prisma.category.findUnique({ where: { id: parsed.data.categoryId } });
+  const category = await prisma.category.findUnique({
+    where: { id: parsed.data.categoryId },
+    select: { id: true },
+  });
   if (!category) {
     return NextResponse.json(fieldError("categoryId", "Category not found"), { status: 400 });
   }
@@ -90,9 +93,18 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   if (csrfError) return csrfError;
 
   const { id } = await params;
-  const existing = await prisma.product.findUnique({ where: { id } });
+  const existing = await prisma.product.findUnique({ where: { id }, select: { id: true } });
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  await prisma.product.delete({ where: { id } });
-  return NextResponse.json({ success: true });
+  try {
+    await prisma.product.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    // TOCTOU backstop: the product was deleted by a concurrent request
+    // between the existence check above and this delete() call.
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    throw err;
+  }
 }

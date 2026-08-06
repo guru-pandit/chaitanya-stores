@@ -32,7 +32,12 @@ jobs:
       - run: npx prisma generate
       - run: npm run lint
       - run: npx tsc --noEmit
-      - run: npm test
+      # Not `npm test` — that includes *.integration.test.ts and
+      # tests/edge-cases/**, which require a live server + seeded Postgres
+      # (TEST_BASE_URL) that doesn't exist in this runner and fail loudly,
+      # not skip (see src/test/apiIntegrationHelpers.ts). test:unit runs
+      # only the mocked-Prisma/mocked-auth suite, which is self-contained.
+      - run: npm run test:unit
 
   deploy:
     needs: verify
@@ -86,15 +91,20 @@ jobs:
             ENVEOF
             chmod 600 .env
 
-            # Forward-only schema migrations, run from the full `builder`
-            # image (see docker-compose.yml's `migrate` service comment) —
-            # never `migrate reset`, never a destructive command here.
+            # Forward-only schema migrations, run from the dedicated
+            # `migrator` build stage (see docker-compose.yml's `migrate`
+            # service) — never `migrate reset`, never a destructive command
+            # here. `--build` is required: Compose only builds an image on
+            # `run` when it's absent, so without it this would silently
+            # reuse whatever `migrate` image was built on a *previous*
+            # deploy — running old migrations against new code, meaning a
+            # new migration in this push would never actually apply.
             # Runs BEFORE the app is recreated so new code never queries a
             # column/table that doesn't exist yet. This only fully covers
             # purely additive migrations — a migration that drops/renames
             # something the currently-live code still references needs the
             # two-deploy pattern instead (see deployment guide Section 8.4).
-            docker compose --profile tools run --rm migrate
+            docker compose --profile tools run --rm --build migrate
 
             # Build+recreate the app; db/nginx are only touched if their own
             # config changed. Never `-v`, never `down` — volumes are untouched.

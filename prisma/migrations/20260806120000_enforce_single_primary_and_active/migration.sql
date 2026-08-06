@@ -40,11 +40,16 @@ UPDATE "FestivalBanner"
 SET "isActive" = false
 WHERE "id" IN (SELECT "id" FROM ranked WHERE rn > 1);
 
--- Enforce both invariants at the database layer. A concurrent writer that
--- loses the race now gets a Postgres unique-violation (P2002 via Prisma)
--- instead of silently leaving two rows primary/active — the API routes
--- catch that P2002 (and P2034 transaction-conflict/deadlock errors) and
--- return a clean 409 instead of a raw 500 (see
+-- Enforce the "at most one" half of both invariants at the database layer
+-- (a partial unique index can express a ceiling, not a floor — "at least
+-- one primary" for ShopLocation remains API-only, via the PATCH/DELETE
+-- guards that refuse to unset/delete the sole primary; this migration's
+-- repair step above only ever demotes extras, never promotes a row).
+-- A concurrent writer that loses the race now gets a Postgres
+-- unique-violation (P2002 via Prisma) instead of silently leaving two rows
+-- primary/active — the API routes catch that P2002 (and P2034
+-- transaction-conflict/deadlock errors) and return a clean 409 instead of
+-- a raw 500 (see
 -- src/app/api/shop-locations/route.ts, src/app/api/shop-locations/[id]/route.ts,
 -- src/app/api/festival-banners/route.ts, src/app/api/festival-banners/[id]/route.ts).
 --

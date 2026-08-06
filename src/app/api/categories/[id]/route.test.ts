@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { GET, PATCH, DELETE } from "./route";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma/client";
 
 // This file was missing entirely before the Phase 4 audit-fix commit
 // (dff2cd4) even though categories/[id]/route.ts gained a 404 existence
@@ -155,6 +156,45 @@ describe("PATCH /api/categories/[id]", () => {
       data: validBody,
     });
   });
+
+  // Phase 5 code-review finding: products/[id] PATCH already caught P2002
+  // on its update() (a slug race that slips past the pre-check) but
+  // categories/[id] PATCH didn't — same pattern, same race, edit missed.
+  it("translates a P2002 race on the slug column into a clean 409, not a raw 500", async () => {
+    authed();
+    mockPrisma.category.findUnique.mockResolvedValueOnce({ id: "cat-1" });
+    mockPrisma.category.findFirst.mockResolvedValueOnce(null);
+    mockPrisma.category.update.mockRejectedValueOnce(
+      new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
+        code: "P2002",
+        clientVersion: "test",
+        meta: { target: ["slug"] },
+      })
+    );
+
+    const res = await PATCH(patchRequest(validBody), { params });
+
+    expect(res.status).toBe(409);
+    const body = await res.json();
+    expect(body.error.fieldErrors.slug).toEqual(["Slug already in use"]);
+  });
+
+  it("translates a P2025 race (deleted between the existence check and update()) into a clean 404", async () => {
+    authed();
+    mockPrisma.category.findUnique.mockResolvedValueOnce({ id: "cat-1" });
+    mockPrisma.category.findFirst.mockResolvedValueOnce(null);
+    mockPrisma.category.update.mockRejectedValueOnce(
+      new Prisma.PrismaClientKnownRequestError("Record to update not found", {
+        code: "P2025",
+        clientVersion: "test",
+      })
+    );
+
+    const res = await PATCH(patchRequest(validBody), { params });
+
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: "Not found" });
+  });
 });
 
 describe("DELETE /api/categories/[id]", () => {
@@ -203,5 +243,22 @@ describe("DELETE /api/categories/[id]", () => {
 
     expect(res.status).toBe(200);
     expect(mockPrisma.category.delete).toHaveBeenCalledWith({ where: { id: "cat-1" } });
+  });
+
+  it("translates a P2025 race (deleted between the existence check and delete()) into a clean 404", async () => {
+    authed();
+    mockPrisma.category.findUnique.mockResolvedValueOnce({ id: "cat-1" });
+    mockPrisma.product.count.mockResolvedValueOnce(0);
+    mockPrisma.category.delete.mockRejectedValueOnce(
+      new Prisma.PrismaClientKnownRequestError("Record to delete does not exist", {
+        code: "P2025",
+        clientVersion: "test",
+      })
+    );
+
+    const res = await DELETE(deleteRequest(), { params });
+
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: "Not found" });
   });
 });

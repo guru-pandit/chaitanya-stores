@@ -25,11 +25,19 @@ export async function authorize(credentials: unknown) {
 
   const { email, password } = parsed.data;
 
-  // Checked before any DB/bcrypt work so a lockout also short-circuits
-  // the expensive path — same generic failure as a wrong password, so
-  // an attacker can't distinguish "locked out" from "wrong password".
-  // This ordering is deliberate and must not change.
-  if (isLoginLocked(email)) return null;
+  // A locked-out email still runs the same dummy bcrypt.compare as the
+  // "user not found" branch below before returning — otherwise this branch
+  // would answer measurably faster than every other failure path (no DB
+  // query, no bcrypt), reintroducing a weaker version of the timing
+  // side-channel the dummy-compare closed for those paths (Phase 4 audit
+  // finding #8). Deliberately skips the DB lookup itself: that's the actual
+  // cost this branch is short-circuiting, and it's already-known-invalid
+  // per-email state, not user-existence, so skipping only that part leaks
+  // nothing new.
+  if (isLoginLocked(email)) {
+    await bcrypt.compare(password, DUMMY_BCRYPT_HASH);
+    return null;
+  }
 
   const user = await prisma.adminUser.findUnique({ where: { email } });
   if (!user) {

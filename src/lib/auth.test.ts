@@ -53,14 +53,25 @@ describe("authorize", () => {
     expect(mockPrisma.adminUser.findUnique).not.toHaveBeenCalled();
   });
 
-  it("returns null when the account is locked, before any DB/bcrypt work", async () => {
+  // Low-severity finding (Phase 4 review): the lockout branch skips the DB
+  // lookup (that's the point of short-circuiting) but must still run the
+  // same dummy bcrypt.compare as the not-found branch below, or a locked-out
+  // email would answer measurably faster than every other failure path —
+  // a weaker version of the same timing side-channel finding #8 closed.
+  it("returns null when the account is locked, running the dummy compare but skipping the DB", async () => {
     mockIsLoginLocked.mockReturnValue(true);
+    mockCompare.mockResolvedValueOnce(false);
 
     const result = await authorize(validCredentials);
 
     expect(result).toBeNull();
     expect(mockPrisma.adminUser.findUnique).not.toHaveBeenCalled();
-    expect(mockCompare).not.toHaveBeenCalled();
+    expect(mockCompare).toHaveBeenCalledTimes(1);
+    expect(mockCompare).toHaveBeenCalledWith(
+      validCredentials.password,
+      expect.stringMatching(/^\$2[aby]\$/)
+    );
+    expect(mockRecordLoginFailure).not.toHaveBeenCalled();
   });
 
   it("returns null and records a failure when the user doesn't exist", async () => {

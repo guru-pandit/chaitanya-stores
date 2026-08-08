@@ -86,11 +86,19 @@ server {
 
     # Strip/normalize any client-supplied forwarding headers so they can't be
     # spoofed to fake the caller's origin — only nginx's own computed values
-    # for the real client IP/proto are ever forwarded to the app.
+    # for the real client IP/proto are ever forwarded to the app. X-Real-IP
+    # and X-Forwarded-For are both set to $remote_addr (never appended) —
+    # src/lib/rate-limit.ts's getClientIp() depends on that; keep both in
+    # sync if this changes. X-Forwarded-Host is explicitly overwritten too:
+    # src/lib/auth.ts's `trustHost: true` makes Auth.js prefer it over Host
+    # when deriving its base URL, and src/lib/csrf.ts's origin check also
+    # assumes Host is trustworthy — an unstripped client-supplied value here
+    # would undermine both.
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $remote_addr;
     proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Host $host;
     proxy_http_version 1.1;
     proxy_set_header Connection "";
 
@@ -100,6 +108,11 @@ server {
     location /uploads/ {
         alias /var/www/uploads/;
         autoindex off;
+        # add_header in a location block suppresses (not merges with) the
+        # server-level add_header directives above — nginx's inheritance
+        # rule for that directive — so this location must re-declare the one
+        # that matters for served files instead of relying on inheriting it.
+        add_header X-Content-Type-Options "nosniff" always;
         add_header Cache-Control "public, max-age=2592000, immutable";
         location ~* \.(php|jsp|cgi|pl|py|sh)$ {
             deny all;

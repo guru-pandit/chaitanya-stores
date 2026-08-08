@@ -25,13 +25,32 @@ export interface RateLimitResult {
   retryAfterSeconds: number;
 }
 
+// How often each limiter sweeps its own bucket map for expired entries —
+// see RateLimiter.check's sweep call below. Independent of any individual
+// limiter's window length; just needs to be frequent enough that expired
+// entries from IP/session churn (e.g. rotating source IPs hitting
+// /api/contact) don't accumulate unboundedly for the process lifetime.
+const SWEEP_INTERVAL_MS = 5 * 60_000;
+
 export class RateLimiter {
   private buckets = new Map<string, Bucket>();
+  private lastSweptAt = Date.now();
 
   constructor(
     private readonly limit: number,
     private readonly windowMs: number
   ) {}
+
+  // Opportunistic sweep run from within check() rather than a setInterval —
+  // avoids a timer that would keep the Node process alive / need manual
+  // teardown in tests. Piggybacks on real request traffic instead.
+  private sweepExpired(now: number): void {
+    if (now - this.lastSweptAt < SWEEP_INTERVAL_MS) return;
+    this.lastSweptAt = now;
+    for (const [key, bucket] of this.buckets) {
+      if (now >= bucket.resetAt) this.buckets.delete(key);
+    }
+  }
 
   check(key: string): RateLimitResult {
     // Test-only escape hatch — see .env.example's warning. Never set this
@@ -44,6 +63,7 @@ export class RateLimiter {
     }
 
     const now = Date.now();
+    this.sweepExpired(now);
     const bucket = this.buckets.get(key);
 
     if (!bucket || now >= bucket.resetAt) {
@@ -95,15 +115,26 @@ const CLIENT_ERROR_LIMIT = 30;
 const CLIENT_ERROR_WINDOW_MS = 10 * 60_000;
 export const clientErrorRateLimiter = new RateLimiter(CLIENT_ERROR_LIMIT, CLIENT_ERROR_WINDOW_MS);
 
-/** Best-effort client IP extraction behind nginx (see architecture.md's deployment target). */
+/**
+ * Best-effort client IP extraction behind nginx (see architecture.md's
+ * deployment target).
+ *
+ * x-real-ip is preferred over x-forwarded-for: nginx/templates/default.conf.template
+ * sets both via `proxy_set_header ... $remote_addr` (never appending), so
+ * either is safe today, but x-real-ip has no multi-value/append convention
+ * at all — trusting "first entry of a comma list" for x-forwarded-for is
+ * only sound because of that nginx config, a coupling nothing enforces. If
+ * you change how either header is set in the nginx template, keep this
+ * function's assumption in sync.
+ */
 export function getClientIp(req: NextRequest): string {
+  const realIp = req.headers.get("x-real-ip");
+  if (realIp) return realIp;
   const forwardedFor = req.headers.get("x-forwarded-for");
   if (forwardedFor) {
     const first = forwardedFor.split(",")[0]?.trim();
     if (first) return first;
   }
-  const realIp = req.headers.get("x-real-ip");
-  if (realIp) return realIp;
   return "unknown";
 }
 

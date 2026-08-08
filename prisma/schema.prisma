@@ -99,11 +99,15 @@ model SiteSettings {
 // primary) — the unique index can't express a floor, only a ceiling, and
 // the migration's repair step only demotes extras, it never promotes a row
 // if a DB somehow reaches zero primaries.
-// DRIFT HAZARD: because the partial index has no equivalent in this file,
-// running `prisma migrate dev` will see schema/DB disagree and propose a
-// migration that DROPs it to "reconcile" — never accept that diff without
-// hand-review (see the migration.sql's own comment and
-// .claude/context/architecture.md's matching note).
+// DRIFT HAZARD: the partial index has no equivalent in this file. Verified
+// against Prisma 7.9.1 (isolated DB, `prisma migrate dev --create-only` and
+// `prisma migrate status`): it does NOT currently propose dropping the
+// index — it's silently ignored rather than reconciled, and status reports
+// "up to date". That's undocumented Prisma behavior, not a guarantee, so
+// still hand-review any future `prisma migrate dev` diff touching
+// ShopLocation/FestivalBanner rather than accepting it blindly (see the
+// migration.sql's own comment and .claude/context/architecture.md's
+// matching note).
 model ShopLocation {
   id             String   @id @default(cuid())
   name           String

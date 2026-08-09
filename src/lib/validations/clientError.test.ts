@@ -5,7 +5,7 @@ const valid = {
   message: "TypeError: cannot read properties of undefined",
   stack: "at Component (App.tsx:10:5)",
   digest: "1234567890",
-  url: "https://example.com/products/sandalwood",
+  url: "https://example.com/catalog/sandalwood",
 };
 
 describe("clientErrorSchema", () => {

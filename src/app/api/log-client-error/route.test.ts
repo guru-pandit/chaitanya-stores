@@ -21,7 +21,7 @@ const validBody = {
   message: "Cannot read properties of undefined",
   stack: "TypeError: ...\n  at Component",
   digest: "1234567890",
-  url: "https://example.com/products/foo",
+  url: "https://example.com/catalog/foo",
 };
 
 function postRequest(body: unknown, headers: Record<string, string> = {}) {

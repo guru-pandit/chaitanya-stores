@@ -89,4 +89,23 @@ describe("POST /api/contact", () => {
     expect(res.headers.get("Retry-After")).toBe("37");
     expect(mockPrisma.enquiry.create).not.toHaveBeenCalled();
   });
+
+  // Honeypot: a filled-in `website` field means a bot submitted the form.
+  it("returns a normal-looking 201 but never persists an Enquiry when the honeypot field is filled in", async () => {
+    const res = await POST(postRequest({ ...validBody, website: "http://spam.example.com" }));
+
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.name).toBe(validBody.name);
+    expect(mockPrisma.enquiry.create).not.toHaveBeenCalled();
+  });
+
+  it("strips the honeypot field before writing to the database on a real submission", async () => {
+    mockPrisma.enquiry.create.mockResolvedValueOnce({ id: "1", ...validBody });
+
+    const res = await POST(postRequest({ ...validBody, website: "" }));
+
+    expect(res.status).toBe(201);
+    expect(mockPrisma.enquiry.create).toHaveBeenCalledWith({ data: validBody });
+  });
 });

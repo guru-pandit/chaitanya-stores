@@ -20,10 +20,10 @@ export function NotFoundContent() {
           Back to Home
         </Link>
         <Link
-          href="/products"
+          href="/catalog"
           className="inline-flex items-center gap-2 rounded-full border border-maroon/30 px-6 py-3 text-sm font-medium text-maroon transition-colors hover:bg-maroon/5"
         >
-          Browse Products
+          Browse Catalog
         </Link>
       </div>
     </div>

@@ -14,14 +14,14 @@ export function ProductCard({
 
   return (
     <Link
-      href={`/products/${product.slug}`}
+      href={`/catalog/${product.slug}`}
       className="group flex flex-col overflow-hidden rounded-2xl border border-maroon/10 bg-white/60 transition-shadow hover:shadow-lg"
     >
       <div className="relative aspect-square w-full overflow-hidden bg-cream-dark">
         {image ? (
           <UploadedImage
             src={image}
-            alt={product.name}
+            alt={`${product.name} ${product.brand} at Chaitanya Stores Sangmeshwar`}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />

@@ -20,13 +20,13 @@ There is no customer account tier — visitors never authenticate, they only bro
 ```mermaid
 flowchart TD
     Start([Visitor arrives]) --> Home["/ (Home)"]
-    Home --> Browse["/products (Catalog)"]
+    Home --> Browse["/catalog (Catalog)"]
     Home --> CatLink["/categories/:slug"]
     Home --> About["/about"]
     Home --> Contact["/contact"]
 
     Browse -- "search / filter by category" --> Browse
-    Browse --> Detail["/products/:slug (Product Detail)"]
+    Browse --> Detail["/catalog/:slug (Product Detail)"]
     CatLink --> Detail
 
     Detail --> Enquire{Enquiry action}

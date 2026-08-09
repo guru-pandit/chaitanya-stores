@@ -8,8 +8,8 @@ Next.js (App Router) + TypeScript (strict) + Prisma/PostgreSQL + Tailwind CSS + 
 src/app/
   (site)/                 Public marketing site — Server Components, direct Prisma reads
     page.tsx              Home
-    products/page.tsx     Catalog (filter by category, search by name)
-    products/[slug]/page.tsx   Product detail
+    catalog/page.tsx      Catalog (filter by category, search by name)
+    catalog/[slug]/page.tsx    Product detail
     categories/[slug]/page.tsx Category landing page
     about/page.tsx
     contact/page.tsx
@@ -231,8 +231,8 @@ Two independent paths feed it:
 
 ## SEO
 - `src/app/sitemap.ts` / `robots.ts` — Next.js file-convention routes, generated from Prisma at request time (products/categories) plus static routes; admin is disallowed
-- `SiteJsonLd` (`src/components/site/SiteJsonLd.tsx`) — `Store` + `WebSite` (with `SearchAction` pointed at `/products?q=`) structured data, rendered once in `(site)/layout.tsx` — never in the root layout, since admin pages shouldn't carry business schema
-- `ProductJsonLd` (`src/components/site/ProductJsonLd.tsx`) — per-product `Product`/`Offer`/`Brand` structured data, rendered on the product detail page only
+- `SiteJsonLd` (`src/components/site/SiteJsonLd.tsx`) — `Store` + `WebSite` (with `SearchAction` pointed at `/catalog?q=`) structured data, rendered once in `(site)/layout.tsx` — never in the root layout, since admin pages shouldn't carry business schema
+- `ProductJsonLd` (`src/components/site/ProductJsonLd.tsx`) — per-product `Product`/`Brand` structured data (no `Offer`/price since prices aren't confirmed until enquiry), rendered on the product detail page only
 - Every public page sets `alternates.canonical`; product/category pages also set `description`/`openGraph` via `generateMetadata` reading the actual record
 - Server Components by default (see `react-patterns.md`) mean page content — including nav — is in the initial server-rendered HTML with no client JS required; verify with `curl` or view-source, not just a browser (which executes JS regardless and can hide a Server/Client mistake)
-- **Accepted trade-off — soft 404s on `/products/[slug]` and `/categories/[slug]`**: an unknown slug renders `not-found.tsx` content correctly but the HTTP status stays 200, not 404. Cause: `(site)/error.tsx` is a shared site-wide error boundary (crash recovery + `reportClientError` reporting for every public page, not just these two), and its presence forces streaming for the whole `(site)` tree — once streaming has started, `notFound()` can no longer flip the already-sent 200 status (a known Next.js/RSC limitation). Removing `error.tsx` would restore true 404s here but drop error-boundary/reporting coverage for the entire public site, which is the worse trade. Mitigated instead with `robots: { index: false, follow: false }` in `generateMetadata` so the soft-404 doesn't get indexed. Decision: keep as-is — do not remove `(site)/error.tsx` to chase this.
+- **Accepted trade-off — soft 404s on `/catalog/[slug]` and `/categories/[slug]`**: an unknown slug renders `not-found.tsx` content correctly but the HTTP status stays 200, not 404. Cause: `(site)/error.tsx` is a shared site-wide error boundary (crash recovery + `reportClientError` reporting for every public page, not just these two), and its presence forces streaming for the whole `(site)` tree — once streaming has started, `notFound()` can no longer flip the already-sent 200 status (a known Next.js/RSC limitation). Removing `error.tsx` would restore true 404s here but drop error-boundary/reporting coverage for the entire public site, which is the worse trade. Mitigated instead with `robots: { index: false, follow: false }` in `generateMetadata` so the soft-404 doesn't get indexed. Decision: keep as-is — do not remove `(site)/error.tsx` to chase this.

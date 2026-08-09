@@ -9,6 +9,17 @@ const nextConfig: NextConfig = {
   // fingerprinting with no functional benefit (Phase 4 audit finding #10;
   // not stripped by nginx today).
   poweredByHeader: false,
+  // The public catalog route was renamed /products -> /catalog. These
+  // sources are exact-segment matches (Next's redirects() path matching is
+  // per-segment, not a string-prefix match), so "/products" only matches
+  // the literal path "/products" — it does not match "/products-foo" or
+  // "/api/products"/"/admin/products" (different path segments entirely).
+  async redirects() {
+    return [
+      { source: "/products", destination: "/catalog", permanent: true },
+      { source: "/products/:slug", destination: "/catalog/:slug", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

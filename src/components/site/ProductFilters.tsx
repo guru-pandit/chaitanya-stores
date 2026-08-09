@@ -47,7 +47,8 @@ export function ProductFilters({
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search products..."
+          placeholder="Search the catalog..."
+          aria-label="Search the catalog"
           className="w-full rounded-full border border-maroon/20 bg-white/70 py-2.5 pl-9 pr-4 text-sm outline-none focus:border-terracotta"
         />
       </form>

@@ -21,7 +21,7 @@ describe("GET /llms.txt", () => {
 
     expect(res.headers.get("Content-Type")).toContain("text/markdown");
     expect(body).toContain("# Chaitanya Stores");
-    expect(body).toContain("/products");
+    expect(body).toContain("/catalog");
     expect(body).toContain("/llms-full.txt");
     expect(body).toContain("/sitemap.xml");
   });

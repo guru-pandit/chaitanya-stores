@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { siteConfig } from "@/lib/site-config";
+import { hasContactValue, siteConfig } from "@/lib/site-config";
 import { formatPrice, formatVariantPrice } from "@/lib/format";
 import { getPrimaryShopLocation } from "@/lib/shop-locations";
 
@@ -25,6 +25,12 @@ export async function GET() {
     getPrimaryShopLocation(),
   ]);
 
+  // Omit any missing part rather than emitting a dangling separator (e.g.
+  // "Contact:  ·  · Sangmeshwar…") — same convention SiteJsonLd follows.
+  const contactParts = [primaryLocation.phone, primaryLocation.email, primaryLocation.address].filter(
+    hasContactValue
+  );
+
   const lines = [
     `# ${siteConfig.name}`,
     "",
@@ -35,10 +41,9 @@ export async function GET() {
     "This is a catalog/marketing site, not an online store — there is no cart, checkout, or " +
       "payment. Visitors browse the catalog and enquire via WhatsApp, email, or phone call.",
     "",
-    `Contact: ${primaryLocation.phone} · ${primaryLocation.email} · ${primaryLocation.address}`,
-    "",
+    ...(contactParts.length > 0 ? [`Contact: ${contactParts.join(" · ")}`, ""] : []),
     `- [Home](${siteConfig.siteUrl}/)`,
-    `- [All Products](${siteConfig.siteUrl}/products)`,
+    `- [Catalog](${siteConfig.siteUrl}/catalog)`,
     `- [About](${siteConfig.siteUrl}/about)`,
     `- [Contact](${siteConfig.siteUrl}/contact)`,
     "",
@@ -64,7 +69,7 @@ export async function GET() {
           ? "In Stock"
           : "Out of Stock";
 
-      lines.push(`- **[${product.name}](${siteConfig.siteUrl}/products/${product.slug})**`);
+      lines.push(`- **[${product.name}](${siteConfig.siteUrl}/catalog/${product.slug})**`);
       lines.push(`  Brand: ${product.brand} · Price: ${price} · ${stock}`);
       if (product.productType) lines.push(`  Type: ${product.productType}`);
       if (!hasVariants && product.weight) lines.push(`  Weight/Quantity: ${product.weight}`);

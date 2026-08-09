@@ -28,7 +28,7 @@ export async function GET() {
     "## Site",
     "",
     `- [Home](${siteConfig.siteUrl}/): Featured products and categories`,
-    `- [All Products](${siteConfig.siteUrl}/products): Full catalog, filterable by category and brand`,
+    `- [Catalog](${siteConfig.siteUrl}/catalog): Full catalog, filterable by category and brand`,
     `- [About](${siteConfig.siteUrl}/about): About ${siteConfig.name}`,
     `- [Contact](${siteConfig.siteUrl}/contact): Shop locations, contact details, and enquiry form`,
     "",

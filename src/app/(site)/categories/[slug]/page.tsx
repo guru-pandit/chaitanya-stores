@@ -46,7 +46,7 @@ export default async function CategoryPage({
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
       <BreadcrumbJsonLd
         items={[
-          { name: "Products", path: "/products" },
+          { name: "Catalog", path: "/catalog" },
           { name: category.name, path: `/categories/${category.slug}` },
         ]}
       />
@@ -56,11 +56,17 @@ export default async function CategoryPage({
       )}
 
       {category.products.length ? (
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {category.products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <>
+          {/* sr-only — keeps heading order strict (h1 -> h2 -> ProductCard's
+              h3) without adding a visible section label the design doesn't
+              call for. */}
+          <h2 className="sr-only">{category.name} Products</h2>
+          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {category.products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </>
       ) : (
         <div className="mt-8">
           <EmptyState

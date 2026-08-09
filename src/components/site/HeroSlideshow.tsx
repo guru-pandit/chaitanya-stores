@@ -44,7 +44,7 @@ export function HeroSlideshow({ images }: { images: string[] }) {
           real photos vary wildly in color and darkness, so the spotlight is
           what keeps headline/body legible regardless of what's underneath. */}
       <div className="absolute inset-0 bg-gradient-to-b from-cream/45 via-cream/60 to-cream" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_65%_55%_at_50%_38%,_var(--color-cream)_0%,_transparent_72%)] opacity-80" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_65%_55%_at_50%_38%,_var(--color-cream)_0%,_transparent_72%)] opacity-60" />
     </div>
   );
 }

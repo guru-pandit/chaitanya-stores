@@ -4,8 +4,8 @@
 Default to Server Components. Add `'use client'` only when you need: hooks (`useState`, React Query, Zustand), event handlers, or browser APIs.
 
 ```tsx
-// src/app/(site)/products/page.tsx — Server Component, no 'use client'
-export default async function ProductsPage({ searchParams }: { searchParams: Promise<{ category?: string; q?: string }> }) {
+// src/app/(site)/catalog/page.tsx — Server Component, no 'use client'
+export default async function CatalogPage({ searchParams }: { searchParams: Promise<{ category?: string; q?: string }> }) {
   const { category, q } = await searchParams;
   const products = await prisma.product.findMany({
     where: {

@@ -6,7 +6,7 @@ describe("POST /api/log-client-error (integration)", () => {
   it("returns 204 with no auth required, for a valid body", async () => {
     const res = await apiJson(
       "/api/log-client-error",
-      { message: "Something broke", url: "/products/foo" },
+      { message: "Something broke", url: "/catalog/foo" },
       {},
       { auth: false }
     );
@@ -21,7 +21,7 @@ describe("POST /api/log-client-error (integration)", () => {
         message: "Something broke",
         stack: "Error: boom\n  at foo (bar.js:1:1)",
         digest: "abc123",
-        url: "/products/foo",
+        url: "/catalog/foo",
       },
       {},
       { auth: false }

@@ -61,7 +61,7 @@ export function ImageUploadField({
             key={src}
             className={`relative overflow-hidden rounded-lg border border-maroon/20 ${thumbnailSize}`}
           >
-            <Image src={src} alt="" fill sizes="160px" unoptimized className="object-cover" />
+            <UploadedImage src={src} alt="" fill sizes="160px" className="object-cover" />
             <button
               type="button"
               onClick={() => removeImage(i)}

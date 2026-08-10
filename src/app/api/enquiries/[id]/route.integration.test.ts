@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect, beforeAll } from "vitest";
-import { apiFetch, apiJson, unique } from "@/test/apiIntegrationHelpers";
+import { apiJson, unique } from "@/test/apiIntegrationHelpers";
 
 let seededEnquiryId: string;
 

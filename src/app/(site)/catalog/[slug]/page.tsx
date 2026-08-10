@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -9,6 +8,7 @@ import { getPrimaryShopLocation } from "@/lib/shop-locations";
 import { EnquiryActions } from "@/components/site/EnquiryActions";
 import { ProductJsonLd } from "@/components/site/ProductJsonLd";
 import { BreadcrumbJsonLd } from "@/components/site/BreadcrumbJsonLd";
+import { UploadedImage } from "@/components/ui/UploadedImage";
 
 export async function generateMetadata({
   params,
@@ -30,7 +30,7 @@ export async function generateMetadata({
   return {
     title: `${product.name} — ${product.brand}`,
     description,
-    alternates: { canonical: `/products/${product.slug}` },
+    alternates: { canonical: `/catalog/${product.slug}` },
     openGraph: {
       title: product.name,
       description,
@@ -71,14 +71,14 @@ export default async function ProductDetailPage({
       <ProductJsonLd product={product} images={images} />
       <BreadcrumbJsonLd
         items={[
-          { name: "Products", path: "/products" },
+          { name: "Catalog", path: "/catalog" },
           { name: product.category.name, path: `/categories/${product.category.slug}` },
-          { name: product.name, path: `/products/${product.slug}` },
+          { name: product.name, path: `/catalog/${product.slug}` },
         ]}
       />
 
       <nav className="mb-6 text-sm text-charcoal/60">
-        <Link href="/products" className="hover:text-terracotta">Products</Link>
+        <Link href="/catalog" className="hover:text-terracotta">Catalog</Link>
         <span className="mx-2">/</span>
         <Link href={`/categories/${product.category.slug}`} className="hover:text-terracotta">
           {product.category.name}
@@ -88,12 +88,11 @@ export default async function ProductDetailPage({
       <div className="grid gap-10 sm:grid-cols-2">
         <div className="relative aspect-square overflow-hidden rounded-2xl bg-cream-dark">
           {images[0] ? (
-            <Image
+            <UploadedImage
               src={images[0]}
-              alt={product.name}
+              alt={`${product.name} ${product.brand} at Chaitanya Stores Sangmeshwar`}
               fill
               className="object-cover"
-              sizes="(min-width: 640px) 50vw, 100vw"
               priority
               unoptimized
             />
@@ -112,7 +111,7 @@ export default async function ProductDetailPage({
           )}
           <h1 className="mt-3 font-display text-2xl text-maroon-dark sm:text-3xl">{product.name}</h1>
           <Link
-            href={`/products?brand=${encodeURIComponent(product.brand)}`}
+            href={`/catalog?brand=${encodeURIComponent(product.brand)}`}
             className="mt-1 inline-block text-sm font-medium text-terracotta hover:underline"
           >
             {product.brand}

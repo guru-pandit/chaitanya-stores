@@ -9,7 +9,7 @@ import { getActiveFestivalBanner } from "@/lib/festival-banner";
 // dynamic here (it propagates to every nested route) stops Next from
 // statically prerendering any of them at build time. Without this, a page
 // with no dynamic segment and no explicit `dynamic` export of its own (e.g.
-// `/products`) is static-eligible by default, so `next build` executes its
+// `/catalog`) is static-eligible by default, so `next build` executes its
 // Prisma calls during "Generating static pages" — which crashes the whole
 // build on a transient DB outage, misleadingly attributed to whatever page
 // Next happens to probe next.

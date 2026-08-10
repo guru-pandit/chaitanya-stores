@@ -1,15 +1,26 @@
 import type { Metadata } from "next";
-import { getAllShopLocations } from "@/lib/shop-locations";
+import { getAllShopLocations, getPrimaryShopLocation } from "@/lib/shop-locations";
 import { siteConfig } from "@/lib/site-config";
 import { MandalaDivider } from "@/components/site/MandalaDivider";
 import { EnquiryActions } from "@/components/site/EnquiryActions";
 import { ShopLocationsList } from "@/components/site/ShopLocationsList";
 
+const ABOUT_TITLE = "About Chaitanya Stores | Pooja Samagri Shop, Sangmeshwar";
+const ABOUT_DESCRIPTION =
+  "Chaitanya Stores is a retail pooja samagri shop in Sangmeshwar, Ratnagiri, stocking agarbatti, dhoop, camphor, and pooja essentials from trusted brands. Browse online, then enquire or visit in person.";
+
 export const metadata: Metadata = {
-  title: "About Us",
-  description:
-    "Chaitanya Stores brings authentic, hand-rolled incense and pooja essentials from trusted brands to homes and temples that value tradition over shortcuts.",
+  // `absolute` opts out of the root layout's `%s | Chaitanya Stores` title
+  // template — this exact string has its own suffix.
+  title: { absolute: ABOUT_TITLE },
+  description: ABOUT_DESCRIPTION,
   alternates: { canonical: "/about" },
+  openGraph: {
+    title: ABOUT_TITLE,
+    description: ABOUT_DESCRIPTION,
+    type: "website",
+    url: `${siteConfig.siteUrl}/about`,
+  },
 };
 
 // Shop locations change whenever the owner edits them in /admin — without
@@ -18,41 +29,42 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function AboutPage() {
-  const locations = await getAllShopLocations();
-  const primary = locations[0] ?? {
-    whatsappNumber: siteConfig.whatsappNumber,
-    email: siteConfig.email,
-    phone: siteConfig.phone,
-  };
+  const [locations, primary] = await Promise.all([getAllShopLocations(), getPrimaryShopLocation()]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
       <h1 className="text-center font-display text-3xl text-maroon-dark sm:text-4xl">
-        Our Story
+        About Chaitanya Stores, Sangmeshwar
       </h1>
       <MandalaDivider className="my-8" />
       <div className="space-y-5 text-charcoal/80 leading-relaxed">
         <p>
-          Chaitanya Stores began as a small family effort to bring authentic, hand-rolled
-          incense and pooja essentials to homes and temples that value tradition over shortcuts.
-          What started with a handful of fragrances has grown into a catalog spanning agarbatti,
-          dhoop, camphor, and pooja thali essentials.
+          Chaitanya Stores opened in Sangmeshwar about two years ago so local families wouldn&apos;t
+          have to travel all the way to Ratnagiri or Chiplun just to pick up agarbatti, dhoop, or
+          pooja samagri. What started as a small shop has grown into a catalog spanning agarbatti,
+          dhoop and dhoop sticks, sambrani/dhoop cones, camphor, and pooja thali essentials like
+          kumkum and chandan.
         </p>
         <p>
-          Every product we offer is chosen for quality first — natural ingredients, traditional
-          recipes, and consistent craftsmanship. We believe pooja items should feel as rooted and
-          trustworthy as the rituals they&apos;re part of.
+          We stock and resell products from trusted brands — Satya, Janak, Manohar, Anil, and Forest
+          — through authorised channels. Chaitanya Stores does not manufacture any of these products;
+          our job is to keep a well-chosen range in stock and help you find the right item.
         </p>
         <p>
-          As we grow, we&apos;re expanding into more categories while keeping the same promise: quality
-          you can trust, offered simply — browse our catalog, and reach out directly to enquire.
-          No clutter, no middlemen.
+          Not sure exactly what you need for a particular pooja, festival, havan, or satyanarayan
+          pooja? Tell us the occasion and we&apos;ll help you pick the right fragrance or item from
+          what&apos;s in stock.
+        </p>
+        <p>
+          This website is a catalog, not an online store — there is no cart, checkout, or online
+          payment. Browse the products here, then enquire via WhatsApp, email, or call, or simply
+          visit the shop in person to see and buy what you need.
         </p>
       </div>
       <div className="mt-10 text-center">
-        <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-maroon">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-maroon">
           Questions about our products?
-        </p>
+        </h2>
         <EnquiryActions
           className="justify-center"
           whatsappNumber={primary.whatsappNumber}
@@ -63,9 +75,9 @@ export default async function AboutPage() {
 
       {locations.length > 0 && (
         <div className="mt-12">
-          <p className="mb-4 text-center text-sm font-semibold uppercase tracking-wide text-maroon">
-            Our Locations
-          </p>
+          <h2 className="mb-4 text-center text-sm font-semibold uppercase tracking-wide text-maroon">
+            Visit the Shop
+          </h2>
           <ShopLocationsList locations={locations} />
         </div>
       )}

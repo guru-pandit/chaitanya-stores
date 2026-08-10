@@ -4,6 +4,7 @@ import { GET, PATCH, DELETE } from "./route";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { deleteUploadedImage } from "@/lib/upload";
+import { Prisma } from "@/generated/prisma/client";
 
 vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 vi.mock("@/lib/upload", async () => {
@@ -139,6 +140,28 @@ describe("PATCH /api/festival-banners/[id]", () => {
       },
     });
   });
+
+  // Phase 4 audit findings #12/#13 — same DB-level "at most one active"
+  // enforcement as POST /api/festival-banners; see that route's test file.
+  it.each(["P2002", "P2034"] as const)(
+    "translates a %s race inside the activation transaction into a clean 409",
+    async (code) => {
+      authed();
+      mockPrisma.festivalBanner.findUnique.mockResolvedValueOnce({ id: "banner-1", isActive: false });
+      mockPrisma.$transaction.mockImplementationOnce(async () => {
+        throw new Prisma.PrismaClientKnownRequestError("conflict", {
+          code,
+          clientVersion: "test",
+        });
+      });
+
+      const res = await PATCH(patchRequest(validBody), { params });
+
+      expect(res.status).toBe(409);
+      const body = await res.json();
+      expect(body.error).toMatch(/Another banner was set as active/);
+    }
+  );
 });
 
 describe("DELETE /api/festival-banners/[id]", () => {

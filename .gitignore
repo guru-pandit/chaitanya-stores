@@ -54,3 +54,10 @@ next-env.d.ts
 /nginx/certs/
 /backups/
 
+# Claude Code local/runtime files — machine-specific, not for the repo or prod
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+.mcp.json
+
+# /issues compiles review/e2e-qa findings here for local triage — not committed
+/issues.md

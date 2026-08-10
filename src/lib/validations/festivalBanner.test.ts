@@ -41,6 +41,27 @@ describe("festivalBannerSchema", () => {
     expect(festivalBannerSchema.safeParse({ ...valid, mediaPath: "" }).success).toBe(false);
   });
 
+  it("rejects a mediaPath that isn't under /uploads/ (off-site URL)", () => {
+    const result = festivalBannerSchema.safeParse({
+      ...valid,
+      mediaPath: "https://evil.example.com/tracker.png",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a mediaPath containing '..'", () => {
+    const result = festivalBannerSchema.safeParse({
+      ...valid,
+      mediaPath: "/uploads/../../../etc/passwd",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a javascript: mediaPath", () => {
+    const result = festivalBannerSchema.safeParse({ ...valid, mediaPath: "javascript:alert(1)" });
+    expect(result.success).toBe(false);
+  });
+
   it("rejects an invalid mediaType", () => {
     const result = festivalBannerSchema.safeParse({ ...valid, mediaType: "AUDIO" });
     expect(result.success).toBe(false);

@@ -1,7 +1,10 @@
 import { siteConfig } from "@/lib/site-config";
-import { variantPriceRange } from "@/lib/format";
 import type { Product, Category, ProductVariant } from "@/generated/prisma/client";
 
+// This is a catalog/enquiry site, not a checkout flow — prices are
+// indicative and change without notice (see siteConfig.productDisclaimer),
+// so no price/lowPrice/highPrice is emitted here. Availability is still
+// useful/accurate structured data without implying an online purchase.
 export function ProductJsonLd({
   product,
   images,
@@ -13,24 +16,13 @@ export function ProductJsonLd({
     src.startsWith("http") ? src : `${siteConfig.siteUrl}${src}`
   );
 
-  const hasVariants = product.variants.length > 0;
-  const variantOffer = hasVariants
-    ? (() => {
-        const { min, max } = variantPriceRange(product.variants);
-        return {
-          "@type": "AggregateOffer",
-          url: `${siteConfig.siteUrl}/products/${product.slug}`,
-          priceCurrency: "INR",
-          lowPrice: (min / 100).toFixed(2),
-          highPrice: (max / 100).toFixed(2),
-          offerCount: product.variants.length,
-          availability: product.variants.some((v) => v.inStock)
-            ? "https://schema.org/InStock"
-            : "https://schema.org/OutOfStock",
-        };
-      })()
-    : undefined;
-
+  // No `offers`/`Offer` node: schema.org (and Google's Product rich-result
+  // eligibility) treats an Offer without `price`/`priceCurrency` as
+  // incomplete, and this catalog deliberately never emits a price here
+  // (see siteConfig.productDisclaimer — prices vary and aren't confirmed
+  // accurate ahead of an enquiry). A bare Offer with only availability
+  // would just be flagged "Missing field price" in Search Console; better
+  // to omit it and keep the still-valid Product/Brand data.
   const data = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -40,19 +32,7 @@ export function ProductJsonLd({
     image: absoluteImages.length ? absoluteImages : undefined,
     brand: { "@type": "Brand", name: product.brand },
     category: product.category.name,
-    ...(hasVariants
-      ? { offers: variantOffer }
-      : product.price != null && {
-          offers: {
-            "@type": "Offer",
-            url: `${siteConfig.siteUrl}/products/${product.slug}`,
-            priceCurrency: "INR",
-            price: (product.price / 100).toFixed(2),
-            availability: product.inStock
-              ? "https://schema.org/InStock"
-              : "https://schema.org/OutOfStock",
-          },
-        }),
+    url: `${siteConfig.siteUrl}/catalog/${product.slug}`,
   };
 
   return (

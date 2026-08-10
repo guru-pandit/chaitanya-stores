@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin } from "lucide-react";
-import { siteConfig } from "@/lib/site-config";
+import { CONTACT_COMING_SOON, hasContactValue, siteConfig } from "@/lib/site-config";
 import { getAllShopLocations } from "@/lib/shop-locations";
 import { MandalaDivider } from "./MandalaDivider";
 import { InstagramIcon, FacebookIcon } from "./SocialIcons";
@@ -9,10 +9,15 @@ import { InstagramIcon, FacebookIcon } from "./SocialIcons";
 export async function Footer() {
   const locations = await getAllShopLocations();
   const primary = locations.find((l) => l.isPrimary) ?? locations[0];
-  const phone = primary?.phone ?? siteConfig.phone;
-  const email = primary?.email ?? siteConfig.email;
-  const addresses =
-    locations.length > 0 ? locations.map((l) => ({ id: l.id, address: l.address })) : [{ id: "default", address: siteConfig.address }];
+  // `??` alone would only fall through on undefined — a primary location's
+  // field could still be `""` in theory, and siteConfig's own env-backed
+  // fields are `""` rather than unset when not configured (see
+  // site-config.ts) — so an empty value must be treated as missing too.
+  const phone = hasContactValue(primary?.phone) ? primary.phone : siteConfig.phone;
+  const email = hasContactValue(primary?.email) ? primary.email : siteConfig.email;
+  const addresses = (
+    locations.length > 0 ? locations.map((l) => ({ id: l.id, address: l.address })) : [{ id: "default", address: siteConfig.address }]
+  ).filter((a) => hasContactValue(a.address));
 
   return (
     <footer className="mt-24 border-t border-maroon/10 bg-maroon text-cream">
@@ -49,7 +54,7 @@ export async function Footer() {
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-gold">Explore</p>
             <div className="mt-3 flex flex-col gap-2 text-sm text-cream/80">
-              <Link href="/products" className="hover:text-gold">Products</Link>
+              <Link href="/catalog" className="hover:text-gold">Catalog</Link>
               <Link href="/about" className="hover:text-gold">About</Link>
               <Link href="/contact" className="hover:text-gold">Contact</Link>
             </div>
@@ -57,8 +62,15 @@ export async function Footer() {
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-gold">Reach Us</p>
             <div className="mt-3 flex flex-col gap-2 text-sm text-cream/80">
-              <a href={`tel:${phone}`} className="hover:text-gold">{phone}</a>
-              <a href={`mailto:${email}`} className="hover:text-gold">{email}</a>
+              {hasContactValue(phone) && (
+                <a href={`tel:${phone}`} className="hover:text-gold">{phone}</a>
+              )}
+              {hasContactValue(email) && (
+                <a href={`mailto:${email}`} className="hover:text-gold">{email}</a>
+              )}
+              {!hasContactValue(phone) && !hasContactValue(email) && addresses.length === 0 && (
+                <p className="text-cream/60">{CONTACT_COMING_SOON}</p>
+              )}
               {addresses.map((a) => (
                 <p key={a.id} className="flex items-start gap-1.5">
                   <MapPin size={16} className="mt-0.5 shrink-0" /> {a.address}

@@ -68,7 +68,7 @@ const productSchema = z.object({ name: z.string(), price: z.number() });
 
 // ✗ React Query on the public site
 'use client';
-const { data } = useQuery(['products'], fetchProducts); // in app/(site)/products/page.tsx
+const { data } = useQuery(['products'], fetchProducts); // in app/(site)/catalog/page.tsx
 
 // ✗ Direct Prisma call from a Client Component
 'use client';

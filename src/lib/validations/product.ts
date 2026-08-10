@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { uploadPathSchema, MAX_PRODUCT_IMAGES } from "@/lib/validations/uploadPath";
 
 export const productVariantSchema = z.object({
   label: z.string().min(1, "Label is required").max(50),
@@ -20,7 +21,9 @@ export const productSchema = z.object({
   productType: z.string().max(50).optional().or(z.literal("")),
   sku: z.string().min(1, "SKU is required").max(50),
   price: z.number().int().positive().optional().nullable(),
-  images: z.array(z.string()),
+  images: z
+    .array(uploadPathSchema())
+    .max(MAX_PRODUCT_IMAGES, `A product can have at most ${MAX_PRODUCT_IMAGES} images`),
   inStock: z.boolean(),
   featured: z.boolean(),
   categoryId: z.string().min(1, "Category is required"),

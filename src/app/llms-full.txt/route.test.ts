@@ -52,7 +52,7 @@ describe("GET /llms-full.txt", () => {
     expect(body).toContain("### Agarbatti");
     expect(body).toContain("Traditional incense sticks");
     expect(body).toContain("[Sandalwood Agarbatti](");
-    expect(body).toContain("/products/sandalwood-agarbatti");
+    expect(body).toContain("/catalog/sandalwood-agarbatti");
     expect(body).toContain("Cycle");
     expect(body).toContain("In Stock");
     expect(body).toContain("100g");

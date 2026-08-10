@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { GET, POST } from "./route";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma/client";
 
 vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 vi.mock("@/lib/prisma", () => ({
@@ -137,4 +138,29 @@ describe("POST /api/shop-locations", () => {
     expect(updateMany).toHaveBeenCalledWith({ data: { isPrimary: false } });
     expect(create).toHaveBeenCalledWith({ data: { ...validBody, isPrimary: true } });
   });
+
+  // Phase 4 audit findings #12/#13: "exactly one primary" is now also
+  // enforced by a Postgres partial unique index (see prisma/schema.prisma's
+  // ShopLocation comment) — a concurrent request that wins the race
+  // surfaces here as P2002 (unique violation) or P2034 (transaction write
+  // conflict), which must translate to a clean 409, not a raw 500.
+  it.each(["P2002", "P2034"] as const)(
+    "translates a %s race inside the promote-to-primary transaction into a clean 409",
+    async (code) => {
+      mockAuth.mockResolvedValueOnce({ user: { id: "admin-1" } } as never);
+      mockPrisma.shopLocation.count.mockResolvedValueOnce(1);
+      mockPrisma.$transaction.mockImplementationOnce(async () => {
+        throw new Prisma.PrismaClientKnownRequestError("conflict", {
+          code,
+          clientVersion: "test",
+        });
+      });
+
+      const res = await POST(postRequest({ ...validBody, isPrimary: true }));
+
+      expect(res.status).toBe(409);
+      const body = await res.json();
+      expect(body.error).toMatch(/Another location was set as primary/);
+    }
+  );
 });

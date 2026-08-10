@@ -48,7 +48,7 @@ $COMPOSE run --rm certbot certonly \
   --webroot --webroot-path /var/www/certbot \
   --email "${LETSENCRYPT_EMAIL}" \
   --agree-tos --no-eff-email \
-  -d "${DOMAIN_NAME}"
+  -d "${DOMAIN_NAME}" -d "www.${DOMAIN_NAME}"
 
 echo "==> Reloading nginx with the real certificate ..."
 $COMPOSE exec nginx nginx -s reload

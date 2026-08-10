@@ -14,6 +14,9 @@ vi.mock("@/lib/prisma", () => ({
       findUnique: vi.fn(),
       create: vi.fn(),
     },
+    category: {
+      findUnique: vi.fn(),
+    },
   },
 }));
 
@@ -24,6 +27,9 @@ const mockPrisma = prisma as unknown as {
     count: ReturnType<typeof vi.fn>;
     findUnique: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
+  };
+  category: {
+    findUnique: ReturnType<typeof vi.fn>;
   };
 };
 
@@ -65,6 +71,12 @@ beforeEach(() => {
   mockPrisma.product.count.mockReset();
   mockPrisma.product.findUnique.mockReset();
   mockPrisma.product.create.mockReset();
+  mockPrisma.category.findUnique.mockReset();
+  // Every POST test exercises the slug/sku conflict + creation path, which
+  // now runs behind a categoryId existence pre-check (finding #16) — default
+  // to "category exists" so existing tests don't need to know about it;
+  // tests for the new 400 path override this explicitly.
+  mockPrisma.category.findUnique.mockResolvedValue({ id: "cat-1" });
 });
 
 describe("GET /api/products", () => {
@@ -106,6 +118,14 @@ describe("POST /api/products", () => {
     expect(res.status).toBe(401);
   });
 
+  // Locks in finding #1: a truthy-but-userless session (e.g. a NextAuth
+  // config-error shape) must still be rejected, not treated as authenticated.
+  it("returns 401 when the session is truthy but has no user", async () => {
+    mockAuth.mockResolvedValueOnce({} as never);
+    const res = await POST(postRequest(validBody));
+    expect(res.status).toBe(401);
+  });
+
   it("returns a clean 400 on malformed JSON instead of a raw 500", async () => {
     authed();
     const res = await POST(
@@ -122,6 +142,19 @@ describe("POST /api/products", () => {
     authed();
     const res = await POST(postRequest({ ...validBody, sku: "" }));
     expect(res.status).toBe(400);
+  });
+
+  it("returns 400 when categoryId does not exist (finding #16)", async () => {
+    authed();
+    mockPrisma.category.findUnique.mockResolvedValueOnce(null);
+
+    const res = await POST(postRequest(validBody));
+
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error.fieldErrors.categoryId).toEqual(["Category not found"]);
+    expect(mockPrisma.product.findUnique).not.toHaveBeenCalled();
+    expect(mockPrisma.product.create).not.toHaveBeenCalled();
   });
 
   it("returns 409 when the slug pre-check finds a conflict", async () => {

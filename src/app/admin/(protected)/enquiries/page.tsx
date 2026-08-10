@@ -84,7 +84,7 @@ export default function AdminEnquiriesPage() {
                     <p className="mt-1 text-xs text-charcoal/50">{enquiry.contactMethod}</p>
                     {enquiry.product && (
                       <Link
-                        href={`/products/${enquiry.product.slug}`}
+                        href={`/catalog/${enquiry.product.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="mt-1 inline-block text-xs font-medium text-terracotta hover:underline"

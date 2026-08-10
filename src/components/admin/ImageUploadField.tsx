@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { X, Upload } from "lucide-react";
 import { useUploadImage, useDeleteImage } from "@/hooks/products/useUploadImage";
+import { UploadedImage } from "@/components/ui/UploadedImage";
 
 // Shared upload/thumbnail-grid/remove UI used by ProductForm and the hero
 // images admin page. Removing a thumbnail updates the field immediately and
@@ -15,15 +15,23 @@ export function ImageUploadField({
   onChange,
   thumbnailSize = "h-20 w-20",
   iconSize = 16,
+  maxImages,
 }: {
   images: string[];
   onChange: (images: string[]) => void;
   thumbnailSize?: string;
   iconSize?: number;
+  /** Hides the upload control once `images.length` reaches this — mirrors
+   * the server-side cap in src/lib/validations/uploadPath.ts so a client
+   * can't upload a file that's just going to be rejected on save (and left
+   * orphaned on disk with no cleanup path, since it was never added to
+   * `images`). Omit for fields with no array cap (e.g. a single image). */
+  maxImages?: number;
 }) {
   const uploadImage = useUploadImage();
   const deleteImage = useDeleteImage();
   const [error, setError] = useState<string | null>(null);
+  const atLimit = maxImages !== undefined && images.length >= maxImages;
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -64,19 +72,24 @@ export function ImageUploadField({
             </button>
           </div>
         ))}
-        <label
-          className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-maroon/30 text-maroon/60 hover:bg-maroon/5 ${thumbnailSize}`}
-        >
-          <Upload size={iconSize} />
-          <span className="text-xs">{uploadImage.isPending ? "Uploading..." : "Upload"}</span>
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-        </label>
+        {!atLimit && (
+          <label
+            className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-maroon/30 text-maroon/60 hover:bg-maroon/5 ${thumbnailSize}`}
+          >
+            <Upload size={iconSize} />
+            <span className="text-xs">{uploadImage.isPending ? "Uploading..." : "Upload"}</span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </label>
+        )}
       </div>
+      {atLimit && (
+        <p className="mt-2 text-xs text-charcoal/60">Maximum of {maxImages} images reached.</p>
+      )}
       {error && <p className="mt-2 text-xs text-red-700">{error}</p>}
     </div>
   );

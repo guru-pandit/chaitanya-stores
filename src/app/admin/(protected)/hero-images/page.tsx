@@ -9,6 +9,7 @@ import { ApiError } from "@/lib/api-client";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
+import { MAX_HERO_IMAGES } from "@/lib/validations/uploadPath";
 import type { SiteSettings } from "@/generated/prisma/client";
 
 // Route protection for /admin/* is enforced in src/proxy.ts (edge
@@ -60,7 +61,13 @@ export default function HeroImagesPage() {
           </div>
         ) : (
           <>
-            <ImageUploadField images={images} onChange={setImages} thumbnailSize="h-24 w-40" iconSize={18} />
+            <ImageUploadField
+              images={images}
+              onChange={setImages}
+              thumbnailSize="h-24 w-40"
+              iconSize={18}
+              maxImages={MAX_HERO_IMAGES}
+            />
 
             <div className="mt-6">
               <Button

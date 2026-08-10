@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireAdminSession } from "@/lib/api-auth";
+import { verifyCsrf } from "@/lib/csrf";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { categorySchema } from "@/lib/validations/category";
@@ -8,8 +9,8 @@ import { getPagination } from "@/lib/pagination";
 import { fieldError } from "@/lib/fieldError";
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const guard = await requireAdminSession();
+  if ("response" in guard) return guard.response;
 
   const { searchParams } = new URL(req.url);
   const { skip, take } = getPagination(searchParams);
@@ -27,8 +28,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const guard = await requireAdminSession();
+  if ("response" in guard) return guard.response;
+
+  const csrfError = verifyCsrf(req);
+  if (csrfError) return csrfError;
 
   const parsed = await parseJsonBody(req, categorySchema);
   if (!parsed.success) {

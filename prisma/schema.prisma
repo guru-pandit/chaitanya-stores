@@ -88,9 +88,26 @@ model SiteSettings {
 }
 
 // One business, multiple physical shops. Exactly one row should have
-// isPrimary = true at any time — enforced at the API layer (src/app/api/
-// shop-locations), not by a DB constraint, since a partial unique index
-// isn't portable across every datasource this schema targets.
+// isPrimary = true at any time — but the two halves of that invariant are
+// enforced at different layers. "At most one": a Postgres partial unique
+// index (`CREATE UNIQUE INDEX ... WHERE "isPrimary" = true`, added by
+// migration 20260806120000_enforce_single_primary_and_active — Prisma's
+// schema language can't express a partial index, so it has no equivalent
+// here) genuinely guarantees this at the DB layer; a losing concurrent
+// writer gets a clean 409 (P2002), never two primary rows. "At least one":
+// still API-only (the PATCH/DELETE guards refuse to unset/delete the sole
+// primary) — the unique index can't express a floor, only a ceiling, and
+// the migration's repair step only demotes extras, it never promotes a row
+// if a DB somehow reaches zero primaries.
+// DRIFT HAZARD: the partial index has no equivalent in this file. Verified
+// against Prisma 7.9.1 (isolated DB, `prisma migrate dev --create-only` and
+// `prisma migrate status`): it does NOT currently propose dropping the
+// index — it's silently ignored rather than reconciled, and status reports
+// "up to date". That's undocumented Prisma behavior, not a guarantee, so
+// still hand-review any future `prisma migrate dev` diff touching
+// ShopLocation/FestivalBanner rather than accepting it blindly (see the
+// migration.sql's own comment and .claude/context/architecture.md's
+// matching note).
 model ShopLocation {
   id             String   @id @default(cuid())
   name           String
@@ -111,9 +128,14 @@ enum FestivalBannerMediaType {
 // A small list of festival greeting banners (Diwali, Ganpati, etc.) — at
 // most one is shown to visitors at a time. Unlike ShopLocation.isPrimary,
 // zero active rows is a perfectly normal state (between festivals), so
-// there's no "at least one must stay active" invariant here. A banner is
-// either an image or a video, not both — mediaType says which, mediaPath
-// points at whichever file was uploaded.
+// there's no "at least one must stay active" invariant here — only "at
+// most one". Enforced BOTH at the API layer (src/app/api/festival-banners,
+// via an updateMany-then-write $transaction) AND, since migration
+// 20260806120000_enforce_single_primary_and_active, by a Postgres partial
+// unique index (`CREATE UNIQUE INDEX ... WHERE "isActive" = true`) — same
+// drift hazard as ShopLocation.isPrimary above; see that comment. A banner
+// is either an image or a video, not both — mediaType says which,
+// mediaPath points at whichever file was uploaded.
 model FestivalBanner {
   id        String                  @id @default(cuid())
   label     String

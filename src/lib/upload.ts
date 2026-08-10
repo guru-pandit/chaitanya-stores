@@ -1,6 +1,7 @@
 import { writeFile, mkdir, unlink } from "fs/promises";
 import path from "path";
 import crypto from "crypto";
+import { isValidUploadPath } from "@/lib/validations/uploadPath";
 
 const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const IMAGE_MAX_SIZE_BYTES = 5 * 1024 * 1024;
@@ -125,7 +126,7 @@ export async function saveUploadedVideo(file: File): Promise<string> {
 // any file under /uploads/ regardless of type — it only ever unlinks by
 // path, so the same function covers both images and videos.
 export async function deleteUploadedImage(publicPath: string): Promise<void> {
-  if (!publicPath.startsWith("/uploads/") || publicPath.includes("..")) {
+  if (!isValidUploadPath(publicPath)) {
     throw new UploadError("Invalid upload path.");
   }
 

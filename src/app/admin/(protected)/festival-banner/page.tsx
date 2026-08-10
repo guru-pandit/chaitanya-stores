@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { Plus, Video } from "lucide-react";
 import { useFestivalBanners } from "@/hooks/festivalBanners/useFestivalBanners";
 import {
@@ -16,6 +15,7 @@ import { LinkButton } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Pagination } from "@/components/ui/Pagination";
 import { RowActions } from "@/components/admin/RowActions";
+import { UploadedImage } from "@/components/ui/UploadedImage";
 
 const PAGE_SIZE = 20;
 

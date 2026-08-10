@@ -17,8 +17,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireAdminSession();
+  if ("response" in guard) return guard.response;
+
+  const csrfError = verifyCsrf(req);
+  if (csrfError) return csrfError;
 
   const parsed = productSchema.safeParse(await req.json());
   if (!parsed.success) {
@@ -31,7 +34,26 @@ export async function POST(req: NextRequest) {
 Item-level routes (`GET/PATCH/DELETE`) live in `src/app/api/products/[id]/route.ts`.
 
 ## Auth Gate
-Every mutating route (`POST`/`PATCH`/`DELETE`) under `/api/products` and `/api/categories` must check the session first via `auth()` from `src/lib/auth.ts` and return `401` if absent. `GET` routes used by the public site (if any) stay open; `GET` routes used only by the admin dashboard should still be gated to avoid leaking unpublished data.
+Every mutating route (`POST`/`PATCH`/`DELETE`) under `/api/products` and `/api/categories` (and every other admin-only route) must check the session first via `requireAdminSession()` from `src/lib/api-auth.ts` and return its `401` response if absent. `GET` routes used by the public site (if any) stay open; `GET` routes used only by the admin dashboard should still be gated to avoid leaking unpublished data.
+
+**Do not** write `if (!session) return ...` inline against `auth()`'s return value — that pattern fails OPEN if `auth()` ever resolves to a truthy-but-userless object (e.g. a NextAuth config-error shape) instead of `null` (Phase 4 audit finding #1, fixed across all 15 route files). Always go through the shared helper:
+```ts
+import { requireAdminSession } from "@/lib/api-auth";
+
+const guard = await requireAdminSession();
+if ("response" in guard) return guard.response; // 401, body: { error: "Unauthorized" }
+// guard.session is a valid, authenticated Session past this point
+```
+
+## CSRF
+Every mutating route (`POST`/`PATCH`/`DELETE`, including the public `POST /api/contact`) calls `verifyCsrf(req)` from `src/lib/csrf.ts` right after the auth gate (or, for public routes, as the first check) and returns its result if non-null:
+```ts
+import { verifyCsrf } from "@/lib/csrf";
+
+const csrfError = verifyCsrf(req);
+if (csrfError) return csrfError; // 403, generic body — never echoes the rejected origin
+```
+`verifyCsrf` allows requests with neither an `Origin` nor a `Referer` header (non-browser clients, including this app's own integration tests) and only rejects a request that presents one of those headers with a host outside the allow-list (`Host` header on the request itself, `NEXT_PUBLIC_SITE_URL`, and its www-variant). This is a server-side backstop on top of the `SameSite=Lax` session cookie, not a replacement for it — deliberately implemented as a per-route helper rather than in `src/proxy.ts`, so it stays scoped to state-changing requests.
 
 ## Validation
 Every route that accepts a body validates with the domain's Zod schema from `src/lib/validations/`, via `safeParse` — never `parse()` (which throws) in a route handler without a catch. Return `400` with `error.flatten()` on failure so the client can map field-level errors.
@@ -56,7 +78,14 @@ No enveloping `data`/`meta` wrapper needed at this scale — keep responses flat
 - Category delete must check for existing products first and return `409` with a clear message rather than cascading — the spec requires a guard/warning, not silent deletion
 
 ## Rate Limiting
-Not implemented at this scale (single admin, low traffic). If the public contact form is abused, add a simple in-memory or edge-config rate limit before reaching for external infra.
+`src/lib/rate-limit.ts` provides in-memory, fixed-window rate limiters (same "in-memory is fine at this scale" stance as `src/lib/login-throttle.ts`):
+- `contactRateLimiter` — IP-keyed (via `getClientIp(req)`), 20 requests / 10 minutes, applied to `POST /api/contact`.
+- `uploadRateLimiter` — session-user-keyed, 15 requests / 15 minutes, shared between `POST /api/upload` and `POST /api/upload/video` (one combined budget, since both write to the same disk).
+- `clientErrorRateLimiter` — IP-keyed, 30 requests / 10 minutes, applied to `POST /api/log-client-error`.
+
+`verifyCsrf` is required on every mutating route, public or admin. A rate limiter is not — only public/abuse-prone routes and anything writing to disk need one (matching `security-baseline.md`'s PR checklist); the admin CRUD routes (products/categories/settings/shop-locations/festival-banners/enquiries) rely on auth + CSRF alone, since abuse there requires a compromised admin session already. `log-client-error` was originally missed from the routes that *do* need one — check new public routes against this list.
+
+All limiters return `{ allowed, retryAfterSeconds }` from `.check(key)`; on `allowed: false`, return `rateLimitResponse(retryAfterSeconds)` (a `429` with a `Retry-After` header and a generic body). Set `RATE_LIMIT_DISABLED=true` to bypass every limiter entirely — **test-only**, see `.env.example`'s warning; never set it in production.
 
 ## API Domain Routes
 | Route | Purpose |

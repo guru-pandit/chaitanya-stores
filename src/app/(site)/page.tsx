@@ -58,7 +58,12 @@ export default async function HomePage() {
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-gradient-to-b from-cream-dark/60 to-cream px-4 py-20 text-center sm:px-6 sm:py-28">
+      {/* Translucent rather than solid `to-cream` so the sitewide backdrop
+          (SiteBackdrop) reads through the hero too — otherwise the homepage
+          would be the one page where the motif is completely hidden. When
+          hero photos are configured, HeroSlideshow covers this anyway and
+          paints its own scrim for text legibility. */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-cream-dark/50 to-cream/50 px-4 py-20 text-center sm:px-6 sm:py-28">
         <HeroSlideshow images={heroImages} />
         <div className="relative z-10">
           <p className="hero-text-glow text-sm font-semibold uppercase tracking-[0.2em] text-terracotta">

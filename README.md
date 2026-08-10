@@ -72,7 +72,6 @@ editing the database directly.
 4. New categories automatically get a public page at `/categories/<slug>` — no code changes
    needed.
 
-
 Deleting a category that still has products is blocked with a clear error; remove or reassign
 its products first.
 

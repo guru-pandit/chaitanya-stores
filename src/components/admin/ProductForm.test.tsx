@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { ProductForm } from "./ProductForm";
@@ -118,5 +118,113 @@ describe("ProductForm — productType field", () => {
 
     await waitFor(() => expect(handleSubmit).toHaveBeenCalled());
     expect(handleSubmit.mock.calls[0][0]).toMatchObject({ productType: "Black Sticks" });
+  });
+});
+
+describe("ProductForm — SKU auto-generation", () => {
+  const SKU_DEBOUNCE_MS = 400;
+
+  function getSkuInput() {
+    return screen.getByLabelText(/^SKU/i) as HTMLInputElement;
+  }
+
+  // Routes the categories request to a static payload and every
+  // generate-sku request to `skuResponder`, which each test uses to control
+  // per-request resolution timing.
+  function stubFetch(skuResponder: (brand: string) => Promise<{ sku: string }>) {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: string) => {
+        const url = String(input);
+        if (url.includes("/api/products/generate-sku")) {
+          const brand = new URL(url, "http://localhost").searchParams.get("brand") ?? "";
+          return skuResponder(brand).then(
+            (body) => new Response(JSON.stringify(body), { status: 200 })
+          );
+        }
+        return Promise.resolve(
+          new Response(JSON.stringify({ items: [category], total: 1 }), { status: 200 })
+        );
+      })
+    );
+  }
+
+  async function typeBrandAndAdvance(brand: string) {
+    fireEvent.change(screen.getByLabelText(/^Brand/i), { target: { value: brand } });
+    await act(async () => {
+      vi.advanceTimersByTime(SKU_DEBOUNCE_MS);
+    });
+  }
+
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  // Regression: a second Anil incense product was generated as A-INC-0001
+  // instead of ANI-INC-0002, because the in-flight request for the
+  // half-typed brand "A" resolved AFTER the request for "Anil" and clobbered
+  // the field. The debounce cannot prevent this once a request has left.
+  it("keeps the finished brand's SKU when a half-typed brand's request resolves last", async () => {
+    const pending: Record<string, (body: { sku: string }) => void> = {};
+    stubFetch(
+      (brand) =>
+        new Promise<{ sku: string }>((resolve) => {
+          pending[brand] = resolve;
+        })
+    );
+
+    renderForm(<ProductForm onSubmit={vi.fn()} isSubmitting={false} />);
+    await waitFor(() => expect(screen.getByLabelText(/^Category/i)).toBeInTheDocument());
+
+    fireEvent.change(screen.getByLabelText(/^Category/i), { target: { value: "cat-1" } });
+
+    // "A" is typed, the debounce elapses, and its request leaves.
+    await typeBrandAndAdvance("A");
+    await waitFor(() => expect(pending["A"]).toBeDefined());
+
+    // The admin finishes typing; the second request leaves and comes back first.
+    await typeBrandAndAdvance("Anil");
+    await waitFor(() => expect(pending["Anil"]).toBeDefined());
+
+    await act(async () => {
+      pending["Anil"]({ sku: "ANI-INC-0002" });
+    });
+    await waitFor(() => expect(getSkuInput().value).toBe("ANI-INC-0002"));
+
+    // The stale "A" response now arrives late — it must be discarded.
+    await act(async () => {
+      pending["A"]({ sku: "A-INC-0001" });
+    });
+
+    expect(getSkuInput().value).toBe("ANI-INC-0002");
+  });
+
+  it("still fills the SKU from the settled brand in the ordinary case", async () => {
+    stubFetch(async (brand) => ({ sku: `${brand.slice(0, 3).toUpperCase()}-INC-0001` }));
+
+    renderForm(<ProductForm onSubmit={vi.fn()} isSubmitting={false} />);
+    await waitFor(() => expect(screen.getByLabelText(/^Category/i)).toBeInTheDocument());
+
+    fireEvent.change(screen.getByLabelText(/^Category/i), { target: { value: "cat-1" } });
+    await typeBrandAndAdvance("Anil");
+
+    await waitFor(() => expect(getSkuInput().value).toBe("ANI-INC-0001"));
+  });
+
+  it("does not overwrite a SKU the admin typed by hand", async () => {
+    stubFetch(async () => ({ sku: "ANI-INC-0002" }));
+
+    renderForm(<ProductForm onSubmit={vi.fn()} isSubmitting={false} />);
+    await waitFor(() => expect(screen.getByLabelText(/^Category/i)).toBeInTheDocument());
+
+    fireEvent.change(getSkuInput(), { target: { value: "CUSTOM-SKU-1" } });
+    fireEvent.change(screen.getByLabelText(/^Category/i), { target: { value: "cat-1" } });
+    await typeBrandAndAdvance("Anil");
+
+    expect(getSkuInput().value).toBe("CUSTOM-SKU-1");
   });
 });

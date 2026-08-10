@@ -32,7 +32,12 @@ jobs:
       - run: npx prisma generate
       - run: npm run lint
       - run: npx tsc --noEmit
-      - run: npm test
+      # Unit tests only. The `*.route.integration.test.ts` and
+      # `tests/edge-cases/**` suites are live-server tests — they fetch a
+      # running app on TEST_BASE_URL (:3100) backed by a seeded Postgres
+      # audit DB, which this runner has neither of. See
+      # src/test/apiIntegrationHelpers.ts for how to run them locally.
+      - run: npm run test:unit
 
   deploy:
     needs: verify

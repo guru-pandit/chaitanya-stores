@@ -94,6 +94,7 @@ export default async function ProductDetailPage({
               fill
               className="object-cover"
               priority
+              unoptimized
             />
           ) : (
             <div className="flex h-full items-center justify-center text-charcoal/40">

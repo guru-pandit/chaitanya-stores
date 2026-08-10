@@ -87,6 +87,7 @@ export function FestivalBannerModal({
             alt={banner.label}
             width={800}
             height={800}
+            unoptimized
             className="max-h-[80vh] max-w-[90vw] w-auto h-auto rounded-2xl object-contain shadow-xl"
           />
         )}

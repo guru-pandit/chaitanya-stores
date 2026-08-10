@@ -35,6 +35,7 @@ export function HeroSlideshow({ images }: { images: string[] }) {
             alt=""
             fill
             priority={i === 0}
+            sizes="100vw"
             className={`object-cover ${i === index ? "animate-hero-zoom" : ""}`}
           />
         </div>

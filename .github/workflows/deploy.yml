@@ -20,10 +20,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Node
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
@@ -32,12 +32,7 @@ jobs:
       - run: npx prisma generate
       - run: npm run lint
       - run: npx tsc --noEmit
-      # Not `npm test` — that includes *.integration.test.ts and
-      # tests/edge-cases/**, which require a live server + seeded Postgres
-      # (TEST_BASE_URL) that doesn't exist in this runner and fail loudly,
-      # not skip (see src/test/apiIntegrationHelpers.ts). test:unit runs
-      # only the mocked-Prisma/mocked-auth suite, which is self-contained.
-      - run: npm run test:unit
+      - run: npm test
 
   deploy:
     needs: verify
@@ -91,29 +86,24 @@ jobs:
             ENVEOF
             chmod 600 .env
 
-            # Forward-only schema migrations, run from the dedicated
-            # `migrator` build stage (see docker-compose.yml's `migrate`
-            # service) — never `migrate reset`, never a destructive command
-            # here. `--build` is required: Compose only builds an image on
-            # `run` when it's absent, so without it this would silently
-            # reuse whatever `migrate` image was built on a *previous*
-            # deploy — running old migrations against new code, meaning a
-            # new migration in this push would never actually apply.
+            # Forward-only schema migrations, run from the full `builder`
+            # image (see docker-compose.yml's `migrate` service comment) —
+            # never `migrate reset`, never a destructive command here.
             # Runs BEFORE the app is recreated so new code never queries a
-            # column/table that doesn't exist yet. This only fully covers
-            # purely additive migrations — a migration that drops/renames
-            # something the currently-live code still references needs the
-            # two-deploy pattern instead (see deployment guide Section 8.4).
-            docker compose --profile tools run --rm --build migrate
+            # schema that isn't there yet. This only fully covers additive
+            # migrations (new column/table old code ignores) — for anything
+            # that drops or renames something the live code still
+            # references, use the two-deploy pattern from the deployment
+            # guide's Section 8.4 instead.
+            docker compose --profile tools run --rm migrate
 
             # Build+recreate the app; db/nginx are only touched if their own
             # config changed. Never `-v`, never `down` — volumes are untouched.
             docker compose up -d --build db web nginx
 
-            # nginx caches the `web` hostname's resolved IP at config load;
-            # recreating `web` above gives it a new IP on the Docker bridge
-            # network, so reload nginx or it keeps proxying to the stale IP
-            # and every deploy causes intermittent 502s.
+            # nginx caches the `web` hostname's resolved IP for the life of
+            # the worker process, so it keeps proxying to the old container
+            # after `web` is recreated above until reloaded.
             docker compose exec nginx nginx -s reload
 
             docker image prune -f

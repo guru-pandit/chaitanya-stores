@@ -70,7 +70,7 @@ export default function AdminFestivalBannerPage() {
                       {banner.mediaType === "VIDEO" ? (
                         <Video size={20} className="text-maroon/50" aria-label="Video banner" />
                       ) : (
-                        <UploadedImage src={banner.mediaPath} alt={banner.label} fill className="object-cover" />
+                        <Image src={banner.mediaPath} alt={banner.label} fill sizes="48px" unoptimized className="object-cover" />
                       )}
                     </div>
                     <div>

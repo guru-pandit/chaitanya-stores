@@ -111,15 +111,34 @@ export function ProductForm({
 
   useEffect(() => {
     if (skuEditedManually.current || !brand || !categoryId) return;
+
+    // The debounce alone does NOT make this safe. Once the timer has fired,
+    // the request is in flight and clearTimeout can't recall it — so a slow
+    // response for a half-typed brand ("A") can land *after* the fast one
+    // for the finished brand ("Anil") and overwrite the correct value. That
+    // is how a second Anil incense product came out as A-INC-0001 instead of
+    // ANI-INC-0002: the prefix "A-INC" has no prior products, so the server
+    // correctly numbered it 0001 — it was just answering a stale question.
+    // Abort the outstanding request and ignore anything a superseded run
+    // still manages to resolve.
+    const controller = new AbortController();
+    let superseded = false;
+
     const timeout = setTimeout(async () => {
       try {
-        const { sku } = await generateSku(brand, categoryId);
-        setValue("sku", sku);
+        const { sku } = await generateSku(brand, categoryId, controller.signal);
+        if (!superseded) setValue("sku", sku);
       } catch {
-        // Generation failed (e.g. network hiccup) — user can still type a SKU by hand.
+        // Generation failed (network hiccup) or this run was aborted — the
+        // user can still type a SKU by hand.
       }
     }, 400);
-    return () => clearTimeout(timeout);
+
+    return () => {
+      superseded = true;
+      clearTimeout(timeout);
+      controller.abort();
+    };
   }, [brand, categoryId, setValue]);
 
   function regenerateSlug() {
@@ -130,20 +149,30 @@ export function ProductForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <SelectField
-          id="categoryId"
-          label="Category"
-          required
-          error={errors.categoryId?.message}
-          {...register("categoryId")}
-        >
-          <option value="">Select a category</option>
-          {categories?.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </SelectField>
+        <Controller
+          control={control}
+          name="categoryId"
+          render={({ field }) => (
+            <SelectField
+              id="categoryId"
+              label="Category"
+              required
+              error={errors.categoryId?.message}
+              name={field.name}
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              ref={field.ref}
+            >
+              <option value="">Select a category</option>
+              {categories?.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </SelectField>
+          )}
+        />
         <TextField
           id="brand"
           label="Brand"

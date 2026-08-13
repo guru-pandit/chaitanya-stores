@@ -59,10 +59,15 @@ export function FooterShopContacts({ shops }: { shops: FooterShopContact[] }) {
               {hasContactValue(shop.email) && (
                 <a
                   href={`mailto:${shop.email}`}
-                  className="flex items-center gap-2 break-all hover:text-gold"
+                  className="flex items-center gap-2 hover:text-gold"
                 >
                   <Mail size={14} className="shrink-0 text-gold" aria-hidden="true" />
-                  <span>{shop.email}</span>
+                  {/* min-w-0 is load-bearing: as a flex item this span defaults
+                      to min-width:auto, which blocks shrinking (and therefore
+                      wrapping) below its content's intrinsic width regardless
+                      of break-words. Without it, a long email overflows the
+                      card on one line instead of wrapping. */}
+                  <span className="min-w-0 break-words">{shop.email}</span>
                 </a>
               )}
               {!hasAnyContact && <p className="text-cream/60">{CONTACT_COMING_SOON}</p>}

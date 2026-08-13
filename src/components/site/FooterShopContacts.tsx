@@ -16,13 +16,25 @@ export type FooterShopContact = {
   isPrimary: boolean;
 };
 
+// Narrow footer cards can't fit a full email on one line, and breaking
+// wherever the text happens to run out of room (break-words) lands mid-word
+// in an ugly spot. Offering a break opportunity right after "@" and each "."
+// instead makes the wrap fall on a natural boundary, e.g.
+// "shop@" / "example.com" rather than "sh" / "op@example.co" / "m".
+function emailWithBreakPoints(email: string) {
+  const segments = email.split(/(?<=[@.])/);
+  return segments.flatMap((segment, i) =>
+    i === 0 ? [segment] : [<wbr key={i} />, segment]
+  );
+}
+
 export function FooterShopContacts({ shops }: { shops: FooterShopContact[] }) {
   // With a single shop there's nothing to distinguish it from, so the badge
   // would just be noise.
   const showPrimaryBadge = shops.length > 1;
 
   return (
-    <ul className="mt-3 grid gap-4 sm:grid-cols-2">
+    <ul className="mt-3 flex flex-col gap-4">
       {shops.map((shop) => {
         // Every contact field is independently optional (a ShopLocation row
         // can be saved with blanks, and the siteConfig fallback's env-backed
@@ -64,10 +76,12 @@ export function FooterShopContacts({ shops }: { shops: FooterShopContact[] }) {
                   <Mail size={14} className="shrink-0 text-gold" aria-hidden="true" />
                   {/* min-w-0 is load-bearing: as a flex item this span defaults
                       to min-width:auto, which blocks shrinking (and therefore
-                      wrapping) below its content's intrinsic width regardless
-                      of break-words. Without it, a long email overflows the
-                      card on one line instead of wrapping. */}
-                  <span className="min-w-0 break-words">{shop.email}</span>
+                      wrapping) below its content's intrinsic width. break-words
+                      is a fallback for the rare segment (between break points)
+                      that's still too long on its own. */}
+                  <span className="min-w-0 break-words">
+                    {emailWithBreakPoints(shop.email)}
+                  </span>
                 </a>
               )}
               {!hasAnyContact && <p className="text-cream/60">{CONTACT_COMING_SOON}</p>}

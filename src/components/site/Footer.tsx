@@ -37,46 +37,45 @@ export async function Footer() {
     <footer className="mt-24 border-t border-maroon/10 bg-maroon text-cream">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         <MandalaDivider className="mb-8 text-gold/70" />
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <Image src="/logo.png" alt="" width={26} height={26} className="shrink-0" />
-              <p className="font-display text-xl">{siteConfig.name}</p>
+        <div className="grid gap-10 sm:grid-cols-2">
+          <div className="flex flex-col gap-10">
+            <div>
+              <div className="flex items-center gap-2">
+                <Image src="/logo.png" alt="" width={26} height={26} className="shrink-0" />
+                <p className="font-display text-xl">{siteConfig.name}</p>
+              </div>
+              <p className="mt-2 text-sm text-cream/70">{siteConfig.tagline}</p>
+              <div className="mt-4 flex items-center gap-4">
+                <a
+                  href={siteConfig.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Follow us on Instagram"
+                  className="text-cream/80 hover:text-gold"
+                >
+                  <InstagramIcon size={20} />
+                </a>
+                <a
+                  href={siteConfig.facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Follow us on Facebook"
+                  className="text-cream/80 hover:text-gold"
+                >
+                  <FacebookIcon size={20} />
+                </a>
+              </div>
             </div>
-            <p className="mt-2 text-sm text-cream/70">{siteConfig.tagline}</p>
-            <div className="mt-4 flex items-center gap-4">
-              <a
-                href={siteConfig.instagramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Follow us on Instagram"
-                className="text-cream/80 hover:text-gold"
-              >
-                <InstagramIcon size={20} />
-              </a>
-              <a
-                href={siteConfig.facebookUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Follow us on Facebook"
-                className="text-cream/80 hover:text-gold"
-              >
-                <FacebookIcon size={20} />
-              </a>
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-gold">Explore</p>
+              <div className="mt-3 flex flex-col gap-2 text-sm text-cream/80">
+                <Link href="/catalog" className="hover:text-gold">Catalog</Link>
+                <Link href="/about" className="hover:text-gold">About</Link>
+                <Link href="/contact" className="hover:text-gold">Contact</Link>
+              </div>
             </div>
           </div>
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-gold">Explore</p>
-            <div className="mt-3 flex flex-col gap-2 text-sm text-cream/80">
-              <Link href="/catalog" className="hover:text-gold">Catalog</Link>
-              <Link href="/about" className="hover:text-gold">About</Link>
-              <Link href="/contact" className="hover:text-gold">Contact</Link>
-            </div>
-          </div>
-          {/* Spans the full row on `sm` (where it sits under brand+Explore) so
-              the per-shop cards get two columns instead of being squeezed into
-              a third of the width. */}
-          <div className="sm:col-span-2">
             <p className="text-sm font-semibold uppercase tracking-wide text-gold">
               {shops.length > 1 ? "Our Shops" : "Reach Us"}
             </p>

@@ -62,8 +62,14 @@ export default async function HomePage() {
           (SiteBackdrop) reads through the hero too — otherwise the homepage
           would be the one page where the motif is completely hidden. When
           hero photos are configured, HeroSlideshow covers this anyway and
-          paints its own scrim for text legibility. */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-cream-dark/50 to-cream/50 px-4 py-20 text-center sm:px-6 sm:py-28">
+          paints its own scrim for text legibility.
+          min-h fills exactly the viewport below the sticky header (h-16, see
+          Header.tsx) and centers the content block in it, rather than
+          top-anchoring it under fixed padding — the previous fixed py-20/28
+          left an amount of empty space below the button row that varied
+          with viewport height, which on tall screens read as a stray gap
+          before the next section instead of a deliberate full-bleed hero. */}
+      <section className="relative flex min-h-[calc(100dvh-4rem)] flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-cream-dark/50 to-cream/50 px-4 py-16 text-center sm:px-6 sm:py-20">
         <HeroSlideshow images={heroImages} />
         <div className="relative z-10">
           <p className="hero-text-glow text-sm font-semibold uppercase tracking-[0.2em] text-terracotta">

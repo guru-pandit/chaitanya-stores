@@ -1,5 +1,6 @@
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+import { SiteBackdrop } from "@/components/site/SiteBackdrop";
 import { SiteJsonLd } from "@/components/site/SiteJsonLd";
 import { FestivalBannerModal } from "@/components/site/FestivalBannerModal";
 import { getActiveFestivalBanner } from "@/lib/festival-banner";
@@ -20,6 +21,10 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
   return (
     <>
+      {/* Fixed behind everything — the content column scrolls over it while
+          the motif holds still. Rendered here rather than in the root layout
+          so the admin dashboard keeps its plain, businesslike background. */}
+      <SiteBackdrop />
       <FestivalBannerModal banner={banner} />
       <SiteJsonLd />
       <Header />

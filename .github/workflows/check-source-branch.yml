@@ -1,0 +1,20 @@
+name: Check source branch
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          if [[ "$BRANCH" != "develop" && "$BRANCH" != hotfix/* ]]; then
+            echo "❌ Only 'develop' or 'hotfix/*' branches can merge into main."
+            echo "Source branch was: $BRANCH"
+            exit 1
+          fi
+          echo "✅ Branch '$BRANCH' is allowed."

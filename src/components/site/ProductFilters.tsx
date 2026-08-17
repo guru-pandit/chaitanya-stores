@@ -3,8 +3,10 @@
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Search } from "lucide-react";
 import type { Category } from "@/generated/prisma/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Select } from "@/components/ui/Select";
+
+const SEARCH_DEBOUNCE_MS = 400;
 
 export function ProductFilters({
   categories,
@@ -24,14 +26,31 @@ export function ProductFilters({
   const searchParams = useSearchParams();
   const [query, setQuery] = useState(activeQuery);
 
-  function updateParams(next: { category?: string; brand?: string; q?: string }) {
+  function updateParams(next: { category?: string; brand?: string; q?: string }, options?: { replace?: boolean }) {
     const params = new URLSearchParams(searchParams.toString());
     Object.entries(next).forEach(([key, value]) => {
       if (value) params.set(key, value);
       else params.delete(key);
     });
-    router.push(`${pathname}?${params.toString()}`);
+    const url = `${pathname}?${params.toString()}`;
+    if (options?.replace) router.replace(url);
+    else router.push(url);
   }
+
+  useEffect(() => {
+    if (query === activeQuery) return;
+
+    // Debounced so every keystroke doesn't trigger a navigation; `replace`
+    // (not `push`) keeps intermediate keystrokes out of browser history —
+    // otherwise pressing back while typing would step through each partial
+    // search term instead of leaving the catalog.
+    const timeout = setTimeout(() => {
+      updateParams({ q: query }, { replace: true });
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- updateParams closes over pathname/searchParams/router freshly each render; only the query itself should retrigger the debounce
+  }, [query, activeQuery]);
 
   return (
     <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">

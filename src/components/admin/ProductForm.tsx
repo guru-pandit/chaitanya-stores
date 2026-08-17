@@ -367,6 +367,7 @@ export function ProductForm({
           images={images}
           onChange={(next) => setValue("images", next)}
           maxImages={MAX_PRODUCT_IMAGES}
+          reorderHint="Drag to reorder, or use the arrows. The first image is the cover shown on cards, search results and social shares."
         />
       </div>
 

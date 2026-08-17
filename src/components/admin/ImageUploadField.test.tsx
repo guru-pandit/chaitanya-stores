@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { ImageUploadField } from "./ImageUploadField";
+import { stubXMLHttpRequest } from "@/test/mockXhr";
 
 const IMAGES = ["/uploads/a.jpg", "/uploads/b.jpg", "/uploads/c.jpg"];
 
@@ -38,17 +39,10 @@ function reorderDataTransfer(fromIndex: number) {
 }
 
 beforeEach(() => {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn(async (url: string) => {
-      if (String(url).includes("/api/upload")) {
-        return new Response(JSON.stringify({ path: `/uploads/new-${Math.random()}.png` }), {
-          status: 200,
-        });
-      }
-      return new Response("{}", { status: 200 });
-    })
-  );
+  stubXMLHttpRequest(() => ({
+    status: 200,
+    body: { path: `/uploads/new-${Math.random()}.png` },
+  }));
 });
 
 describe("ImageUploadField — reordering", () => {
@@ -128,6 +122,15 @@ describe("ImageUploadField — drag-and-drop upload", () => {
 
     await waitFor(() => expect(onChange).toHaveBeenCalled());
     expect(onChange.mock.calls[0][0]).toHaveLength(1);
+  });
+
+  it("shows a circular progress indicator while an upload is in flight", () => {
+    renderField({ images: [] });
+
+    const zone = screen.getByText("Upload").closest("div")!.parentElement!;
+    fireEvent.drop(zone, { dataTransfer: fileDataTransfer([imageFile("one.png")]) });
+
+    expect(screen.getByRole("progressbar")).toBeInTheDocument();
   });
 
   it("uploads every file when several are dropped at once", async () => {

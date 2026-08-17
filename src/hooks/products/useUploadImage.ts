@@ -1,17 +1,13 @@
 import { useMutation } from "@tanstack/react-query";
 import { ApiError } from "@/lib/api-client";
+import { uploadWithProgress } from "@/lib/uploadWithProgress";
 
 export const useUploadImage = () =>
   useMutation({
-    mutationFn: async (file: File) => {
+    mutationFn: async ({ file, onProgress }: { file: File; onProgress?: (percent: number) => void }) => {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        throw new ApiError(body?.error ?? "Upload failed");
-      }
-      const data: { path: string } = await res.json();
+      const data = await uploadWithProgress<{ path: string }>("/api/upload", formData, onProgress);
       return data.path;
     },
   });

@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { useUploadVideo } from "@/hooks/festivalBanners/useUploadVideo";
 import { ApiError } from "@/lib/api-client";
+import { stubXMLHttpRequest } from "@/test/mockXhr";
 
 function wrapper({ children }: { children: ReactNode }) {
   const queryClient = new QueryClient();
@@ -11,36 +12,39 @@ function wrapper({ children }: { children: ReactNode }) {
 }
 
 describe("useUploadVideo", () => {
-  beforeEach(() => {
-    vi.stubGlobal("fetch", vi.fn());
-  });
-
   it("POSTs the file as multipart form data to /api/upload/video and resolves with the returned path", async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(
-      new Response(JSON.stringify({ path: "/uploads/clip123.mp4" }), { status: 200 })
-    );
+    const calls = stubXMLHttpRequest({ status: 200, body: { path: "/uploads/clip123.mp4" } });
     const file = new File(["fake"], "clip.mp4", { type: "video/mp4" });
 
     const { result } = renderHook(() => useUploadVideo(), { wrapper });
-    result.current.mutate(file);
+    result.current.mutate({ file });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toBe("/uploads/clip123.mp4");
-    const [url, init] = vi.mocked(fetch).mock.calls[0];
-    expect(url).toBe("/api/upload/video");
-    expect(init).toMatchObject({ method: "POST" });
-    expect(init!.body).toBeInstanceOf(FormData);
+    expect(calls[0]).toMatchObject({ method: "POST", url: "/api/upload/video" });
+    expect(calls[0].body).toBeInstanceOf(FormData);
+  });
+
+  it("reports upload progress as it happens", async () => {
+    stubXMLHttpRequest({ status: 200, body: { path: "/uploads/clip123.mp4" }, progress: [10, 50, 100] });
+    const file = new File(["fake"], "clip.mp4", { type: "video/mp4" });
+    const onProgress = vi.fn();
+
+    const { result } = renderHook(() => useUploadVideo(), { wrapper });
+    result.current.mutate({ file, onProgress });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(onProgress.mock.calls.map((c) => c[0])).toEqual([10, 50, 100]);
   });
 
   it("throws an ApiError with the server message when the upload is rejected (e.g. over size limit)", async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(
-      new Response(JSON.stringify({ error: "File exceeds 20MB limit" }), { status: 400 })
-    );
+    stubXMLHttpRequest({ status: 400, body: { error: "File exceeds 20MB limit" } });
     const file = new File(["fake"], "clip.mp4", { type: "video/mp4" });
 
     const { result } = renderHook(() => useUploadVideo(), { wrapper });
-    result.current.mutate(file);
+    result.current.mutate({ file });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
 
@@ -49,11 +53,11 @@ describe("useUploadVideo", () => {
   });
 
   it("falls back to a generic message when the error body isn't valid JSON", async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(new Response("not json", { status: 500 }));
+    stubXMLHttpRequest({ status: 500, rawBody: "not json" });
     const file = new File(["fake"], "clip.mp4", { type: "video/mp4" });
 
     const { result } = renderHook(() => useUploadVideo(), { wrapper });
-    result.current.mutate(file);
+    result.current.mutate({ file });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
 

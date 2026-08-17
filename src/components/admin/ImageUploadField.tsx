@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { X, Upload, ChevronLeft, ChevronRight, GripVertical } from "lucide-react";
 import { useUploadImage, useDeleteImage } from "@/hooks/products/useUploadImage";
 import { UploadedImage } from "@/components/ui/UploadedImage";
+import { CircularProgress } from "@/components/ui/CircularProgress";
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
@@ -50,6 +51,7 @@ export function ImageUploadField({
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
   const [uploadingCount, setUploadingCount] = useState(0);
+  const [uploadProgress, setUploadProgress] = useState(0);
   // dragenter/dragleave fire for every child element crossed, so a plain
   // boolean flickers as the pointer moves over thumbnails. Counting
   // enter/leave pairs keeps the highlight stable.
@@ -85,8 +87,9 @@ export function ImageUploadField({
 
     try {
       for (const file of toUpload) {
+        setUploadProgress(0);
         try {
-          uploaded.push(await uploadImage.mutateAsync(file));
+          uploaded.push(await uploadImage.mutateAsync({ file, onProgress: setUploadProgress }));
         } catch (err) {
           failure = err instanceof Error ? err.message : "Upload failed";
           break;
@@ -94,6 +97,7 @@ export function ImageUploadField({
       }
     } finally {
       setUploadingCount(0);
+      setUploadProgress(0);
     }
 
     if (uploaded.length > 0) onChange([...images, ...uploaded]);
@@ -205,12 +209,9 @@ export function ImageUploadField({
     setDropTargetIndex(null);
   }
 
+  const isUploading = uploadImage.isPending || uploadingCount > 0;
   const uploadLabel =
-    uploadingCount > 1
-      ? `Uploading ${uploadingCount}...`
-      : uploadImage.isPending || uploadingCount === 1
-        ? "Uploading..."
-        : "Upload";
+    uploadingCount > 1 ? `Uploading ${uploadingCount}...` : isUploading ? "Uploading..." : "Upload";
 
   return (
     <div>
@@ -287,7 +288,11 @@ export function ImageUploadField({
             <label
               className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-maroon/30 text-center text-maroon/60 hover:bg-maroon/5 ${thumbnailSize}`}
             >
-              <Upload size={iconSize} />
+              {isUploading ? (
+                <CircularProgress value={uploadProgress} size={iconSize + 16} />
+              ) : (
+                <Upload size={iconSize} />
+              )}
               <span className="px-1 text-xs leading-tight">{uploadLabel}</span>
               <input
                 type="file"

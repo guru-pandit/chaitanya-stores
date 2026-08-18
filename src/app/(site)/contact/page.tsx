@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MessageCircle, Mail, Phone, MapPin } from "lucide-react";
+import { MessageCircle, Mail, Phone, MapPin, ExternalLink } from "lucide-react";
 import {
   buildWhatsappLink,
   buildMailtoLink,
@@ -127,6 +127,16 @@ export default async function ContactPage() {
               <p className="text-sm text-charcoal/70">
                 {hasContactValue(primary.address) ? primary.address : CONTACT_COMING_SOON}
               </p>
+              {hasContactValue(primary.mapLink) && (
+                <a
+                  href={primary.mapLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 inline-flex items-center gap-1.5 text-sm font-medium text-terracotta hover:underline"
+                >
+                  <ExternalLink size={14} /> View on Map
+                </a>
+              )}
             </div>
           </div>
         </div>

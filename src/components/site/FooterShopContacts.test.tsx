@@ -9,6 +9,7 @@ const sangmeshwar: FooterShopContact = {
   address: "Main Road, Sangmeshwar, Ratnagiri 415611",
   phone: "+919876543210",
   email: "sangmeshwar@chaitanyastores.in",
+  mapLink: "https://maps.app.goo.gl/sangmeshwar",
   isPrimary: true,
 };
 
@@ -18,6 +19,7 @@ const devrukh: FooterShopContact = {
   address: "Market Yard, Devrukh, Ratnagiri 415804",
   phone: "+919812345678",
   email: "devrukh@chaitanyastores.in",
+  mapLink: null,
   isPrimary: false,
 };
 
@@ -87,5 +89,20 @@ describe("FooterShopContacts", () => {
 
     expect(screen.queryByText(CONTACT_COMING_SOON)).not.toBeInTheDocument();
     expect(screen.getByText(devrukh.phone)).toBeInTheDocument();
+  });
+
+  it('renders a "View on Map" link when a shop has a mapLink', () => {
+    render(<FooterShopContacts shops={[sangmeshwar]} />);
+
+    expect(screen.getByText("View on Map").closest("a")).toHaveAttribute(
+      "href",
+      sangmeshwar.mapLink
+    );
+  });
+
+  it('omits the "View on Map" link when a shop has no mapLink', () => {
+    render(<FooterShopContacts shops={[devrukh]} />);
+
+    expect(screen.queryByText("View on Map")).not.toBeInTheDocument();
   });
 });

@@ -26,6 +26,7 @@ export const productSchema = z.object({
     .max(MAX_PRODUCT_IMAGES, `A product can have at most ${MAX_PRODUCT_IMAGES} images`),
   inStock: z.boolean(),
   featured: z.boolean(),
+  isHidden: z.boolean(),
   categoryId: z.string().min(1, "Category is required"),
   variants: z.array(productVariantSchema),
 });

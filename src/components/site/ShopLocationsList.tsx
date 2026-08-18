@@ -1,4 +1,5 @@
-import { MapPin, Phone, Mail } from "lucide-react";
+import { MapPin, Phone, Mail, ExternalLink } from "lucide-react";
+import { hasContactValue } from "@/lib/site-config";
 import type { ShopLocation } from "@/generated/prisma/client";
 
 // Plain-text list of shop locations (address/phone/email) — used for
@@ -17,6 +18,16 @@ export function ShopLocationsList({ locations }: { locations: ShopLocation[] }) 
             <p className="flex items-start gap-1.5">
               <MapPin size={14} className="mt-0.5 shrink-0 text-terracotta" /> {location.address}
             </p>
+            {hasContactValue(location.mapLink) && (
+              <a
+                href={location.mapLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 hover:text-terracotta"
+              >
+                <ExternalLink size={14} className="shrink-0 text-terracotta" /> View on Map
+              </a>
+            )}
             <a
               href={`tel:${location.phone}`}
               className="flex items-center gap-1.5 hover:text-terracotta"

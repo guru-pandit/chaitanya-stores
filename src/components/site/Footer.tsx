@@ -20,6 +20,7 @@ export async function Footer() {
           address: l.address,
           phone: l.phone,
           email: l.email,
+          mapLink: l.mapLink,
           isPrimary: l.isPrimary,
         }))
       : [
@@ -29,6 +30,7 @@ export async function Footer() {
             address: siteConfig.address,
             phone: siteConfig.phone,
             email: siteConfig.email,
+            mapLink: null,
             isPrimary: true,
           },
         ];
@@ -72,6 +74,7 @@ export async function Footer() {
                 <Link href="/catalog" className="hover:text-gold">Catalog</Link>
                 <Link href="/about" className="hover:text-gold">About</Link>
                 <Link href="/contact" className="hover:text-gold">Contact</Link>
+                <Link href="/sitemap.xml" className="hover:text-gold">Sitemap</Link>
               </div>
             </div>
           </div>

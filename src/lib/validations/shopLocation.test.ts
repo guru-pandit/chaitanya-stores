@@ -33,3 +33,32 @@ describe("shopLocationSchema", () => {
     expect(result.success).toBe(false);
   });
 });
+
+describe("shopLocationSchema — mapLink", () => {
+  it("accepts mapLink omitted entirely (optional)", () => {
+    expect(shopLocationSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("accepts an empty string mapLink", () => {
+    expect(shopLocationSchema.safeParse({ ...valid, mapLink: "" }).success).toBe(true);
+  });
+
+  it("accepts a valid https URL", () => {
+    const result = shopLocationSchema.safeParse({
+      ...valid,
+      mapLink: "https://maps.app.goo.gl/abc123",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects a non-URL string", () => {
+    const result = shopLocationSchema.safeParse({ ...valid, mapLink: "not-a-url" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a mapLink over the 500-char boundary", () => {
+    const longUrl = `https://maps.app.goo.gl/${"a".repeat(500)}`;
+    const result = shopLocationSchema.safeParse({ ...valid, mapLink: longUrl });
+    expect(result.success).toBe(false);
+  });
+});

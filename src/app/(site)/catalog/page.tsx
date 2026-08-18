@@ -38,6 +38,7 @@ export default async function CatalogPage({
   const page = Number.isFinite(requestedPage) && requestedPage >= 1 ? Math.floor(requestedPage) : 1;
 
   const where = {
+    isHidden: false,
     ...(category ? { category: { slug: category } } : {}),
     ...(brand ? { brand } : {}),
     ...(q ? { name: { contains: q } } : {}),
@@ -53,7 +54,12 @@ export default async function CatalogPage({
     }),
     prisma.product.count({ where }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
-    prisma.product.findMany({ distinct: ["brand"], select: { brand: true }, orderBy: { brand: "asc" } }),
+    prisma.product.findMany({
+      where: { isHidden: false },
+      distinct: ["brand"],
+      select: { brand: true },
+      orderBy: { brand: "asc" },
+    }),
     getPrimaryShopLocation(),
   ]);
 

@@ -18,6 +18,7 @@ function shopLocation(overrides: Partial<ShopLocation> & { id: string }): ShopLo
     phone: "+919876543210",
     whatsappNumber: "919876543210",
     email: "hello@chaitanyastores.in",
+    mapLink: null,
     isPrimary: false,
     createdAt: new Date("2026-01-01"),
     updatedAt: new Date("2026-01-01"),
@@ -51,6 +52,14 @@ describe("Footer — Policies block", () => {
     for (const policy of siteConfig.policies) {
       expect(screen.getByText(policy)).toBeInTheDocument();
     }
+  });
+});
+
+describe("Footer — Explore block", () => {
+  it("links to /sitemap.xml", async () => {
+    await renderFooter();
+
+    expect(screen.getByRole("link", { name: "Sitemap" })).toHaveAttribute("href", "/sitemap.xml");
   });
 });
 

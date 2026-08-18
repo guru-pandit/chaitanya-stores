@@ -38,6 +38,7 @@ export function ShopLocationForm({
           phone: shopLocation.phone,
           whatsappNumber: shopLocation.whatsappNumber,
           email: shopLocation.email,
+          mapLink: shopLocation.mapLink ?? "",
           isPrimary: shopLocation.isPrimary,
         }
       : {
@@ -46,6 +47,7 @@ export function ShopLocationForm({
           phone: "",
           whatsappNumber: "",
           email: "",
+          mapLink: "",
           isPrimary: false,
         },
   });
@@ -97,6 +99,15 @@ export function ShopLocationForm({
         required
         error={errors.email?.message}
         {...register("email")}
+      />
+
+      <TextField
+        id="mapLink"
+        label="Google Maps Link"
+        type="url"
+        error={errors.mapLink?.message}
+        placeholder="https://maps.app.goo.gl/..."
+        {...register("mapLink")}
       />
 
       <Controller

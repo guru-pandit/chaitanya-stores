@@ -7,7 +7,7 @@ import { siteConfig } from "@/lib/site-config";
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     product: {
-      findUnique: vi.fn(),
+      findFirst: vi.fn(),
     },
   },
 }));
@@ -25,7 +25,7 @@ vi.mock("@/lib/shop-locations", () => ({
 }));
 
 const mockPrisma = prisma as unknown as {
-  product: { findUnique: ReturnType<typeof vi.fn> };
+  product: { findFirst: ReturnType<typeof vi.fn> };
 };
 
 const baseProduct = {
@@ -49,7 +49,7 @@ const baseProduct = {
 };
 
 async function renderPage(overrides: Partial<typeof baseProduct> = {}) {
-  mockPrisma.product.findUnique.mockResolvedValueOnce({ ...baseProduct, ...overrides });
+  mockPrisma.product.findFirst.mockResolvedValueOnce({ ...baseProduct, ...overrides });
   const jsx = await ProductDetailPage({ params: Promise.resolve({ slug: "sandalwood-agarbatti" }) });
   render(jsx);
 }

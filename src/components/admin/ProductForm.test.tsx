@@ -44,6 +44,7 @@ const baseProduct: Product = {
   images: "[]",
   inStock: true,
   featured: false,
+  isHidden: false,
   categoryId: "cat-1",
   createdAt: new Date("2026-01-01"),
   updatedAt: new Date("2026-01-01"),
@@ -118,6 +119,48 @@ describe("ProductForm — productType field", () => {
 
     await waitFor(() => expect(handleSubmit).toHaveBeenCalled());
     expect(handleSubmit.mock.calls[0][0]).toMatchObject({ productType: "Black Sticks" });
+  });
+});
+
+describe("ProductForm — Hidden from website field", () => {
+  beforeEach(() => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ items: [category], total: 1 }), { status: 200 })
+      )
+    );
+  });
+
+  it("defaults to unchecked when creating a new product", () => {
+    renderForm(<ProductForm onSubmit={vi.fn()} isSubmitting={false} />);
+
+    expect(screen.getByLabelText("Hidden from website")).not.toBeChecked();
+  });
+
+  it("prefills from an existing hidden product in edit mode", async () => {
+    renderForm(
+      <ProductForm
+        product={{ ...baseProduct, isHidden: true }}
+        onSubmit={vi.fn()}
+        isSubmitting={false}
+      />
+    );
+
+    await waitFor(() => expect(screen.getByLabelText("Hidden from website")).toBeChecked());
+  });
+
+  it("submits isHidden: true when the admin checks the box", async () => {
+    const handleSubmit = vi.fn();
+    renderForm(<ProductForm product={baseProduct} onSubmit={handleSubmit} isSubmitting={false} />);
+
+    await waitFor(() => expect(getTypeInput().value).toBe("Masala Sticks"));
+
+    fireEvent.click(screen.getByLabelText("Hidden from website"));
+    fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
+
+    await waitFor(() => expect(handleSubmit).toHaveBeenCalled());
+    expect(handleSubmit.mock.calls[0][0]).toMatchObject({ isHidden: true });
   });
 });
 

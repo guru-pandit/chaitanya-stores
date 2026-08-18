@@ -12,12 +12,14 @@ export function DataTable<T>({
   columns,
   data,
   getRowKey,
+  getRowClassName,
   isLoading,
   emptyState,
 }: {
   columns: DataTableColumn<T>[];
   data: T[] | undefined;
   getRowKey: (row: T) => string;
+  getRowClassName?: (row: T) => string;
   isLoading?: boolean;
   emptyState: ReactNode;
 }) {
@@ -61,7 +63,7 @@ export function DataTable<T>({
       {header}
       <tbody className="divide-y divide-maroon/10">
         {data.map((row) => (
-          <tr key={getRowKey(row)}>
+          <tr key={getRowKey(row)} className={getRowClassName?.(row) ?? ""}>
             {columns.map((col) => (
               <td key={col.header} className={`p-4 ${col.cellClassName ?? ""}`}>
                 {col.cell(row)}

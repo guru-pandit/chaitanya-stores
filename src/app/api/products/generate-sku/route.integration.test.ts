@@ -71,6 +71,7 @@ describe("GET /api/products/generate-sku (integration)", () => {
         images: [],
         inStock: true,
         featured: false,
+        isHidden: false,
         categoryId,
         variants: [],
       }),

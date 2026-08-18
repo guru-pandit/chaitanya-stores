@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Eye, EyeOff } from "lucide-react";
 import { useProducts } from "@/hooks/products/useProducts";
-import { useDeleteProduct } from "@/hooks/products/useProductMutations";
+import { useDeleteProduct, useToggleProductHidden } from "@/hooks/products/useProductMutations";
 import { useCategories } from "@/hooks/categories/useCategories";
 import { useBrands } from "@/hooks/products/useBrands";
 import { useAdminProductFiltersStore } from "@/store/adminProductFiltersStore";
@@ -37,6 +37,8 @@ export default function AdminProductsPage() {
   const totalPages = data ? Math.max(1, Math.ceil(data.total / PAGE_SIZE)) : 1;
   const { mutate: deleteProduct, isPending } = useDeleteProduct();
   const { confirmDelete, pendingId } = useDeleteWithConfirm(deleteProduct);
+  const { mutate: toggleHidden, isPending: isToggling, variables: togglingProduct } =
+    useToggleProductHidden();
 
   // Filter changes should reset to page 1 — the currently viewed page
   // number from a different filter set has no meaning under a new one.
@@ -59,6 +61,11 @@ export default function AdminProductsPage() {
           {product.featured && (
             <span className="ml-2 rounded-full bg-gold/30 px-2 py-0.5 text-[10px] font-semibold text-maroon-dark">
               Featured
+            </span>
+          )}
+          {product.isHidden && (
+            <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-charcoal/10 px-2 py-0.5 text-[10px] font-semibold text-charcoal/60">
+              <EyeOff size={10} /> Hidden
             </span>
           )}
         </span>
@@ -104,12 +111,23 @@ export default function AdminProductsPage() {
       headerClassName: "text-right",
       cellClassName: "text-right",
       cell: (product) => (
-        <RowActions
-          editHref={`/admin/products/${product.id}/edit`}
-          label={product.name}
-          onDelete={() => confirmDelete(product.id, product.name)}
-          deleting={isPending && pendingId === product.id}
-        />
+        <div className="flex items-center justify-end gap-1">
+          <button
+            type="button"
+            onClick={() => toggleHidden(product)}
+            disabled={isToggling && togglingProduct?.id === product.id}
+            className="rounded-full p-2 text-maroon hover:bg-maroon/5 disabled:opacity-50"
+            aria-label={product.isHidden ? `Show ${product.name}` : `Hide ${product.name}`}
+          >
+            {product.isHidden ? <Eye size={16} /> : <EyeOff size={16} />}
+          </button>
+          <RowActions
+            editHref={`/admin/products/${product.id}/edit`}
+            label={product.name}
+            onDelete={() => confirmDelete(product.id, product.name)}
+            deleting={isPending && pendingId === product.id}
+          />
+        </div>
       ),
     },
   ];
@@ -167,6 +185,7 @@ export default function AdminProductsPage() {
           columns={columns}
           data={products}
           getRowKey={(product) => product.id}
+          getRowClassName={(product) => (product.isHidden ? "bg-charcoal/5 opacity-60" : "")}
           isLoading={isLoading}
           emptyState={
             <EmptyState

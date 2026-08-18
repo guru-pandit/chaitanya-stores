@@ -16,7 +16,10 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const product = await prisma.product.findUnique({ where: { slug }, include: { category: true } });
+  const product = await prisma.product.findFirst({
+    where: { slug, isHidden: false },
+    include: { category: true },
+  });
   // `error.tsx` in this segment tree forces streaming, so notFound() can no longer set a true
   // 404 status here (a known Next.js/RSC limitation) — noindex prevents this soft-404 from
   // getting indexed even though the HTTP status stays 200.
@@ -53,8 +56,8 @@ export default async function ProductDetailPage({
 }) {
   const { slug } = await params;
   const [product, primaryLocation] = await Promise.all([
-    prisma.product.findUnique({
-      where: { slug },
+    prisma.product.findFirst({
+      where: { slug, isHidden: false },
       include: { category: true, variants: true },
     }),
     getPrimaryShopLocation(),

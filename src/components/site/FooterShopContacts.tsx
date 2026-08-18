@@ -1,4 +1,4 @@
-import { MapPin, Phone, Mail } from "lucide-react";
+import { MapPin, Phone, Mail, ExternalLink } from "lucide-react";
 import { CONTACT_COMING_SOON, hasContactValue } from "@/lib/site-config";
 
 // Dark-theme counterpart to ShopLocationsList (which is styled for the
@@ -13,6 +13,7 @@ export type FooterShopContact = {
   address: string;
   phone: string;
   email: string;
+  mapLink: string | null;
   isPrimary: boolean;
 };
 
@@ -61,6 +62,17 @@ export function FooterShopContacts({ shops }: { shops: FooterShopContact[] }) {
                   <MapPin size={14} className="mt-0.5 shrink-0 text-gold" aria-hidden="true" />
                   <span>{shop.address}</span>
                 </p>
+              )}
+              {hasContactValue(shop.mapLink) && (
+                <a
+                  href={shop.mapLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 hover:text-gold"
+                >
+                  <ExternalLink size={14} className="shrink-0 text-gold" aria-hidden="true" />
+                  <span>View on Map</span>
+                </a>
               )}
               {hasContactValue(shop.phone) && (
                 <a href={`tel:${shop.phone}`} className="flex items-center gap-2 hover:text-gold">

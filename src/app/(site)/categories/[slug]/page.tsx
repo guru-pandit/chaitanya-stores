@@ -36,7 +36,11 @@ export default async function CategoryPage({
   const category = await prisma.category.findUnique({
     where: { slug },
     include: {
-      products: { include: { category: true, variants: true }, orderBy: { createdAt: "desc" } },
+      products: {
+        where: { isHidden: false },
+        include: { category: true, variants: true },
+        orderBy: { createdAt: "desc" },
+      },
     },
   });
 

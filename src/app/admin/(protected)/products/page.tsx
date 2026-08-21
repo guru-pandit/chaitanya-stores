@@ -180,24 +180,31 @@ export default function AdminProductsPage() {
         </Select>
       </div>
 
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-maroon/10 bg-white/70">
-        <DataTable
-          columns={columns}
-          data={products}
-          getRowKey={(product) => product.id}
-          getRowClassName={(product) => (product.isHidden ? "bg-charcoal/5 opacity-60" : "")}
-          isLoading={isLoading}
-          emptyState={
-            <EmptyState
-              title="No products found"
-              description="Try a different search or filter, or add your first product."
-              action={
-                <LinkButton href="/admin/products/new" variant="primary" className="mt-2">
-                  <Plus size={16} /> New Product
-                </LinkButton>
-              }
-            />
-          }
+      <div className="relative mt-6 overflow-hidden rounded-2xl border border-maroon/10 bg-white/70">
+        <div className="overflow-x-auto">
+          <DataTable
+            columns={columns}
+            data={products}
+            getRowKey={(product) => product.id}
+            getRowClassName={(product) => (product.isHidden ? "bg-charcoal/5 opacity-60" : "")}
+            isLoading={isLoading}
+            emptyState={
+              <EmptyState
+                title="No products found"
+                description="Try a different search or filter, or add your first product."
+                action={
+                  <LinkButton href="/admin/products/new" variant="primary" className="mt-2">
+                    <Plus size={16} /> New Product
+                  </LinkButton>
+                }
+              />
+            }
+          />
+        </div>
+        {/* Mobile-only hint that the table scrolls horizontally — see issues.md */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white/90 to-transparent sm:hidden"
         />
         {products && products.length > 0 && (
           <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />

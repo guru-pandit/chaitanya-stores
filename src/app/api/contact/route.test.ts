@@ -90,9 +90,9 @@ describe("POST /api/contact", () => {
     expect(mockPrisma.enquiry.create).not.toHaveBeenCalled();
   });
 
-  // Honeypot: a filled-in `website` field means a bot submitted the form.
+  // Honeypot: a filled-in `hp_ref` field means a bot submitted the form.
   it("returns a normal-looking 201 but never persists an Enquiry when the honeypot field is filled in", async () => {
-    const res = await POST(postRequest({ ...validBody, website: "http://spam.example.com" }));
+    const res = await POST(postRequest({ ...validBody, hp_ref: "http://spam.example.com" }));
 
     expect(res.status).toBe(201);
     const body = await res.json();
@@ -103,7 +103,7 @@ describe("POST /api/contact", () => {
   it("strips the honeypot field before writing to the database on a real submission", async () => {
     mockPrisma.enquiry.create.mockResolvedValueOnce({ id: "1", ...validBody });
 
-    const res = await POST(postRequest({ ...validBody, website: "" }));
+    const res = await POST(postRequest({ ...validBody, hp_ref: "" }));
 
     expect(res.status).toBe(201);
     expect(mockPrisma.enquiry.create).toHaveBeenCalledWith({ data: validBody });

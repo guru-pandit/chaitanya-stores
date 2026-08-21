@@ -18,9 +18,13 @@ describe("ContactForm — honeypot field", () => {
   it("renders the honeypot input hidden from sighted/assistive users and out of the tab order", () => {
     render(<ContactForm whatsappNumber="919999999999" />);
 
-    const honeypot = screen.getByLabelText("Company", { selector: "input" }) as HTMLInputElement;
+    const honeypot = screen.getByLabelText("Leave this field blank", {
+      selector: "input",
+    }) as HTMLInputElement;
     expect(honeypot).toHaveAttribute("tabIndex", "-1");
     expect(honeypot).toHaveAttribute("autoComplete", "off");
+    expect(honeypot).toHaveAttribute("data-lpignore", "true");
+    expect(honeypot).toHaveAttribute("data-1p-ignore", "");
     expect(honeypot.closest("div")).toHaveAttribute("aria-hidden", "true");
     expect(honeypot.closest("div")).toHaveClass("sr-only");
     // Never pre-filled — a real visitor's browser autofill/password manager
@@ -41,7 +45,7 @@ describe("ContactForm — honeypot field", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     const [, init] = fetchMock.mock.calls[0];
     const body = JSON.parse(init.body as string);
-    expect(body.website).toBe("");
+    expect(body.hp_ref).toBe("");
 
     vi.unstubAllGlobals();
   });

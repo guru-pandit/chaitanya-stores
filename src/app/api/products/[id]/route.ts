@@ -3,9 +3,11 @@ import { requireAdminSession } from "@/lib/api-auth";
 import { verifyCsrf } from "@/lib/csrf";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
+import { deleteUploadedImage } from "@/lib/upload";
 import { productSchema, toProductData } from "@/lib/validations/product";
 import { parseJsonBody } from "@/lib/parseJsonBody";
 import { fieldError } from "@/lib/fieldError";
+import { parseImages } from "@/lib/format";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const guard = await requireAdminSession();
@@ -93,11 +95,22 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   if (csrfError) return csrfError;
 
   const { id } = await params;
-  const existing = await prisma.product.findUnique({ where: { id }, select: { id: true } });
+  const existing = await prisma.product.findUnique({ where: { id }, select: { id: true, images: true } });
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   try {
     await prisma.product.delete({ where: { id } });
+
+    for (const imagePath of parseImages(existing.images)) {
+      try {
+        await deleteUploadedImage(imagePath);
+      } catch (err) {
+        // Best-effort cleanup — a filesystem hiccup here should never block
+        // the response; the DB delete already succeeded.
+        console.error("Failed to delete product image file:", err);
+      }
+    }
+
     return NextResponse.json({ success: true });
   } catch (err) {
     // TOCTOU backstop: the product was deleted by a concurrent request

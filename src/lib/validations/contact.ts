@@ -10,15 +10,17 @@ export const contactSchema = z.object({
   message: z.string().min(1, "Message is required").max(2000),
   // Honeypot: a field a real visitor never sees or fills in (hidden
   // off-screen in ContactForm), but a naive bot autofill script is likely
-  // to target given the innocuous name. No length cap and no way for this
-  // field to produce its own field-level validation error — a `400` keyed
-  // `website` would be the one response path that names the trap to a
-  // probing client. A non-empty value isn't rejected here at all; it's
-  // handled in the route (POST /api/contact) by faking a normal success
-  // response so a bot doesn't learn the check exists, while silently
-  // dropping the submit. Request body size is already bounded upstream, so
-  // an unbounded string here isn't a payload-size concern.
-  website: z.string().optional(),
+  // to target given the innocuous-looking input. Named non-semantically
+  // (not "website"/"email"/etc.) so it doesn't match browser/password-manager
+  // autofill heuristics either. No length cap and no way for this field to
+  // produce its own field-level validation error — a `400` keyed `hp_ref`
+  // would be the one response path that names the trap to a probing client.
+  // A non-empty value isn't rejected here at all; it's handled in the route
+  // (POST /api/contact) by faking a normal success response so a bot doesn't
+  // learn the check exists, while silently dropping the submit. Request body
+  // size is already bounded upstream, so an unbounded string here isn't a
+  // payload-size concern.
+  hp_ref: z.string().optional(),
 });
 
 export type ContactInput = z.infer<typeof contactSchema>;

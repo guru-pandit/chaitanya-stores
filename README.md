@@ -245,6 +245,53 @@ To redeploy manually from the VPS instead of waiting for CI: `cd /opt/chaitanya-
 git pull && docker compose up -d --build db web nginx && docker compose --profile tools run --rm
 migrate`.
 
+### Merging `develop` → `main`: how a pending migration reaches production
+
+Schema changes are developed on `develop` as normal Prisma migration folders
+(`npx prisma migrate dev --name <name>`), committed alongside the code that needs them. The
+migration does **not** touch the production database until that commit reaches `main` — creating
+it on `develop` only affects your local/dev database. As of this writing, `develop` has two
+migrations not yet on `main`:
+
+- `20260817140026_add_product_is_hidden` — adds `Product.isHidden` (`BOOLEAN NOT NULL DEFAULT false`)
+- `20260818113610_add_shop_location_map_link` — adds `ShopLocation.mapLink` (`TEXT`, nullable)
+
+`check-source-branch.yml` only allows a PR into `main` whose source branch is `develop` or
+`hotfix/*`. Once that PR is merged, here's what actually runs the migration:
+
+1. The merge pushes a new commit to `main`, triggering `.github/workflows/deploy.yml`.
+2. The `verify` job lints, typechecks, and runs unit tests against the merged code.
+3. The `deploy` job SSHes into the VPS and runs `git pull --ff-only origin main`, which pulls
+   down the two new folders under `prisma/migrations/`, the corresponding `schema.prisma`
+   changes, and whatever application code now reads `isHidden`/`mapLink`.
+4. `docker compose --profile tools run --rm migrate` runs `prisma migrate deploy` — **before**
+   `web` is rebuilt or recreated. It builds from the dedicated `migrator` stage (the full `prisma`
+   CLI + `prisma/migrations`), not the pruned `web` standalone image, which doesn't carry the CLI.
+   - Prisma records every migration it has already run in a `_prisma_migrations` table inside the
+     production database, keyed by folder name. `migrate deploy` compares that table against the
+     9 folders now on disk and applies only the ones it hasn't seen — so the 2 new migrations run,
+     and the 7 already present on `main` are no-ops.
+   - Both new columns are additive (a defaulted `NOT NULL` boolean, a nullable text column), so
+     this is safe as a single step: the **old** `web` container is still running at this point
+     (unchanged, not yet rebuilt) and keeps working fine against the new schema, since it simply
+     never reads or writes the new columns.
+5. Only after the migration step exits `0` does `docker compose up -d --build db web nginx` run,
+   rebuilding `web` from the new code and recreating the container — from this point the app can
+   read/write `isHidden` and `mapLink`.
+6. `docker compose exec nginx nginx -s reload` picks up the recreated `web` container's new IP.
+
+If a future migration needs to **drop or rename** a column/table that currently-live code still
+references, this single-step sequence is not safe on its own (step 4 would apply the destructive
+change while the still-running old `web` container from step 3 is mid-request against it) — use
+the two-deploy (expand/contract) pattern referenced in the `deploy.yml` comment above the
+`migrate` step instead.
+
+To check on the VPS what has and hasn't been applied:
+```bash
+docker compose exec db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
+  -c "select migration_name, finished_at from _prisma_migrations order by finished_at;"
+```
+
 ### Sizing
 
 A 2 vCPU / 2GB RAM KVM VPS plan (or larger) is a reasonable minimum for Postgres + Next.js + nginx

@@ -79,26 +79,26 @@ describe("contactSchema", () => {
     expect(contactSchema.safeParse({ ...valid, message: "a".repeat(2001) }).success).toBe(false);
   });
 
-  describe("website (honeypot)", () => {
+  describe("hp_ref (honeypot)", () => {
     it("accepts the field omitted (optional) — a real visitor never fills it in", () => {
       expect(contactSchema.safeParse(valid).success).toBe(true);
-      expect("website" in contactSchema.parse(valid)).toBe(false);
+      expect("hp_ref" in contactSchema.parse(valid)).toBe(false);
     });
 
     it("accepts an empty string", () => {
-      expect(contactSchema.safeParse({ ...valid, website: "" }).success).toBe(true);
+      expect(contactSchema.safeParse({ ...valid, hp_ref: "" }).success).toBe(true);
     });
 
     it("still succeeds validation when a bot fills it in — the honeypot check happens in the API route, not here", () => {
-      const result = contactSchema.safeParse({ ...valid, website: "http://spam.example.com" });
+      const result = contactSchema.safeParse({ ...valid, hp_ref: "http://spam.example.com" });
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.website).toBe("http://spam.example.com");
+        expect(result.data.hp_ref).toBe("http://spam.example.com");
       }
     });
 
-    it("accepts an arbitrarily long website value — no length cap, so it can never produce its own field-level 400 that would name the trap to a probing client", () => {
-      expect(contactSchema.safeParse({ ...valid, website: "a".repeat(5000) }).success).toBe(true);
+    it("accepts an arbitrarily long hp_ref value — no length cap, so it can never produce its own field-level 400 that would name the trap to a probing client", () => {
+      expect(contactSchema.safeParse({ ...valid, hp_ref: "a".repeat(5000) }).success).toBe(true);
     });
   });
 });

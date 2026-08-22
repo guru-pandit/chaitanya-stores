@@ -30,6 +30,7 @@ function validProductBody(overrides: Record<string, unknown> = {}) {
     images: [],
     inStock: true,
     featured: false,
+    isHidden: false,
     categoryId,
     variants: [],
     ...overrides,

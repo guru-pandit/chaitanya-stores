@@ -6,11 +6,13 @@ export function RowActions({
   label,
   onDelete,
   deleting,
+  deleteDisabledReason,
 }: {
   editHref: string;
   label: string;
   onDelete: () => void;
   deleting?: boolean;
+  deleteDisabledReason?: string;
 }) {
   return (
     <div className="flex justify-end gap-2">
@@ -24,7 +26,8 @@ export function RowActions({
       <button
         type="button"
         onClick={onDelete}
-        disabled={deleting}
+        disabled={deleting || !!deleteDisabledReason}
+        title={deleteDisabledReason}
         className="rounded-full p-2 text-red-700 hover:bg-red-50 disabled:opacity-50"
         aria-label={`Delete ${label}`}
       >

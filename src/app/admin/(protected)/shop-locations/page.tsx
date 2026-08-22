@@ -87,6 +87,11 @@ export default function AdminShopLocationsPage() {
                       label={location.name}
                       onDelete={() => confirmDelete(location.id, location.name)}
                       deleting={isPending && pendingId === location.id}
+                      deleteDisabledReason={
+                        location.isPrimary
+                          ? "Set a different location as primary before deleting this one"
+                          : undefined
+                      }
                     />
                   </div>
                 </li>

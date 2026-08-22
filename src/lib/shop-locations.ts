@@ -23,6 +23,7 @@ export async function getPrimaryShopLocation(): Promise<PrimaryShopLocation> {
     phone: siteConfig.phone,
     whatsappNumber: siteConfig.whatsappNumber,
     email: siteConfig.email,
+    mapLink: null,
     isPrimary: true,
   };
 }

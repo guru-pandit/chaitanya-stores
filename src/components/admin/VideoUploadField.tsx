@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X, Upload } from "lucide-react";
 import { useUploadVideo } from "@/hooks/festivalBanners/useUploadVideo";
 import { useDeleteImage } from "@/hooks/products/useUploadImage";
+import { CircularProgress } from "@/components/ui/CircularProgress";
 
 // Single-video counterpart to ImageUploadField, used only by
 // FestivalBannerForm when the admin picks "Video" as the media type.
@@ -17,19 +18,22 @@ export function VideoUploadField({
   const uploadVideo = useUploadVideo();
   const deleteVideo = useDeleteImage();
   const [error, setError] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setError(null);
+    setUploadProgress(0);
     try {
-      const path = await uploadVideo.mutateAsync(file);
+      const path = await uploadVideo.mutateAsync({ file, onProgress: setUploadProgress });
       if (videoPath) deleteVideo.mutate(videoPath);
       onChange(path);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       e.target.value = "";
+      setUploadProgress(0);
     }
   }
 
@@ -54,7 +58,11 @@ export function VideoUploadField({
         </div>
       ) : (
         <label className="flex h-24 w-40 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-maroon/30 text-maroon/60 hover:bg-maroon/5">
-          <Upload size={18} />
+          {uploadVideo.isPending ? (
+            <CircularProgress value={uploadProgress} size={34} />
+          ) : (
+            <Upload size={18} />
+          )}
           <span className="text-xs">{uploadVideo.isPending ? "Uploading..." : "Upload video"}</span>
           <input
             type="file"

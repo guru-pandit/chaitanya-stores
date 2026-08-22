@@ -45,6 +45,7 @@ const validBody = {
   images: [],
   inStock: true,
   featured: false,
+  isHidden: false,
   categoryId: "cat-1",
   variants: [],
 };

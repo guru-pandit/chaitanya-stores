@@ -60,6 +60,7 @@ export function ProductForm({
           images: parseImages(product.images),
           inStock: product.inStock,
           featured: product.featured,
+          isHidden: product.isHidden,
           categoryId: product.categoryId,
           variants: (product.variants ?? []).map((v) => ({
             label: v.label,
@@ -79,6 +80,7 @@ export function ProductForm({
           images: [],
           inStock: true,
           featured: false,
+          isHidden: false,
           categoryId: "",
           variants: [],
         },
@@ -367,6 +369,7 @@ export function ProductForm({
           images={images}
           onChange={(next) => setValue("images", next)}
           maxImages={MAX_PRODUCT_IMAGES}
+          reorderHint="Drag to reorder, or use the arrows. The first image is the cover shown on cards, search results and social shares."
         />
       </div>
 
@@ -388,6 +391,17 @@ export function ProductForm({
           render={({ field }) => (
             <CheckboxField
               label="Featured"
+              checked={field.value}
+              onChange={(e) => field.onChange(e.target.checked)}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="isHidden"
+          render={({ field }) => (
+            <CheckboxField
+              label="Hidden from website"
               checked={field.value}
               onChange={(e) => field.onChange(e.target.checked)}
             />

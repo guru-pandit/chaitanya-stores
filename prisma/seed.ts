@@ -10,7 +10,7 @@ async function main() {
     {
       name: "Incense Sticks",
       slug: "incense-sticks",
-      description: "Hand-rolled agarbatti in traditional and signature fragrances.",
+      description: "Agarbatti in traditional and signature fragrances.",
     },
     {
       name: "Pooja Thali Items",
@@ -40,7 +40,7 @@ async function main() {
     {
       name: "Sandalwood Agarbatti",
       slug: "sandalwood-agarbatti",
-      description: "Classic sandalwood fragrance, hand-rolled, 100 sticks per pack.",
+      description: "Classic sandalwood fragrance, 100 sticks per pack.",
       brand: "Cycle",
       weight: "100g (approx. 100 sticks)",
       sku: "CYC-SAND-100",

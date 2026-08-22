@@ -36,6 +36,7 @@ model Product {
   images      String           @default("[]")
   inStock     Boolean          @default(true)
   featured    Boolean          @default(false)
+  isHidden    Boolean          @default(false)
   category    Category         @relation(fields: [categoryId], references: [id])
   categoryId  String
   variants    ProductVariant[]
@@ -115,6 +116,7 @@ model ShopLocation {
   phone          String
   whatsappNumber String
   email          String
+  mapLink        String?
   isPrimary      Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

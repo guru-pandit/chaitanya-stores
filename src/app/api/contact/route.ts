@@ -7,9 +7,16 @@ import { contactRateLimiter, getClientIp, rateLimitResponse } from "@/lib/rate-l
 
 // Not a real cuid — just shaped like one (Prisma ids here are
 // `@default(cuid())`) so the honeypot's fake-success response below isn't
-// trivially distinguishable from a real one by id format alone.
+// trivially distinguishable from a real one by id format alone. Real cuids
+// are base36 (0-9, a-z) — drawing from the same alphabet here (rather than
+// hex, a strict subset) keeps a charset comparison from telling the two
+// apart.
 function fakeCuid(): string {
-  return `c${crypto.randomUUID().replace(/-/g, "").slice(0, 24)}`;
+  let id = "c";
+  while (id.length < 25) {
+    id += Math.floor(Math.random() * 36).toString(36);
+  }
+  return id;
 }
 
 export async function POST(req: NextRequest) {
@@ -26,9 +33,9 @@ export async function POST(req: NextRequest) {
 
   // Honeypot field is never part of the Enquiry model — strip it before any
   // Prisma write regardless of outcome.
-  const { website, ...data } = parsed.data;
+  const { hp_ref, ...data } = parsed.data;
 
-  if (website) {
+  if (hp_ref) {
     // A bot filled in the hidden field. Respond as close to a real success
     // as possible (same status, same field shape — a real cuid-looking id
     // and an explicit `productId: null` rather than an omitted key) so the

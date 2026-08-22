@@ -14,6 +14,7 @@ const valid: ProductInput = {
   images: [],
   inStock: true,
   featured: false,
+  isHidden: false,
   categoryId: "cat-1",
   variants: [],
 };
@@ -243,6 +244,20 @@ describe("productSchema — inStock / featured", () => {
   it("rejects a non-boolean featured", () => {
     expect(productSchema.safeParse({ ...valid, featured: "no" }).success).toBe(false);
   });
+
+  it("rejects a missing isHidden", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- destructured only to exclude the field from the parsed object
+    const { isHidden: _ih, ...rest } = valid;
+    expect(productSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it("rejects a non-boolean isHidden", () => {
+    expect(productSchema.safeParse({ ...valid, isHidden: "no" }).success).toBe(false);
+  });
+
+  it("accepts isHidden: true", () => {
+    expect(productSchema.safeParse({ ...valid, isHidden: true }).success).toBe(true);
+  });
 });
 
 describe("productSchema — categoryId", () => {
@@ -384,6 +399,7 @@ describe("toProductData — images / weight / variants exclusion", () => {
     expect(data.price).toBe(valid.price);
     expect(data.inStock).toBe(valid.inStock);
     expect(data.featured).toBe(valid.featured);
+    expect(data.isHidden).toBe(valid.isHidden);
     expect(data.categoryId).toBe(valid.categoryId);
   });
 });

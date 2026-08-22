@@ -107,7 +107,7 @@ sequenceDiagram
     participant P as Prisma Client (src/lib/prisma.ts)
     participant DB as SQLite / Postgres
 
-    B->>SC: GET /products?category=incense-sticks
+    B->>SC: GET /catalog?category=incense-sticks
     SC->>P: prisma.product.findMany({ where, include: { category } })
     P->>DB: SQL query
     DB-->>P: rows

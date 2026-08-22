@@ -6,9 +6,11 @@ import {
   useCreateProduct,
   useUpdateProduct,
   useDeleteProduct,
+  useToggleProductHidden,
 } from "@/hooks/products/useProductMutations";
 import { ApiError } from "@/lib/api-client";
 import type { ProductInput } from "@/lib/validations/product";
+import type { ProductWithCategory } from "@/hooks/products/useProducts";
 
 function makeWrapper(queryClient: QueryClient) {
   return function wrapper({ children }: { children: ReactNode }) {
@@ -32,6 +34,7 @@ const productInput: ProductInput = {
   images: [],
   inStock: true,
   featured: false,
+  isHidden: false,
   categoryId: "cat-1",
   variants: [],
 };
@@ -87,6 +90,73 @@ describe("useUpdateProduct", () => {
 
     expect(fetch).toHaveBeenCalledWith("/api/products/p1", expect.objectContaining({ method: "PATCH" }));
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["products"] });
+  });
+});
+
+describe("useToggleProductHidden", () => {
+  beforeEach(() => {
+    vi.stubGlobal("fetch", vi.fn());
+  });
+
+  const product: ProductWithCategory = {
+    id: "p1",
+    name: "Sandalwood Agarbatti",
+    slug: "sandalwood-agarbatti",
+    description: null,
+    brand: "Cycle",
+    weight: "100g",
+    productType: null,
+    sku: "CYC-INC-001",
+    price: 12000,
+    images: JSON.stringify(["/uploads/a.jpg"]),
+    inStock: true,
+    featured: false,
+    isHidden: false,
+    categoryId: "cat-1",
+    createdAt: new Date("2026-01-01"),
+    updatedAt: new Date("2026-01-01"),
+    category: {
+      id: "cat-1",
+      name: "Incense Sticks",
+      slug: "incense-sticks",
+      description: null,
+      image: null,
+      createdAt: new Date("2026-01-01"),
+      updatedAt: new Date("2026-01-01"),
+    },
+    variants: [{ id: "v1", label: "100g", price: 12000, inStock: true, productId: "p1", createdAt: new Date("2026-01-01"), updatedAt: new Date("2026-01-01") }],
+  };
+
+  it("PATCHes the full product payload with isHidden inverted and invalidates the products cache", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(jsonResponse(200, { ...product, isHidden: true }));
+    const queryClient = new QueryClient();
+    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+
+    const { result } = renderHook(() => useToggleProductHidden(), { wrapper: makeWrapper(queryClient) });
+    result.current.mutate(product);
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(fetch).toHaveBeenCalledWith("/api/products/p1", expect.objectContaining({ method: "PATCH" }));
+    const body = JSON.parse(vi.mocked(fetch).mock.calls[0][1]!.body as string);
+    expect(body.isHidden).toBe(true);
+    expect(body.images).toEqual(["/uploads/a.jpg"]);
+    expect(body.variants).toEqual([{ label: "100g", price: 12000, inStock: true }]);
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["products"] });
+  });
+
+  it("flips isHidden: true back to false when un-hiding", async () => {
+    const hiddenProduct = { ...product, isHidden: true };
+    vi.mocked(fetch).mockResolvedValueOnce(jsonResponse(200, { ...hiddenProduct, isHidden: false }));
+    const queryClient = new QueryClient();
+
+    const { result } = renderHook(() => useToggleProductHidden(), { wrapper: makeWrapper(queryClient) });
+    result.current.mutate(hiddenProduct);
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    const body = JSON.parse(vi.mocked(fetch).mock.calls[0][1]!.body as string);
+    expect(body.isHidden).toBe(false);
   });
 });
 

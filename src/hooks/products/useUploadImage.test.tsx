@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { useDeleteImage, useUploadImage } from "@/hooks/products/useUploadImage";
 import { ApiError } from "@/lib/api-client";
+import { stubXMLHttpRequest } from "@/test/mockXhr";
 
 function wrapper({ children }: { children: ReactNode }) {
   const queryClient = new QueryClient();
@@ -11,36 +12,39 @@ function wrapper({ children }: { children: ReactNode }) {
 }
 
 describe("useUploadImage", () => {
-  beforeEach(() => {
-    vi.stubGlobal("fetch", vi.fn());
-  });
-
   it("POSTs the file as multipart form data and resolves with the returned path", async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(
-      new Response(JSON.stringify({ path: "/uploads/abc123.jpg" }), { status: 200 })
-    );
+    const calls = stubXMLHttpRequest({ status: 200, body: { path: "/uploads/abc123.jpg" } });
     const file = new File(["fake"], "photo.jpg", { type: "image/jpeg" });
 
     const { result } = renderHook(() => useUploadImage(), { wrapper });
-    result.current.mutate(file);
+    result.current.mutate({ file });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toBe("/uploads/abc123.jpg");
-    const [url, init] = vi.mocked(fetch).mock.calls[0];
-    expect(url).toBe("/api/upload");
-    expect(init).toMatchObject({ method: "POST" });
-    expect(init!.body).toBeInstanceOf(FormData);
+    expect(calls[0]).toMatchObject({ method: "POST", url: "/api/upload" });
+    expect(calls[0].body).toBeInstanceOf(FormData);
+  });
+
+  it("reports upload progress as it happens", async () => {
+    stubXMLHttpRequest({ status: 200, body: { path: "/uploads/abc123.jpg" }, progress: [25, 60, 100] });
+    const file = new File(["fake"], "photo.jpg", { type: "image/jpeg" });
+    const onProgress = vi.fn();
+
+    const { result } = renderHook(() => useUploadImage(), { wrapper });
+    result.current.mutate({ file, onProgress });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(onProgress.mock.calls.map((c) => c[0])).toEqual([25, 60, 100]);
   });
 
   it("throws an ApiError with the server message when the upload is rejected", async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(
-      new Response(JSON.stringify({ error: "Unsupported file type" }), { status: 400 })
-    );
+    stubXMLHttpRequest({ status: 400, body: { error: "Unsupported file type" } });
     const file = new File(["fake"], "photo.gif", { type: "image/gif" });
 
     const { result } = renderHook(() => useUploadImage(), { wrapper });
-    result.current.mutate(file);
+    result.current.mutate({ file });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
 
@@ -49,11 +53,11 @@ describe("useUploadImage", () => {
   });
 
   it("falls back to a generic message when the error body isn't valid JSON", async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(new Response("not json", { status: 500 }));
+    stubXMLHttpRequest({ status: 500, rawBody: "not json" });
     const file = new File(["fake"], "photo.jpg", { type: "image/jpeg" });
 
     const { result } = renderHook(() => useUploadImage(), { wrapper });
-    result.current.mutate(file);
+    result.current.mutate({ file });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
 

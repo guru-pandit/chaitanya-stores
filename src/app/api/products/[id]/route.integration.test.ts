@@ -79,6 +79,7 @@ describe("PATCH /api/products/[id] (integration)", () => {
         images: [],
         inStock: true,
         featured: false,
+        isHidden: false,
         categoryId,
         variants: [],
       },

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api-client";
+import { parseImages } from "@/lib/format";
 import type { ProductInput } from "@/lib/validations/product";
 import type { ProductWithCategory } from "@/hooks/products/useProducts";
 
@@ -20,6 +21,40 @@ export const useUpdateProduct = (id: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
     },
+  });
+};
+
+// Flips a product's visibility — sends its full current data back with
+// isHidden inverted, since PATCH /api/products/[id] validates/persists the
+// whole row (no dedicated partial-toggle endpoint exists for Product).
+export const useToggleProductHidden = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (product: ProductWithCategory) =>
+      apiFetch<ProductWithCategory>(`/api/products/${product.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          name: product.name,
+          slug: product.slug,
+          description: product.description ?? "",
+          brand: product.brand,
+          weight: product.weight ?? "",
+          productType: product.productType ?? "",
+          sku: product.sku,
+          price: product.price,
+          images: parseImages(product.images),
+          inStock: product.inStock,
+          featured: product.featured,
+          isHidden: !product.isHidden,
+          categoryId: product.categoryId,
+          variants: product.variants.map((v) => ({
+            label: v.label,
+            price: v.price,
+            inStock: v.inStock,
+          })),
+        } satisfies ProductInput),
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["products"] }),
   });
 };
 

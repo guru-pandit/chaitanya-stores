@@ -13,13 +13,14 @@ import { toast } from "@/lib/toast";
 import { apiFetch, ApiError } from "@/lib/api-client";
 import { useApiFormErrors } from "@/hooks/useApiFormErrors";
 
-export function ContactForm({ whatsappNumber }: { whatsappNumber?: string }) {
+export function ContactForm({ whatsappNumber }: { whatsappNumber?: string | null }) {
   const [submitError, setSubmitError] = useState<unknown>(null);
   const [submitted, setSubmitted] = useState(false);
   const {
     register,
     handleSubmit,
     setError,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<ContactInput>({ resolver: zodResolver(contactSchema) });
 
@@ -55,6 +56,16 @@ export function ContactForm({ whatsappNumber }: { whatsappNumber?: string }) {
         ) : (
           <p className="mt-4 text-sm text-charcoal/50">{CONTACT_COMING_SOON}</p>
         )}
+        <button
+          type="button"
+          onClick={() => {
+            reset();
+            setSubmitted(false);
+          }}
+          className="mt-4 block w-full text-sm font-medium text-maroon underline-offset-2 hover:underline"
+        >
+          Send another message
+        </button>
       </div>
     );
   }
@@ -91,15 +102,22 @@ export function ContactForm({ whatsappNumber }: { whatsappNumber?: string }) {
           naive bot script. sr-only (not display:none) + aria-hidden +
           tabIndex={-1} + autoComplete="off" keeps it out of the visual
           layout, the tab order, and assistive tech, without a submit-time
-          error being shown to a bot (handled server-side instead). */}
+          error being shown to a bot (handled server-side instead). The
+          id/name/label are deliberately non-semantic (not "website",
+          "email", "company", etc.) so the field doesn't match browser or
+          password-manager autofill heuristics, which routinely ignore
+          autoComplete="off" for address-class fields — data-lpignore/
+          data-1p-ignore are a second layer for the same reason. */}
       <div className="sr-only" aria-hidden="true">
-        <label htmlFor="website">Company</label>
+        <label htmlFor="hp_ref">Leave this field blank</label>
         <input
-          id="website"
+          id="hp_ref"
           type="text"
           tabIndex={-1}
           autoComplete="off"
-          {...register("website")}
+          data-lpignore="true"
+          data-1p-ignore=""
+          {...register("hp_ref")}
         />
       </div>
 

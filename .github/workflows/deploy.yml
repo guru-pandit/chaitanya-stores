@@ -99,8 +99,14 @@ jobs:
             # migrations (new column/table old code ignores) — for anything
             # that drops or renames something the live code still
             # references, use the two-deploy pattern from the deployment
-            # guide's Section 8.4 instead.
-            docker compose --profile tools run --rm migrate
+            # guide's Section 8.4 instead. --build is required: without it,
+            # `run` reuses whatever `migrate` image is already cached on the
+            # VPS from a prior deploy, silently skipping any migration
+            # folders added since that image was last built (while `web`
+            # below always gets a fresh build) — this caused a real
+            # production outage (schema drift: code querying columns that
+            # didn't exist yet) on 2026-08-22.
+            docker compose --profile tools run --rm --build migrate
 
             # Build+recreate the app; db/nginx are only touched if their own
             # config changed. Never `-v`, never `down` — volumes are untouched.

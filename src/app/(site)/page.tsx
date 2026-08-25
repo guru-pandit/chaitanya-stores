@@ -27,6 +27,7 @@ export const metadata: Metadata = {
     description: HOME_DESCRIPTION,
     type: "website",
     url: siteConfig.siteUrl,
+    images: ["/logo.png"],
   },
 };
 

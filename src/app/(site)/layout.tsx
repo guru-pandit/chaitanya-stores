@@ -4,6 +4,8 @@ import { SiteBackdrop } from "@/components/site/SiteBackdrop";
 import { SiteJsonLd } from "@/components/site/SiteJsonLd";
 import { FestivalBannerModal } from "@/components/site/FestivalBannerModal";
 import { BottomNav } from "@/components/site/BottomNav";
+import { Analytics, GtmNoScript } from "@/components/site/Analytics";
+import { ScrollDepthTracker } from "@/components/site/ScrollDepthTracker";
 import { getActiveFestivalBanner } from "@/lib/festival-banner";
 import { getPrimaryShopLocation } from "@/lib/shop-locations";
 
@@ -26,6 +28,12 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
   return (
     <>
+      {/* GTM's documented noscript fallback — must sit as close to the top
+          of <body> as possible. Scoped to (site) rather than the root
+          layout so admin dashboard usage is never tracked. */}
+      <GtmNoScript />
+      <Analytics />
+      <ScrollDepthTracker />
       {/* Fixed behind everything — the content column scrolls over it while
           the motif holds still. Rendered here rather than in the root layout
           so the admin dashboard keeps its plain, businesslike background. */}

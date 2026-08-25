@@ -1,5 +1,8 @@
+"use client";
+
 import { MapPin, Phone, Mail, ExternalLink } from "lucide-react";
 import { hasContactValue } from "@/lib/site-config";
+import { trackCallClick } from "@/lib/analytics";
 import type { ShopLocation } from "@/generated/prisma/client";
 
 // Plain-text list of shop locations (address/phone/email) — used for
@@ -30,6 +33,7 @@ export function ShopLocationsList({ locations }: { locations: ShopLocation[] }) 
             )}
             <a
               href={`tel:${location.phone}`}
+              onClick={() => trackCallClick(window.location.pathname)}
               className="flex items-center gap-1.5 hover:text-terracotta"
             >
               <Phone size={14} className="shrink-0 text-terracotta" /> {location.phone}

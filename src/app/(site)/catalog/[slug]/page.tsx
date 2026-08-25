@@ -10,6 +10,7 @@ import { ProductJsonLd } from "@/components/site/ProductJsonLd";
 import { BreadcrumbJsonLd } from "@/components/site/BreadcrumbJsonLd";
 import { ProductGallery } from "@/components/site/ProductGallery";
 import { StickyEnquiryBar } from "@/components/site/StickyEnquiryBar";
+import { TrackOnMount } from "@/components/site/TrackOnMount";
 
 export async function generateMetadata({
   params,
@@ -72,6 +73,10 @@ export default async function ProductDetailPage({
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+4.5rem)] sm:px-6 sm:pb-12">
+      <TrackOnMount
+        event="view_product"
+        params={{ item_name: product.name, item_category: product.category.name, item_id: product.slug }}
+      />
       <ProductJsonLd product={product} images={images} />
       <BreadcrumbJsonLd
         items={[
@@ -94,6 +99,7 @@ export default async function ProductDetailPage({
           <ProductGallery
             images={images}
             alt={`${product.name} ${product.brand} at Chaitanya Stores Sangameshwar`}
+            productName={product.name}
           />
         </div>
 

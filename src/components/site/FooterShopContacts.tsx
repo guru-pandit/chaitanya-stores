@@ -1,5 +1,8 @@
+"use client";
+
 import { MapPin, Phone, Mail, ExternalLink } from "lucide-react";
 import { CONTACT_COMING_SOON, hasContactValue } from "@/lib/site-config";
+import { trackCallClick } from "@/lib/analytics";
 
 // Dark-theme counterpart to ShopLocationsList (which is styled for the
 // cream Contact/About pages) — same name/address/phone/email data, but
@@ -75,7 +78,11 @@ export function FooterShopContacts({ shops }: { shops: FooterShopContact[] }) {
                 </a>
               )}
               {hasContactValue(shop.phone) && (
-                <a href={`tel:${shop.phone}`} className="flex items-center gap-2 hover:text-gold">
+                <a
+                  href={`tel:${shop.phone}`}
+                  onClick={() => trackCallClick(window.location.pathname)}
+                  className="flex items-center gap-2 hover:text-gold"
+                >
                   <Phone size={14} className="shrink-0 text-gold" aria-hidden="true" />
                   <span>{shop.phone}</span>
                 </a>

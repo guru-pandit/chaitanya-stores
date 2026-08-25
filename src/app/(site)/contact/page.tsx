@@ -1,17 +1,11 @@
 import type { Metadata } from "next";
-import { Mail, Phone, MapPin, ExternalLink } from "lucide-react";
-import { WhatsAppIcon } from "@/components/site/SocialIcons";
-import {
-  buildWhatsappLink,
-  buildMailtoLink,
-  buildTelLink,
-  CONTACT_COMING_SOON,
-  hasContactValue,
-  siteConfig,
-} from "@/lib/site-config";
+import { MapPin, ExternalLink } from "lucide-react";
+import { CONTACT_COMING_SOON, hasContactValue, siteConfig } from "@/lib/site-config";
 import { getAllShopLocations, getPrimaryShopLocation } from "@/lib/shop-locations";
 import { ContactForm } from "@/components/site/ContactForm";
 import { ShopLocationsList } from "@/components/site/ShopLocationsList";
+import { ContactMethodCards } from "@/components/site/ContactMethodCards";
+import { TrackOnMount } from "@/components/site/TrackOnMount";
 
 const CONTACT_TITLE = "Contact Chaitanya Stores | Pooja Samagri Shop, Sangameshwar";
 const CONTACT_DESCRIPTION =
@@ -28,6 +22,7 @@ export const metadata: Metadata = {
     description: CONTACT_DESCRIPTION,
     type: "website",
     url: `${siteConfig.siteUrl}/contact`,
+    images: ["/logo.png"],
   },
 };
 
@@ -45,6 +40,7 @@ export default async function ContactPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
+      <TrackOnMount event="click_contact" params={{ source_page: "/contact" }} />
       <h1 className="font-display text-3xl text-maroon-dark sm:text-4xl">
         Contact Chaitanya Stores, Sangameshwar
       </h1>
@@ -56,70 +52,11 @@ export default async function ContactPage() {
 
       <div className="mt-8 grid gap-8 sm:mt-10 sm:grid-cols-2 sm:gap-10">
         <div className="space-y-4">
-          {hasContactValue(primary.whatsappNumber) ? (
-            <a
-              href={buildWhatsappLink(primary.whatsappNumber)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 rounded-xl border border-maroon/10 bg-white/60 p-4 transition-shadow hover:shadow-md"
-            >
-              <WhatsAppIcon className="text-terracotta" size={22} />
-              <div>
-                <p className="text-sm font-semibold text-maroon-dark">WhatsApp — fastest reply</p>
-                <p className="text-sm text-charcoal/70">{primary.whatsappNumber}</p>
-              </div>
-            </a>
-          ) : (
-            <div className="flex items-center gap-3 rounded-xl border border-maroon/10 bg-white/60 p-4">
-              <WhatsAppIcon className="text-terracotta" size={22} />
-              <div>
-                <p className="text-sm font-semibold text-maroon-dark">WhatsApp — fastest reply</p>
-                <p className="text-sm text-charcoal/50">{CONTACT_COMING_SOON}</p>
-              </div>
-            </div>
-          )}
-
-          {hasContactValue(primary.email) ? (
-            <a
-              href={buildMailtoLink(primary.email)}
-              className="flex items-center gap-3 rounded-xl border border-maroon/10 bg-white/60 p-4 transition-shadow hover:shadow-md"
-            >
-              <Mail className="text-terracotta" size={22} />
-              <div>
-                <p className="text-sm font-semibold text-maroon-dark">Email</p>
-                <p className="text-sm text-charcoal/70">{primary.email}</p>
-              </div>
-            </a>
-          ) : (
-            <div className="flex items-center gap-3 rounded-xl border border-maroon/10 bg-white/60 p-4">
-              <Mail className="text-terracotta" size={22} />
-              <div>
-                <p className="text-sm font-semibold text-maroon-dark">Email</p>
-                <p className="text-sm text-charcoal/50">{CONTACT_COMING_SOON}</p>
-              </div>
-            </div>
-          )}
-
-          {hasContactValue(primary.phone) ? (
-            <a
-              href={buildTelLink(primary.phone)}
-              className="flex items-center gap-3 rounded-xl border border-maroon/10 bg-white/60 p-4 transition-shadow hover:shadow-md"
-            >
-              <Phone className="text-terracotta" size={22} />
-              <div>
-                <p className="text-sm font-semibold text-maroon-dark">Call</p>
-                <p className="text-sm text-charcoal/70">{primary.phone}</p>
-              </div>
-            </a>
-          ) : (
-            <div className="flex items-center gap-3 rounded-xl border border-maroon/10 bg-white/60 p-4">
-              <Phone className="text-terracotta" size={22} />
-              <div>
-                <p className="text-sm font-semibold text-maroon-dark">Call</p>
-                <p className="text-sm text-charcoal/50">{CONTACT_COMING_SOON}</p>
-              </div>
-            </div>
-          )}
+          <ContactMethodCards
+            whatsappNumber={primary.whatsappNumber}
+            email={primary.email}
+            phone={primary.phone}
+          />
 
           <div className="flex items-start gap-3 rounded-xl border border-maroon/10 bg-white/60 p-4">
             <MapPin className="mt-0.5 text-terracotta" size={22} />

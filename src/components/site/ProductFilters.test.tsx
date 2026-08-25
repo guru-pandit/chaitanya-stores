@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ProductFilters } from "./ProductFilters";
 import type { Category } from "@/generated/prisma/client";
+import * as analytics from "@/lib/analytics";
 
 const mockPush = vi.fn();
 const mockReplace = vi.fn();
@@ -41,6 +42,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers();
+  vi.restoreAllMocks();
 });
 
 describe("ProductFilters — search debounce", () => {
@@ -171,5 +173,40 @@ describe("ProductFilters — category and brand selects", () => {
     expect(screen.getByRole("option", { name: "Agarbatti" })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "Cycle" })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "Satya" })).toBeInTheDocument();
+  });
+});
+
+describe("ProductFilters — analytics", () => {
+  it("fires filter_category with the category's name (not its slug) on category change", () => {
+    const spy = vi.spyOn(analytics, "trackFilterCategory");
+    renderFilters();
+
+    fireEvent.change(screen.getByDisplayValue("All Categories"), {
+      target: { value: "agarbatti" },
+    });
+
+    expect(spy).toHaveBeenCalledWith("Agarbatti");
+  });
+
+  it("fires search with the final debounced query term", () => {
+    const spy = vi.spyOn(analytics, "trackSearch");
+    renderFilters();
+
+    fireEvent.change(screen.getByLabelText("Search the catalog"), {
+      target: { value: "sandalwood" },
+    });
+    vi.advanceTimersByTime(400);
+
+    expect(spy).toHaveBeenCalledWith("sandalwood");
+  });
+
+  it("does not fire search when the query is cleared", () => {
+    const spy = vi.spyOn(analytics, "trackSearch");
+    renderFilters({ activeQuery: "sandalwood" });
+
+    fireEvent.change(screen.getByLabelText("Search the catalog"), { target: { value: "" } });
+    vi.advanceTimersByTime(400);
+
+    expect(spy).not.toHaveBeenCalled();
   });
 });

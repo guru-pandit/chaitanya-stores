@@ -29,11 +29,17 @@ export const metadata: Metadata = {
     title: "Chaitanya Stores — Incense & Pooja Essentials",
     description: siteConfig.description,
     url: siteConfig.siteUrl,
+    // Default WhatsApp/social share thumbnail for any page that doesn't set
+    // its own `openGraph.images` (product pages override this with the
+    // actual product photo) — child routes replace this object wholesale,
+    // so pages that define their own `openGraph` block need this repeated.
+    images: ["/logo.png"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Chaitanya Stores — Incense & Pooja Essentials",
     description: siteConfig.description,
+    images: ["/logo.png"],
   },
   robots: { index: true, follow: true },
   // Referenced separately from the icon.png/apple-icon.png/favicon.ico file

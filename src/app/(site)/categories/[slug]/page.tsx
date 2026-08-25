@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { ProductCard } from "@/components/site/ProductCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { BreadcrumbJsonLd } from "@/components/site/BreadcrumbJsonLd";
+import { TrackOnMount } from "@/components/site/TrackOnMount";
 
 export async function generateMetadata({
   params,
@@ -23,7 +24,7 @@ export async function generateMetadata({
     title: category.name,
     description,
     alternates: { canonical: `/categories/${category.slug}` },
-    openGraph: { title: category.name, description, type: "website" },
+    openGraph: { title: category.name, description, type: "website", images: ["/logo.png"] },
   };
 }
 
@@ -48,6 +49,7 @@ export default async function CategoryPage({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+      <TrackOnMount event="view_category" params={{ category_name: category.name }} />
       <BreadcrumbJsonLd
         items={[
           { name: "Catalog", path: "/catalog" },

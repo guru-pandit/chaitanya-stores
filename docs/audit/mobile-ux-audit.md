@@ -132,4 +132,17 @@ On mobile the catalog/category/home grids are `grid-cols-2 gap-4`. At 360px each
 - [x] Phase 3 — Product detail
 - [x] Phase 4 — Homepage
 - [x] Phase 5 — Filters, secondary pages, FAB
-- [ ] Phase 6 — QA
+- [x] Phase 6 — QA
+
+## Phase 6 — QA results
+- `npx tsc --noEmit` — clean.
+- `npm run lint` — 0 errors (3 pre-existing `react-hooks/incompatible-library` warnings in admin forms, untouched).
+- `npm run test:unit` — 74 files, 695 tests pass.
+- `npm run build` — compiles successfully, all routes generate.
+- Integration tests (`*.integration.test.ts`, `tests/edge-cases/**`) require a DB on :3100 and were not run — unrelated to this branch.
+- Visual sweep: run `npm run dev` and check at 360 / 390 / 414 — home, `/catalog`, `/categories/[slug]`, `/catalog/[slug]`, `/contact`, `/about`, a 404. Optionally `/e2e-qa`.
+
+### Not changed (deliberately)
+- Admin dashboard — out of scope (desktop-only).
+- Any data fetching, Zod schemas, `site-config`, auth, Prisma schema, React Query hooks.
+- The 2-up mobile product grid — kept as requested; only typography/spacing changed.

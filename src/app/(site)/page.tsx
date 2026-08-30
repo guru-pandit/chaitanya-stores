@@ -72,19 +72,19 @@ export default async function HomePage() {
       <section className="relative flex min-h-[calc(100dvh-4rem)] flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-cream-dark/50 to-cream/50 px-4 py-16 text-center sm:px-6 sm:py-20">
         <HeroSlideshow images={heroImages} />
         <div className="relative z-10">
-          <p className="hero-text-glow text-sm font-semibold uppercase tracking-[0.2em] text-terracotta">
+          <p className="hero-text-glow text-xs font-semibold uppercase tracking-[0.15em] text-terracotta sm:text-sm sm:tracking-[0.2em]">
             Trusted Brands &middot; Sangmeshwar, Ratnagiri
           </p>
-          <h1 className="hero-text-glow mx-auto mt-4 max-w-2xl font-display text-4xl leading-tight text-maroon-dark sm:text-5xl">
+          <h1 className="hero-text-glow mx-auto mt-4 max-w-2xl font-display text-3xl leading-tight text-maroon-dark sm:text-4xl lg:text-5xl">
             Agarbatti, Dhoop &amp; Pooja Samagri in Sangmeshwar
           </h1>
-          <p className="mx-auto mt-4 max-w-lg text-charcoal/70">
+          <p className="mx-auto mt-4 max-w-lg text-sm text-charcoal/70 sm:text-base">
             Agarbatti, dhoop, camphor, and pooja thali essentials from Satya, Janak, Manohar, Anil,
             and Forest. Browse the catalog, then enquire directly on WhatsApp, email, or call — no
             online checkout, just a straight answer from the shop.
           </p>
-          <MandalaDivider className="my-8" />
-          <div className="flex flex-wrap items-center justify-center gap-4">
+          <MandalaDivider className="my-6 sm:my-8" />
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             <Link
               href="/catalog"
               className="inline-flex items-center gap-2 rounded-full bg-terracotta px-6 py-3 text-sm font-medium text-cream transition-colors hover:bg-terracotta-dark"
@@ -112,10 +112,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <div className="mb-8 flex items-end justify-between">
+      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+        <div className="mb-6 flex items-end justify-between gap-3 sm:mb-8">
           <h2 className="font-display text-2xl text-maroon-dark sm:text-3xl">Featured Products</h2>
-          <Link href="/catalog" className="text-sm font-medium text-terracotta hover:underline">
+          <Link
+            href="/catalog"
+            className="shrink-0 text-sm font-medium text-terracotta hover:underline"
+          >
             View all →
           </Link>
         </div>
@@ -134,19 +137,19 @@ export default async function HomePage() {
       </section>
 
       {categories.length > 0 && (
-        <section className="bg-cream-dark/40 px-4 py-16 sm:px-6">
+        <section className="bg-cream-dark/40 px-4 py-12 sm:px-6 sm:py-16">
           <div className="mx-auto max-w-6xl">
-            <h2 className="mb-8 font-display text-2xl text-maroon-dark sm:text-3xl">
+            <h2 className="mb-6 font-display text-2xl text-maroon-dark sm:mb-8 sm:text-3xl">
               Shop by Category
             </h2>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
               {categories.map((category) => (
                 <Link
                   key={category.id}
                   href={`/categories/${category.slug}`}
-                  className="group rounded-2xl border border-maroon/10 bg-white/60 p-6 text-center transition-shadow hover:shadow-lg"
+                  className="group flex items-center justify-center rounded-2xl border border-maroon/10 bg-white/60 p-4 text-center transition-shadow hover:shadow-lg sm:p-6"
                 >
-                  <p className="font-display text-lg text-maroon-dark group-hover:text-terracotta">
+                  <p className="font-display text-base text-maroon-dark group-hover:text-terracotta sm:text-lg">
                     {category.name}
                   </p>
                 </Link>
@@ -156,11 +159,11 @@ export default async function HomePage() {
         </section>
       )}
 
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <h2 className="mb-8 text-center font-display text-2xl text-maroon-dark sm:text-3xl">
+      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+        <h2 className="mb-6 text-center font-display text-2xl text-maroon-dark sm:mb-8 sm:text-3xl">
           Why Shop at Chaitanya Stores
         </h2>
-        <div className="grid gap-8 sm:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-3 sm:gap-8">
           <div className="flex flex-col items-center text-center">
             <ShieldCheck className="mb-3 text-terracotta" size={28} />
             <p className="font-display text-lg text-maroon-dark">Trusted Brands</p>
@@ -184,14 +187,15 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="bg-maroon px-4 py-16 text-center text-cream sm:px-6">
+      <section className="bg-maroon px-4 py-12 text-center text-cream sm:px-6 sm:py-16">
         <h2 className="font-display text-2xl sm:text-3xl">Have a question about a product?</h2>
         <p className="mx-auto mt-2 max-w-md text-cream/80">
           Reach out directly — we reply personally to every enquiry.
         </p>
         <EnquiryActions
-          className="mt-6 justify-center"
+          className="mx-auto mt-6 max-w-xs sm:max-w-none sm:justify-center"
           onDark
+          fullWidthOnMobile
           whatsappNumber={primaryLocation.whatsappNumber}
           email={primaryLocation.email}
           phone={primaryLocation.phone}

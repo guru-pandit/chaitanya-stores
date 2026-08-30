@@ -129,7 +129,7 @@ On mobile the catalog/category/home grids are `grid-cols-2 gap-4`. At 360px each
 ## Progress
 - [x] Phase 1 — Product card & grids
 - [x] Phase 2 — Global chrome & tap targets
-- [ ] Phase 3 — Product detail
+- [x] Phase 3 — Product detail
 - [ ] Phase 4 — Homepage
 - [ ] Phase 5 — Filters, secondary pages, FAB
 - [ ] Phase 6 — QA

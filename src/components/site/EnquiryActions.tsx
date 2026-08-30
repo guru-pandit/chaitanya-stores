@@ -8,6 +8,7 @@ export function EnquiryActions({
   productName,
   className = "",
   onDark = false,
+  fullWidthOnMobile = false,
 }: {
   whatsappNumber?: string | null;
   email?: string | null;
@@ -15,6 +16,9 @@ export function EnquiryActions({
   productName?: string;
   className?: string;
   onDark?: boolean;
+  /** Stack the three actions full-width on mobile (larger tap targets),
+   *  reverting to the inline wrapped row at `sm` and up. */
+  fullWidthOnMobile?: boolean;
 }) {
   const callClasses = onDark
     ? "border border-cream/40 text-cream hover:bg-cream/10"
@@ -25,6 +29,11 @@ export function EnquiryActions({
   const hasEmail = hasContactValue(email);
   const hasPhone = hasContactValue(phone);
 
+  const layoutClasses = fullWidthOnMobile
+    ? "flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3"
+    : "flex flex-wrap gap-3";
+  const itemClasses = fullWidthOnMobile ? "w-full justify-center sm:w-auto" : "";
+
   // No ShopLocation configured yet and no env fallback set — never build a
   // wa.me/mailto/tel link from an empty value (see site-config.ts).
   if (!hasWhatsapp && !hasEmail && !hasPhone) {
@@ -32,13 +41,13 @@ export function EnquiryActions({
   }
 
   return (
-    <div className={`flex flex-wrap gap-3 ${className}`}>
+    <div className={`${layoutClasses} ${className}`}>
       {hasWhatsapp ? (
         <a
           href={buildWhatsappLink(whatsappNumber, productName)}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-full bg-terracotta px-5 py-2.5 text-sm font-medium text-cream transition-colors hover:bg-terracotta-dark"
+          className={`inline-flex items-center gap-2 rounded-full bg-terracotta px-5 py-2.5 text-sm font-medium text-cream transition-colors hover:bg-terracotta-dark ${itemClasses}`}
         >
           <MessageCircle size={16} /> WhatsApp
         </a>
@@ -48,7 +57,7 @@ export function EnquiryActions({
           href={buildMailtoLink(email, productName)}
           className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-colors ${
             onDark ? "bg-gold text-maroon-dark hover:bg-gold-light" : "bg-maroon text-cream hover:bg-maroon-dark"
-          }`}
+          } ${itemClasses}`}
         >
           <Mail size={16} /> Email
         </a>
@@ -56,7 +65,7 @@ export function EnquiryActions({
       {hasPhone ? (
         <a
           href={buildTelLink(phone)}
-          className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-colors ${callClasses}`}
+          className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-colors ${callClasses} ${itemClasses}`}
         >
           <Phone size={16} /> Call
         </a>

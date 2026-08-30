@@ -18,7 +18,7 @@ export default function SiteError({
   }, [error]);
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col items-center px-4 py-24 text-center sm:px-6">
+    <div className="mx-auto flex max-w-xl flex-col items-center px-4 py-16 text-center sm:px-6 sm:py-24">
       <h1 className="font-display text-3xl text-maroon-dark">Something Went Wrong</h1>
       <MandalaDivider className="my-6" />
       <p className="text-charcoal/70">

@@ -43,7 +43,7 @@ export default async function ContactPage() {
   const [locations, primary] = await Promise.all([getAllShopLocations(), getPrimaryShopLocation()]);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6">
+    <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
       <h1 className="font-display text-3xl text-maroon-dark sm:text-4xl">
         Contact Chaitanya Stores, Sangmeshwar
       </h1>
@@ -53,7 +53,7 @@ export default async function ContactPage() {
         is confirmed by us before you visit.
       </p>
 
-      <div className="mt-10 grid gap-10 sm:grid-cols-2">
+      <div className="mt-8 grid gap-8 sm:mt-10 sm:grid-cols-2 sm:gap-10">
         <div className="space-y-4">
           {hasContactValue(primary.whatsappNumber) ? (
             <a

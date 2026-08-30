@@ -68,37 +68,43 @@ export function ProductFilters({
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search the catalog..."
           aria-label="Search the catalog"
-          className="w-full rounded-full border border-maroon/20 bg-white/70 py-2.5 pl-9 pr-4 text-sm outline-none focus:border-terracotta"
+          className="w-full rounded-full border border-maroon/20 bg-white/70 py-3 pl-9 pr-4 text-sm outline-none focus:border-terracotta sm:py-2.5"
         />
       </form>
 
-      <Select
-        value={activeCategory}
-        onChange={(e) => updateParams({ category: e.target.value })}
-        wrapperClassName="sm:w-48"
-        className="rounded-full border border-maroon/20 bg-white/70 py-2.5 pl-4 text-sm outline-none focus:border-terracotta"
-      >
-        <option value="">All Categories</option>
-        {categories.map((c) => (
-          <option key={c.id} value={c.slug}>
-            {c.name}
-          </option>
-        ))}
-      </Select>
+      {/* Two selects share a row on mobile; `sm:contents` dissolves this
+          wrapper at sm so they rejoin the flex row with their own widths. */}
+      <div className="grid grid-cols-2 gap-3 sm:contents">
+        <Select
+          value={activeCategory}
+          onChange={(e) => updateParams({ category: e.target.value })}
+          wrapperClassName="sm:w-48"
+          aria-label="Filter by category"
+          className="rounded-full border border-maroon/20 bg-white/70 py-3 pl-4 text-sm outline-none focus:border-terracotta sm:py-2.5"
+        >
+          <option value="">All Categories</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.slug}>
+              {c.name}
+            </option>
+          ))}
+        </Select>
 
-      <Select
-        value={activeBrand}
-        onChange={(e) => updateParams({ brand: e.target.value })}
-        wrapperClassName="sm:w-48"
-        className="rounded-full border border-maroon/20 bg-white/70 py-2.5 pl-4 text-sm outline-none focus:border-terracotta"
-      >
-        <option value="">All Brands</option>
-        {brands.map((b) => (
-          <option key={b} value={b}>
-            {b}
-          </option>
-        ))}
-      </Select>
+        <Select
+          value={activeBrand}
+          onChange={(e) => updateParams({ brand: e.target.value })}
+          wrapperClassName="sm:w-48"
+          aria-label="Filter by brand"
+          className="rounded-full border border-maroon/20 bg-white/70 py-3 pl-4 text-sm outline-none focus:border-terracotta sm:py-2.5"
+        >
+          <option value="">All Brands</option>
+          {brands.map((b) => (
+            <option key={b} value={b}>
+              {b}
+            </option>
+          ))}
+        </Select>
+      </div>
     </div>
   );
 }

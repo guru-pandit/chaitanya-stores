@@ -97,6 +97,16 @@ describe("Footer — social icons (conditional on configured URLs)", () => {
     expect(screen.getByRole("link", { name: /instagram/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /facebook/i })).toBeInTheDocument();
   });
+
+  it("ignores a configured value that is not an https:// URL (fails closed)", async () => {
+    siteConfig.instagramUrl = "javascript:alert(1)";
+    siteConfig.facebookUrl = "instagram.com/chaitanyastores"; // no scheme
+
+    await renderFooter();
+
+    expect(screen.queryByRole("link", { name: /instagram/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /facebook/i })).not.toBeInTheDocument();
+  });
 });
 
 describe("Footer — Explore block", () => {

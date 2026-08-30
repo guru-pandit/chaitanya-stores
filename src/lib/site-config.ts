@@ -15,6 +15,14 @@ export function hasContactValue(value: string | null | undefined): value is stri
   return Boolean(value && value.trim().length > 0);
 }
 
+// For values that are put straight into an `href` and come from deploy-time
+// env (social profile URLs) rather than a repo constant: require a real
+// value AND an https:// scheme, so a typo or mis-pasted string fails closed
+// to "not shown" instead of rendering a link with an arbitrary scheme.
+export function isConfiguredHttpsUrl(value: string | null | undefined): value is string {
+  return hasContactValue(value) && /^https:\/\//i.test(value.trim());
+}
+
 export const siteConfig = {
   name: "Chaitanya Stores",
   tagline: "Agarbatti, dhoop & pooja samagri from trusted brands in Sangmeshwar.",

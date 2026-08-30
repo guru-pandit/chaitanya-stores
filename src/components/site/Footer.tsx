@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { siteConfig, hasContactValue } from "@/lib/site-config";
+import { siteConfig, isConfiguredHttpsUrl } from "@/lib/site-config";
 import { getAllShopLocations } from "@/lib/shop-locations";
 import { MandalaDivider } from "./MandalaDivider";
 import { FooterShopContacts, type FooterShopContact } from "./FooterShopContacts";
@@ -50,12 +50,12 @@ export async function Footer() {
               </div>
               <p className="mt-2 text-sm text-cream/70">{siteConfig.tagline}</p>
               {/* Each icon appears only once its profile URL is configured
-                  in siteConfig — the row disappears entirely while both are
-                  still empty. */}
-              {(hasContactValue(siteConfig.instagramUrl) ||
-                hasContactValue(siteConfig.facebookUrl)) && (
+                  in siteConfig as a real https:// URL — the row disappears
+                  entirely while both are still empty. */}
+              {(isConfiguredHttpsUrl(siteConfig.instagramUrl) ||
+                isConfiguredHttpsUrl(siteConfig.facebookUrl)) && (
                 <div className="-ml-3 mt-2 flex items-center">
-                  {hasContactValue(siteConfig.instagramUrl) && (
+                  {isConfiguredHttpsUrl(siteConfig.instagramUrl) && (
                     <a
                       href={siteConfig.instagramUrl}
                       target="_blank"
@@ -66,7 +66,7 @@ export async function Footer() {
                       <InstagramIcon size={20} />
                     </a>
                   )}
-                  {hasContactValue(siteConfig.facebookUrl) && (
+                  {isConfiguredHttpsUrl(siteConfig.facebookUrl) && (
                     <a
                       href={siteConfig.facebookUrl}
                       target="_blank"

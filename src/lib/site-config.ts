@@ -34,8 +34,13 @@ export const siteConfig = {
     ? process.env.NEXT_PUBLIC_BUSINESS_ADDRESS
     : "Sangmeshwar, Ratnagiri, Maharashtra 415611",
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  instagramUrl: "https://instagram.com/chaitanyastores",
-  facebookUrl: "https://facebook.com/chaitanyastores",
+  // Social profiles aren't live yet. Left env-backed and empty by default —
+  // the footer renders each icon only when its URL is a real value
+  // (hasContactValue), so a half-configured pair (only one set) still works.
+  // Fill the env var (or hard-code the URL here) when the profile goes live;
+  // no schema or component change needed.
+  instagramUrl: process.env.NEXT_PUBLIC_INSTAGRAM_URL ?? "",
+  facebookUrl: process.env.NEXT_PUBLIC_FACEBOOK_URL ?? "",
   // Shown on every product detail page, below the enquiry actions — trivially
   // editable here without touching page markup.
   productDisclaimer:

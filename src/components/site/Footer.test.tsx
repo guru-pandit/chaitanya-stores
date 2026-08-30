@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { Footer } from "./Footer";
 import { siteConfig } from "@/lib/site-config";
@@ -52,6 +52,50 @@ describe("Footer — Policies block", () => {
     for (const policy of siteConfig.policies) {
       expect(screen.getByText(policy)).toBeInTheDocument();
     }
+  });
+});
+
+describe("Footer — social icons (conditional on configured URLs)", () => {
+  // siteConfig is a plain object; snapshot and restore the two fields we poke.
+  const originalInstagram = siteConfig.instagramUrl;
+  const originalFacebook = siteConfig.facebookUrl;
+
+  afterEach(() => {
+    siteConfig.instagramUrl = originalInstagram;
+    siteConfig.facebookUrl = originalFacebook;
+  });
+
+  it("renders neither icon (nor the row) when both URLs are empty", async () => {
+    siteConfig.instagramUrl = "";
+    siteConfig.facebookUrl = "";
+
+    await renderFooter();
+
+    expect(screen.queryByRole("link", { name: /instagram/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /facebook/i })).not.toBeInTheDocument();
+  });
+
+  it("renders only the Instagram icon when only that URL is set", async () => {
+    siteConfig.instagramUrl = "https://instagram.com/chaitanyastores";
+    siteConfig.facebookUrl = "   ";
+
+    await renderFooter();
+
+    expect(screen.getByRole("link", { name: /instagram/i })).toHaveAttribute(
+      "href",
+      "https://instagram.com/chaitanyastores"
+    );
+    expect(screen.queryByRole("link", { name: /facebook/i })).not.toBeInTheDocument();
+  });
+
+  it("renders both icons when both URLs are set", async () => {
+    siteConfig.instagramUrl = "https://instagram.com/chaitanyastores";
+    siteConfig.facebookUrl = "https://facebook.com/chaitanyastores";
+
+    await renderFooter();
+
+    expect(screen.getByRole("link", { name: /instagram/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /facebook/i })).toBeInTheDocument();
   });
 });
 

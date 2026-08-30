@@ -47,13 +47,13 @@ export async function Footer() {
                 <p className="font-display text-xl">{siteConfig.name}</p>
               </div>
               <p className="mt-2 text-sm text-cream/70">{siteConfig.tagline}</p>
-              <div className="mt-4 flex items-center gap-4">
+              <div className="-ml-3 mt-2 flex items-center">
                 <a
                   href={siteConfig.instagramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Follow us on Instagram"
-                  className="text-cream/80 hover:text-gold"
+                  className="p-3 text-cream/80 hover:text-gold"
                 >
                   <InstagramIcon size={20} />
                 </a>
@@ -62,7 +62,7 @@ export async function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Follow us on Facebook"
-                  className="text-cream/80 hover:text-gold"
+                  className="p-3 text-cream/80 hover:text-gold"
                 >
                   <FacebookIcon size={20} />
                 </a>

@@ -10,9 +10,10 @@ export function MobileNavToggle() {
     <button
       type="button"
       onClick={toggle}
-      className="text-maroon sm:hidden"
+      className="-mr-2.5 p-2.5 text-maroon sm:hidden"
       aria-label={isOpen ? "Close menu" : "Open menu"}
       aria-expanded={isOpen}
+      aria-controls="mobile-nav"
     >
       {isOpen ? <X size={24} /> : <Menu size={24} />}
     </button>

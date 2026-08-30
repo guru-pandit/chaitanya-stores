@@ -20,7 +20,7 @@ export function NavLink({
       href={href}
       className={
         mobile
-          ? `rounded-lg px-3 py-2.5 text-sm font-medium ${
+          ? `rounded-lg px-3 py-3 text-sm font-medium ${
               active ? "bg-terracotta/10 text-terracotta" : "text-charcoal/80"
             }`
           : `text-sm font-medium transition-colors hover:text-terracotta ${

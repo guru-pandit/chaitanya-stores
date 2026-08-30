@@ -1,5 +1,6 @@
-import { MessageCircle, Mail, Phone } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 import { buildMailtoLink, buildTelLink, buildWhatsappLink, CONTACT_COMING_SOON, hasContactValue } from "@/lib/site-config";
+import { WhatsAppIcon } from "./SocialIcons";
 
 export function EnquiryActions({
   whatsappNumber,
@@ -49,7 +50,7 @@ export function EnquiryActions({
           rel="noopener noreferrer"
           className={`inline-flex items-center gap-2 rounded-full bg-terracotta px-5 py-2.5 text-sm font-medium text-cream transition-colors hover:bg-terracotta-dark ${itemClasses}`}
         >
-          <MessageCircle size={16} /> WhatsApp
+          <WhatsAppIcon size={16} /> WhatsApp
         </a>
       ) : null}
       {hasEmail ? (

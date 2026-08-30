@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { MessageCircle, Mail, Phone, MapPin, ExternalLink } from "lucide-react";
+import { Mail, Phone, MapPin, ExternalLink } from "lucide-react";
+import { WhatsAppIcon } from "@/components/site/SocialIcons";
 import {
   buildWhatsappLink,
   buildMailtoLink,
@@ -62,7 +63,7 @@ export default async function ContactPage() {
               rel="noopener noreferrer"
               className="flex items-center gap-3 rounded-xl border border-maroon/10 bg-white/60 p-4 transition-shadow hover:shadow-md"
             >
-              <MessageCircle className="text-terracotta" size={22} />
+              <WhatsAppIcon className="text-terracotta" size={22} />
               <div>
                 <p className="text-sm font-semibold text-maroon-dark">WhatsApp — fastest reply</p>
                 <p className="text-sm text-charcoal/70">{primary.whatsappNumber}</p>
@@ -70,7 +71,7 @@ export default async function ContactPage() {
             </a>
           ) : (
             <div className="flex items-center gap-3 rounded-xl border border-maroon/10 bg-white/60 p-4">
-              <MessageCircle className="text-terracotta" size={22} />
+              <WhatsAppIcon className="text-terracotta" size={22} />
               <div>
                 <p className="text-sm font-semibold text-maroon-dark">WhatsApp — fastest reply</p>
                 <p className="text-sm text-charcoal/50">{CONTACT_COMING_SOON}</p>

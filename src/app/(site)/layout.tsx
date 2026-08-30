@@ -3,10 +3,9 @@ import { Footer } from "@/components/site/Footer";
 import { SiteBackdrop } from "@/components/site/SiteBackdrop";
 import { SiteJsonLd } from "@/components/site/SiteJsonLd";
 import { FestivalBannerModal } from "@/components/site/FestivalBannerModal";
-import { WhatsAppFab } from "@/components/site/WhatsAppFab";
+import { BottomNav } from "@/components/site/BottomNav";
 import { getActiveFestivalBanner } from "@/lib/festival-banner";
 import { getPrimaryShopLocation } from "@/lib/shop-locations";
-import { hasContactValue } from "@/lib/site-config";
 
 // Every page under this layout reads live data via Prisma (Footer's shop
 // locations, this layout's festival banner) — forcing the whole subtree
@@ -36,9 +35,9 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />
-      {hasContactValue(primaryLocation.whatsappNumber) && (
-        <WhatsAppFab whatsappNumber={primaryLocation.whatsappNumber} />
-      )}
+      {/* App-style mobile tab bar; hidden at sm and up (Header's top nav
+          takes over there). */}
+      <BottomNav whatsappNumber={primaryLocation.whatsappNumber} />
     </>
   );
 }

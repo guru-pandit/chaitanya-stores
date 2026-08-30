@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MessageCircle } from "lucide-react";
+import { WhatsAppIcon } from "@/components/site/SocialIcons";
 import { prisma } from "@/lib/prisma";
 import { buildWhatsappLink, CONTACT_COMING_SOON, hasContactValue, siteConfig } from "@/lib/site-config";
 import { getPrimaryShopLocation } from "@/lib/shop-locations";
@@ -115,7 +115,7 @@ export default async function CatalogPage({
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-full bg-terracotta px-5 py-2.5 text-sm font-medium text-cream transition-colors hover:bg-terracotta-dark"
                 >
-                  <MessageCircle size={16} /> Ask on WhatsApp
+                  <WhatsAppIcon size={16} /> Ask on WhatsApp
                 </a>
               ) : (
                 <p className="text-sm text-charcoal/50">{CONTACT_COMING_SOON}</p>

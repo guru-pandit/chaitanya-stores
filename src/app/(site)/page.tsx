@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ShieldCheck, Sparkles, MessageCircle } from "lucide-react";
+import { WhatsAppIcon } from "@/components/site/SocialIcons";
 import { prisma } from "@/lib/prisma";
 import { parseImages } from "@/lib/format";
 import { getPrimaryShopLocation } from "@/lib/shop-locations";
@@ -98,7 +99,7 @@ export default async function HomePage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full border border-maroon/30 px-6 py-3 text-sm font-medium text-maroon transition-colors hover:bg-maroon/5"
               >
-                WhatsApp Us
+                <WhatsAppIcon size={16} /> WhatsApp Us
               </a>
             ) : (
               <Link

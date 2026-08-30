@@ -1,4 +1,5 @@
-import { MessageCircle, Phone, Mail } from "lucide-react";
+import { Phone, Mail } from "lucide-react";
+import { WhatsAppIcon } from "./SocialIcons";
 import {
   buildMailtoLink,
   buildTelLink,
@@ -26,7 +27,6 @@ export function StickyEnquiryBar({
   // Call, then Email); any others sit alongside as icon-only buttons.
   const primary = hasContactValue(whatsappNumber)
     ? {
-        Icon: MessageCircle,
         href: buildWhatsappLink(whatsappNumber, productName),
         label: "Enquire on WhatsApp",
         external: true,
@@ -34,7 +34,6 @@ export function StickyEnquiryBar({
       }
     : hasContactValue(phone)
       ? {
-          Icon: Phone,
           href: buildTelLink(phone),
           label: "Call the shop",
           external: false,
@@ -42,7 +41,6 @@ export function StickyEnquiryBar({
         }
       : hasContactValue(email)
         ? {
-            Icon: Mail,
             href: buildMailtoLink(email, productName),
             label: "Email the shop",
             external: false,
@@ -54,17 +52,24 @@ export function StickyEnquiryBar({
   // "coming soon" note, so this bar just stays out of the way.
   if (!primary) return null;
 
-  const { Icon } = primary;
+  const primaryIcon =
+    primary.slot === "whatsapp" ? (
+      <WhatsAppIcon size={18} />
+    ) : primary.slot === "phone" ? (
+      <Phone size={18} aria-hidden="true" />
+    ) : (
+      <Mail size={18} aria-hidden="true" />
+    );
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-maroon/15 bg-cream/95 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2 backdrop-blur sm:hidden">
+    <div className="fixed inset-x-0 bottom-[calc(3.25rem+env(safe-area-inset-bottom))] z-30 border-y border-maroon/15 bg-cream/95 px-3 py-2 backdrop-blur sm:hidden">
       <div className="mx-auto flex max-w-md items-center gap-2">
         <a
           href={primary.href}
           {...(primary.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
           className="flex flex-1 items-center justify-center gap-2 rounded-full bg-terracotta px-4 py-3 text-sm font-semibold text-cream transition-colors hover:bg-terracotta-dark"
         >
-          <Icon size={18} aria-hidden="true" /> {primary.label}
+          {primaryIcon} {primary.label}
         </a>
 
         {primary.slot !== "phone" && hasContactValue(phone) && (

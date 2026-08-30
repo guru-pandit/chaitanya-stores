@@ -32,29 +32,31 @@ export function ProductCard({
           </div>
         )}
         {product.featured && (
-          <span className="absolute left-3 top-3 rounded-full bg-gold px-3 py-1 text-xs font-semibold text-maroon-dark">
+          <span className="absolute left-2 top-2 rounded-full bg-gold px-2.5 py-0.5 text-[11px] font-semibold text-maroon-dark sm:left-3 sm:top-3 sm:px-3 sm:py-1 sm:text-xs">
             Featured
           </span>
         )}
         {!product.inStock && (
-          <span className="absolute right-3 top-3 rounded-full bg-charcoal/80 px-3 py-1 text-xs font-semibold text-cream">
+          <span className="absolute right-2 top-2 rounded-full bg-charcoal/80 px-2.5 py-0.5 text-[11px] font-semibold text-cream sm:right-3 sm:top-3 sm:px-3 sm:py-1 sm:text-xs">
             Out of Stock
           </span>
         )}
       </div>
-      <div className="flex flex-1 flex-col gap-1 p-4">
-        <p className="text-xs uppercase tracking-wide text-terracotta">
+      <div className="flex flex-1 flex-col gap-1 p-3 sm:p-4">
+        <p className="line-clamp-1 text-[11px] uppercase tracking-normal text-terracotta sm:text-xs sm:tracking-wide">
           {product.category.name} · {product.brand}
         </p>
-        <h3 className="font-display text-lg text-maroon-dark">{product.name}</h3>
-        <div className="mt-auto flex items-baseline justify-between gap-2 pt-2">
+        <h3 className="line-clamp-2 min-h-[2.75em] font-display text-sm leading-snug text-maroon-dark sm:text-lg">
+          {product.name}
+        </h3>
+        <div className="mt-auto flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5 pt-2">
           <p className="text-sm font-medium text-charcoal">
             {hasVariants ? formatVariantPrice(product.variants) : formatPrice(product.price)}
           </p>
           {hasVariants ? (
-            <p className="text-xs text-charcoal/50">{product.variants.length} options</p>
+            <p className="shrink-0 text-xs text-charcoal/50">{product.variants.length} options</p>
           ) : (
-            product.weight && <p className="text-xs text-charcoal/50">{product.weight}</p>
+            product.weight && <p className="shrink-0 text-xs text-charcoal/50">{product.weight}</p>
           )}
         </div>
       </div>

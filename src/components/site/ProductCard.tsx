@@ -32,20 +32,22 @@ export function ProductCard({
           </div>
         )}
         {product.featured && (
-          <span className="absolute left-2 top-2 rounded-full bg-gold px-2.5 py-0.5 text-[11px] font-semibold text-maroon-dark sm:left-3 sm:top-3 sm:px-3 sm:py-1 sm:text-xs">
+          <span className="absolute left-2 top-2 rounded-full bg-gold px-2.5 py-0.5 text-xs font-semibold text-maroon-dark sm:left-3 sm:top-3 sm:px-3 sm:py-1">
             Featured
           </span>
         )}
         {!product.inStock && (
-          <span className="absolute right-2 top-2 rounded-full bg-charcoal/80 px-2.5 py-0.5 text-[11px] font-semibold text-cream sm:right-3 sm:top-3 sm:px-3 sm:py-1 sm:text-xs">
+          <span className="absolute right-2 top-2 rounded-full bg-charcoal/80 px-2.5 py-0.5 text-xs font-semibold text-cream sm:right-3 sm:top-3 sm:px-3 sm:py-1">
             Out of Stock
           </span>
         )}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3 sm:p-4">
-        <p className="line-clamp-1 text-[11px] uppercase tracking-normal text-terracotta sm:text-xs sm:tracking-wide">
+        <p className="line-clamp-1 text-xs uppercase tracking-normal text-terracotta sm:tracking-wide">
           {product.category.name} · {product.brand}
         </p>
+        {/* min-h reserves two lines (line-clamp-2 x leading-snug = 2.75em) so
+            one- and two-line names keep the price row aligned across a row. */}
         <h3 className="line-clamp-2 min-h-[2.75em] font-display text-sm leading-snug text-maroon-dark sm:text-lg">
           {product.name}
         </h3>

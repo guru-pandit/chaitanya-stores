@@ -1,6 +1,13 @@
 @import "tailwindcss";
 
 :root {
+  /* Height of the mobile <BottomNav> tab bar. Single source of truth: the
+     bar sets its own height from this, and everything that must sit clear of
+     it — <StickyEnquiryBar>'s bottom offset, the footer's and the product
+     page's bottom padding — keys off the same value instead of each
+     guessing the number. */
+  --bottom-nav-h: 3.5rem;
+
   --color-cream: #fbf3e7;
   --color-cream-dark: #f2e4cd;
   --color-terracotta: #c1622d;

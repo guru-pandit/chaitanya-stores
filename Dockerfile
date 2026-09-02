@@ -37,8 +37,9 @@ ENV NEXT_PUBLIC_BUSINESS_WHATSAPP=$NEXT_PUBLIC_BUSINESS_WHATSAPP
 ENV NEXT_PUBLIC_BUSINESS_EMAIL=$NEXT_PUBLIC_BUSINESS_EMAIL
 ENV NEXT_PUBLIC_BUSINESS_ADDRESS=$NEXT_PUBLIC_BUSINESS_ADDRESS
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
-# Optional — empty until the social profiles go live; the footer hides each
-# icon whose URL is blank (see src/lib/site-config.ts / Footer.tsx).
+# Optional — empty until the social profiles go live. Must be full https://
+# URLs; the footer hides each icon whose value is blank or not https
+# (see src/lib/site-config.ts isConfiguredHttpsUrl / Footer.tsx).
 ENV NEXT_PUBLIC_INSTAGRAM_URL=$NEXT_PUBLIC_INSTAGRAM_URL
 ENV NEXT_PUBLIC_FACEBOOK_URL=$NEXT_PUBLIC_FACEBOOK_URL
 

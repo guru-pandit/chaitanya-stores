@@ -1,5 +1,8 @@
-// lucide-react ships no brand icons (Instagram/Facebook), so these are hand-drawn
-// to match its stroke style (24x24, strokeWidth 2, round caps) for visual consistency.
+// lucide-react ships no brand icons, so these are hand-drawn. Instagram and
+// Facebook follow lucide's stroke style (24x24, strokeWidth 2, round caps).
+// WhatsApp is the deliberate exception — a filled glyph, because the mark is
+// only recognisable as WhatsApp when filled. All three bake in
+// aria-hidden="true": they are decorative, always paired with visible text.
 type IconProps = { size?: number; className?: string };
 
 export function InstagramIcon({ size = 20, className = "" }: IconProps) {

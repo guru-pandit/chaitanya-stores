@@ -38,8 +38,8 @@ export async function Footer() {
   return (
     <footer className="mt-24 border-t border-maroon/10 bg-maroon text-cream">
       {/* Extra bottom padding on mobile so the last line clears the fixed
-          BottomNav tab bar. */}
-      <div className="mx-auto max-w-6xl px-4 py-12 pb-24 sm:px-6 sm:pb-12">
+          BottomNav tab bar (height --bottom-nav-h, see globals.css). */}
+      <div className="mx-auto max-w-6xl px-4 py-12 pb-[calc(var(--bottom-nav-h)+2.5rem)] sm:px-6 sm:pb-12">
         <MandalaDivider className="mb-8 text-gold/70" />
         <div className="grid gap-10 sm:grid-cols-2">
           <div className="flex flex-col gap-10">

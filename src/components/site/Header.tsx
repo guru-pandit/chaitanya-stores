@@ -19,7 +19,7 @@ export function Header() {
           <span className="font-display text-xl text-maroon-dark">Chaitanya Stores</span>
         </Link>
 
-        <nav className="hidden items-center gap-8 sm:flex">
+        <nav aria-label="Primary" className="hidden items-center gap-8 sm:flex">
           {navLinks.map((link) => (
             <NavLink key={link.href} href={link.href}>
               {link.label}

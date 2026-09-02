@@ -59,8 +59,9 @@ jobs:
           NEXT_PUBLIC_BUSINESS_EMAIL: ${{ secrets.NEXT_PUBLIC_BUSINESS_EMAIL }}
           NEXT_PUBLIC_BUSINESS_ADDRESS: ${{ secrets.NEXT_PUBLIC_BUSINESS_ADDRESS }}
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
-          # Optional — unset secret expands to "" and the footer just hides
-          # that icon (see src/lib/site-config.ts).
+          # Optional — must be a full https:// URL. An unset secret expands
+          # to "" and the footer just hides that icon; a non-https value is
+          # ignored the same way (src/lib/site-config.ts isConfiguredHttpsUrl).
           NEXT_PUBLIC_INSTAGRAM_URL: ${{ secrets.NEXT_PUBLIC_INSTAGRAM_URL }}
           NEXT_PUBLIC_FACEBOOK_URL: ${{ secrets.NEXT_PUBLIC_FACEBOOK_URL }}
           DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}

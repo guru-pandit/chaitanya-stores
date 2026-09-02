@@ -6,7 +6,10 @@ export function ProductCardSkeleton() {
       <Skeleton className="aspect-square w-full rounded-none" />
       <div className="flex flex-1 flex-col gap-1 p-3 sm:p-4">
         <Skeleton className="h-3 w-1/2" />
-        <div className="flex min-h-[2.75em] flex-col gap-1.5">
+        {/* text-sm sm:text-lg matches ProductCard's <h3> so this reserved
+            two-line block (min-h-[2.75em]) is the same height the real name
+            will occupy — otherwise the grid jumps when content loads. */}
+        <div className="flex min-h-[2.75em] flex-col gap-1.5 text-sm sm:text-lg">
           <Skeleton className="h-3.5 w-3/4" />
           <Skeleton className="h-3.5 w-1/2 sm:hidden" />
         </div>

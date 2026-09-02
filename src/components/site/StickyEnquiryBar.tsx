@@ -62,7 +62,7 @@ export function StickyEnquiryBar({
     );
 
   return (
-    <div className="fixed inset-x-0 bottom-[calc(3.25rem+env(safe-area-inset-bottom))] z-30 border-y border-maroon/15 bg-cream/95 px-3 py-2 backdrop-blur sm:hidden">
+    <div className="fixed inset-x-0 bottom-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom))] z-30 border-y border-maroon/15 bg-cream/95 px-3 py-2 backdrop-blur sm:hidden">
       <div className="mx-auto flex max-w-md items-center gap-2">
         <a
           href={primary.href}

@@ -12,6 +12,10 @@ export function Header() {
     // homepage hero can size itself off it via calc(100dvh-4rem).
     // On mobile the nav lives in <BottomNav> (app-style tab bar), so the
     // header is just the wordmark; the top <nav> below is desktop-only.
+    // Only <BottomNav> carries aria-label="Primary" — the two navs are the
+    // same navigation in responsive forms and are never both in the a11y
+    // tree (display:none per breakpoint), so labelling both just trips the
+    // "duplicate landmark label" check for no real benefit.
     <header className="sticky top-0 z-40 h-16 border-b border-maroon/10 bg-cream">
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
@@ -19,7 +23,7 @@ export function Header() {
           <span className="font-display text-xl text-maroon-dark">Chaitanya Stores</span>
         </Link>
 
-        <nav aria-label="Primary" className="hidden items-center gap-8 sm:flex">
+        <nav className="hidden items-center gap-8 sm:flex">
           {navLinks.map((link) => (
             <NavLink key={link.href} href={link.href}>
               {link.label}

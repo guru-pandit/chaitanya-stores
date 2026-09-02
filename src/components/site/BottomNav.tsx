@@ -13,7 +13,11 @@ import { WhatsAppIcon } from "./SocialIcons";
 
 // Per-tab icon + extra active-path prefixes, keyed by the href in navLinks
 // (the single source of truth for label + destination, shared with Header).
-const TAB_META: Record<string, { Icon: LucideIcon; match?: string[] }> = {
+// Typed against navLinks' hrefs so adding a nav item without an icon here is
+// a compile error, not a silent wrong-icon at runtime.
+type NavHref = (typeof navLinks)[number]["href"];
+
+const TAB_META: Record<NavHref, { Icon: LucideIcon; match?: string[] }> = {
   "/": { Icon: Home },
   "/catalog": { Icon: ShoppingBag, match: ["/catalog", "/categories"] },
   "/about": { Icon: Info },
@@ -25,8 +29,8 @@ type Tab = { href: string; label: string; Icon: LucideIcon; match?: string[] };
 const NAV_TABS: Tab[] = navLinks.map((link) => ({
   href: link.href,
   label: link.label,
-  Icon: TAB_META[link.href]?.Icon ?? Info,
-  match: TAB_META[link.href]?.match,
+  Icon: TAB_META[link.href].Icon,
+  match: TAB_META[link.href].match,
 }));
 
 function isActive(pathname: string, tab: Tab) {
@@ -54,7 +58,7 @@ export function BottomNav({ whatsappNumber }: { whatsappNumber?: string | null }
       aria-label="Primary"
       className="fixed inset-x-0 bottom-0 z-40 h-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom))] border-t border-maroon/15 bg-cream pb-[env(safe-area-inset-bottom)] sm:hidden"
     >
-      <ul className="mx-auto flex h-[var(--bottom-nav-h)] max-w-md items-stretch justify-around">
+      <ul className="mx-auto flex h-full max-w-md items-stretch justify-around">
         {left.map((tab) => (
           <TabLink key={tab.href} tab={tab} active={isActive(pathname, tab)} />
         ))}

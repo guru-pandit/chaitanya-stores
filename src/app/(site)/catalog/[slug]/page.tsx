@@ -71,7 +71,7 @@ export default async function ProductDetailPage({
   const sortedVariants = [...product.variants].sort((a, b) => a.price - b.price);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12 pb-[calc(var(--bottom-nav-h)+4.5rem)] sm:px-6 sm:pb-12">
+    <div className="mx-auto max-w-5xl px-4 py-12 pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+4.5rem)] sm:px-6 sm:pb-12">
       <ProductJsonLd product={product} images={images} />
       <BreadcrumbJsonLd
         items={[

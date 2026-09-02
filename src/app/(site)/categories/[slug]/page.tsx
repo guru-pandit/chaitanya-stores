@@ -65,7 +65,7 @@ export default async function CategoryPage({
               h3) without adding a visible section label the design doesn't
               call for. */}
           <h2 className="sr-only">{category.name} Products</h2>
-          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="mt-8 grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
             {category.products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

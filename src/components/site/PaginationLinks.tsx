@@ -29,33 +29,36 @@ export function PaginationLinks({
   };
 
   return (
-    <nav className="mt-10 flex items-center justify-center gap-4" aria-label="Pagination">
+    <nav
+      className="mt-10 flex items-center justify-center gap-2 sm:gap-4"
+      aria-label="Pagination"
+    >
       {page > 1 ? (
         <Link
           href={hrefFor(page - 1)}
-          className="flex items-center gap-1 rounded-full border border-maroon/20 px-4 py-2 text-sm font-medium text-maroon hover:bg-maroon/5"
+          className="flex items-center gap-1 rounded-full border border-maroon/20 px-4 py-2.5 text-sm font-medium text-maroon hover:bg-maroon/5"
         >
           <ChevronLeft size={16} /> Previous
         </Link>
       ) : (
-        <span className="flex items-center gap-1 rounded-full border border-maroon/10 px-4 py-2 text-sm font-medium text-charcoal/30">
+        <span className="flex items-center gap-1 rounded-full border border-maroon/10 px-4 py-2.5 text-sm font-medium text-charcoal/30">
           <ChevronLeft size={16} /> Previous
         </span>
       )}
 
-      <span className="text-sm text-charcoal/60">
+      <span className="whitespace-nowrap px-1 text-xs text-charcoal/60 sm:text-sm">
         Page {page} of {totalPages}
       </span>
 
       {page < totalPages ? (
         <Link
           href={hrefFor(page + 1)}
-          className="flex items-center gap-1 rounded-full border border-maroon/20 px-4 py-2 text-sm font-medium text-maroon hover:bg-maroon/5"
+          className="flex items-center gap-1 rounded-full border border-maroon/20 px-4 py-2.5 text-sm font-medium text-maroon hover:bg-maroon/5"
         >
           Next <ChevronRight size={16} />
         </Link>
       ) : (
-        <span className="flex items-center gap-1 rounded-full border border-maroon/10 px-4 py-2 text-sm font-medium text-charcoal/30">
+        <span className="flex items-center gap-1 rounded-full border border-maroon/10 px-4 py-2.5 text-sm font-medium text-charcoal/30">
           Next <ChevronRight size={16} />
         </span>
       )}

@@ -4,7 +4,7 @@ import { MandalaDivider } from "./MandalaDivider";
 
 export function NotFoundContent() {
   return (
-    <div className="mx-auto flex max-w-xl flex-col items-center px-4 py-24 text-center sm:px-6">
+    <div className="mx-auto flex max-w-xl flex-col items-center px-4 py-16 text-center sm:px-6 sm:py-24">
       <Image src="/logo.png" alt="" width={44} height={44} className="opacity-40" />
       <h1 className="mt-4 font-display text-3xl text-maroon-dark">Page Not Found</h1>
       <MandalaDivider className="my-6" />

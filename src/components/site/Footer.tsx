@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { siteConfig } from "@/lib/site-config";
+import { siteConfig, isConfiguredHttpsUrl } from "@/lib/site-config";
 import { getAllShopLocations } from "@/lib/shop-locations";
 import { MandalaDivider } from "./MandalaDivider";
 import { FooterShopContacts, type FooterShopContact } from "./FooterShopContacts";
@@ -37,7 +37,9 @@ export async function Footer() {
 
   return (
     <footer className="mt-24 border-t border-maroon/10 bg-maroon text-cream">
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+      {/* Extra bottom padding on mobile so the last line clears the fixed
+          BottomNav tab bar (height --bottom-nav-h, see globals.css). */}
+      <div className="mx-auto max-w-6xl px-4 py-12 pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+2.5rem)] sm:px-6 sm:pb-12">
         <MandalaDivider className="mb-8 text-gold/70" />
         <div className="grid gap-10 sm:grid-cols-2">
           <div className="flex flex-col gap-10">
@@ -47,26 +49,36 @@ export async function Footer() {
                 <p className="font-display text-xl">{siteConfig.name}</p>
               </div>
               <p className="mt-2 text-sm text-cream/70">{siteConfig.tagline}</p>
-              <div className="mt-4 flex items-center gap-4">
-                <a
-                  href={siteConfig.instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Follow us on Instagram"
-                  className="text-cream/80 hover:text-gold"
-                >
-                  <InstagramIcon size={20} />
-                </a>
-                <a
-                  href={siteConfig.facebookUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Follow us on Facebook"
-                  className="text-cream/80 hover:text-gold"
-                >
-                  <FacebookIcon size={20} />
-                </a>
-              </div>
+              {/* Each icon appears only once its profile URL is configured
+                  in siteConfig as a real https:// URL — the row disappears
+                  entirely while both are still empty. */}
+              {(isConfiguredHttpsUrl(siteConfig.instagramUrl) ||
+                isConfiguredHttpsUrl(siteConfig.facebookUrl)) && (
+                <div className="-ml-3 mt-2 flex items-center">
+                  {isConfiguredHttpsUrl(siteConfig.instagramUrl) && (
+                    <a
+                      href={siteConfig.instagramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Follow us on Instagram"
+                      className="p-3 text-cream/80 hover:text-gold"
+                    >
+                      <InstagramIcon size={20} />
+                    </a>
+                  )}
+                  {isConfiguredHttpsUrl(siteConfig.facebookUrl) && (
+                    <a
+                      href={siteConfig.facebookUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Follow us on Facebook"
+                      className="p-3 text-cream/80 hover:text-gold"
+                    >
+                      <FacebookIcon size={20} />
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
             <div>
               <p className="text-sm font-semibold uppercase tracking-wide text-gold">Explore</p>

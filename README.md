@@ -53,6 +53,7 @@ the Docker-internal hostname `db`, which docker-compose.yml constructs automatic
 | `NEXTAUTH_URL` | Base URL of the app (`http://localhost:3000` in dev) |
 | `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` | Admin login created by `prisma db seed` |
 | `NEXT_PUBLIC_BUSINESS_PHONE` / `_WHATSAPP` / `_EMAIL` / `_ADDRESS` | Contact details used in enquiry links across the site (`src/lib/site-config.ts`) |
+| `NEXT_PUBLIC_INSTAGRAM_URL` / `NEXT_PUBLIC_FACEBOOK_URL` | Optional. Social profile URLs — must be full `https://` URLs. The footer shows each icon only when its value is a valid https URL, so leaving one or both empty (or non-https) is fine |
 
 The seed script prints the admin email/password it created — use those to log in at
 `/admin/login`.
@@ -222,6 +223,7 @@ and masked in logs; Variables are plaintext):
 | `NEXTAUTH_URL` | `https://chaitanystores.com` |
 | `NEXT_PUBLIC_BUSINESS_PHONE` / `_WHATSAPP` / `_EMAIL` / `_ADDRESS` | Real business contact details |
 | `NEXT_PUBLIC_SITE_URL` | `https://chaitanystores.com` |
+| `NEXT_PUBLIC_INSTAGRAM_URL` / `NEXT_PUBLIC_FACEBOOK_URL` | Optional — full `https://` social profile URLs. Skip until the profiles exist; the footer hides an icon whose value is blank or not https |
 | `DOMAIN_NAME` | `chaitanystores.com` (must match what you issued the cert for) |
 
 Fork-triggered PRs never get access to these — only pushes to `main` in this repo do. Rotate

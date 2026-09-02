@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MessageCircle } from "lucide-react";
+import { WhatsAppIcon } from "@/components/site/SocialIcons";
 import { prisma } from "@/lib/prisma";
 import { buildWhatsappLink, CONTACT_COMING_SOON, hasContactValue, siteConfig } from "@/lib/site-config";
 import { getPrimaryShopLocation } from "@/lib/shop-locations";
@@ -90,7 +90,7 @@ export default async function CatalogPage({
               h3) without adding a visible section label the design doesn't
               call for. */}
           <h2 className="sr-only">Catalog Results</h2>
-          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="mt-8 grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -115,7 +115,7 @@ export default async function CatalogPage({
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-full bg-terracotta px-5 py-2.5 text-sm font-medium text-cream transition-colors hover:bg-terracotta-dark"
                 >
-                  <MessageCircle size={16} /> Ask on WhatsApp
+                  <WhatsAppIcon size={16} /> Ask on WhatsApp
                 </a>
               ) : (
                 <p className="text-sm text-charcoal/50">{CONTACT_COMING_SOON}</p>

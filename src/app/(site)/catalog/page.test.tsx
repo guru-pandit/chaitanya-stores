@@ -68,7 +68,7 @@ describe("CatalogPage — happy path", () => {
       whatsappNumber: "919999999999",
       email: "shop@example.com",
       phone: "+919999999999",
-      address: "Sangmeshwar",
+      address: "Sangameshwar",
       name: "Chaitanya Stores",
       isPrimary: true,
     });
@@ -87,7 +87,7 @@ describe("CatalogPage — empty state", () => {
       whatsappNumber: "919999999999",
       email: "shop@example.com",
       phone: "+919999999999",
-      address: "Sangmeshwar",
+      address: "Sangameshwar",
       name: "Chaitanya Stores",
       isPrimary: true,
     });

@@ -30,7 +30,7 @@ const fullLocation = {
   whatsappNumber: "919999999999",
   email: "shop@example.com",
   phone: "+919999999999",
-  address: "Main Road, Sangmeshwar",
+  address: "Main Road, Sangameshwar",
   name: "Chaitanya Stores",
   isPrimary: true,
   createdAt: new Date("2026-01-01"),
@@ -70,7 +70,7 @@ describe("ContactPage — contact cards with full contact info", () => {
     expect(call).toHaveAttribute("href", "tel:+919999999999");
     // May also appear a second time in the "Visit the Shop" locations list
     // below, since a location is present — assert it's shown at least once.
-    expect(screen.getAllByText("Main Road, Sangmeshwar").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Main Road, Sangameshwar").length).toBeGreaterThan(0);
   });
 
   // Regression guard for the pre-existing bug this session fixed: the

@@ -25,7 +25,7 @@ export function isConfiguredHttpsUrl(value: string | null | undefined): value is
 
 export const siteConfig = {
   name: "Chaitanya Stores",
-  tagline: "Agarbatti, dhoop & pooja samagri from trusted brands in Sangmeshwar.",
+  tagline: "Agarbatti, dhoop & pooja samagri from trusted brands in Sangameshwar.",
   // Kept to ~160 chars — the sitewide default meta/OG/Twitter description
   // (see src/app/layout.tsx), so length matters for search snippet display.
   description:
@@ -40,7 +40,7 @@ export const siteConfig = {
   // check for a real value the same way every other contact field does.
   address: hasContactValue(process.env.NEXT_PUBLIC_BUSINESS_ADDRESS)
     ? process.env.NEXT_PUBLIC_BUSINESS_ADDRESS
-    : "Sangmeshwar, Ratnagiri, Maharashtra 415611",
+    : "Sangameshwar, Ratnagiri, Maharashtra 415611",
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   // Social profiles aren't live yet. Left env-backed and empty by default —
   // the footer renders each icon only when its URL is a real value

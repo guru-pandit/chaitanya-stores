@@ -12,9 +12,9 @@ import { MandalaDivider } from "@/components/site/MandalaDivider";
 import { HeroSlideshow } from "@/components/site/HeroSlideshow";
 import { EmptyState } from "@/components/ui/EmptyState";
 
-const HOME_TITLE = "Pooja Samagri & Agarbatti Shop in Sangmeshwar | Chaitanya Stores";
+const HOME_TITLE = "Pooja Samagri & Agarbatti Shop in Sangameshwar | Chaitanya Stores";
 const HOME_DESCRIPTION =
-  "Chaitanya Stores in Sangmeshwar stocks agarbatti, dhoop, camphor & pooja samagri from trusted brands — Satya, Janak, Manohar, Anil & Forest. Browse the catalog and enquire via WhatsApp, email, or call.";
+  "Chaitanya Stores in Sangameshwar stocks agarbatti, dhoop, camphor & pooja samagri from trusted brands — Satya, Janak, Manohar, Anil & Forest. Browse the catalog and enquire via WhatsApp, email, or call.";
 
 export const metadata: Metadata = {
   // `absolute` opts out of the root layout's `%s | Chaitanya Stores` title
@@ -74,10 +74,10 @@ export default async function HomePage() {
         <HeroSlideshow images={heroImages} />
         <div className="relative z-10">
           <p className="hero-text-glow text-xs font-semibold uppercase tracking-[0.15em] text-terracotta sm:text-sm sm:tracking-[0.2em]">
-            Trusted Brands &middot; Sangmeshwar, Ratnagiri
+            Trusted Brands &middot; Sangameshwar, Ratnagiri
           </p>
           <h1 className="hero-text-glow mx-auto mt-4 max-w-2xl font-display text-3xl leading-tight text-maroon-dark sm:text-4xl lg:text-5xl">
-            Agarbatti, Dhoop &amp; Pooja Samagri in Sangmeshwar
+            Agarbatti, Dhoop &amp; Pooja Samagri in Sangameshwar
           </h1>
           <p className="mx-auto mt-4 max-w-lg text-sm text-charcoal/70 sm:text-base">
             Agarbatti, dhoop, camphor, and pooja thali essentials from Satya, Janak, Manohar, Anil,

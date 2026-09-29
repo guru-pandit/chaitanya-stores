@@ -5,9 +5,9 @@ import { MandalaDivider } from "@/components/site/MandalaDivider";
 import { EnquiryActions } from "@/components/site/EnquiryActions";
 import { ShopLocationsList } from "@/components/site/ShopLocationsList";
 
-const ABOUT_TITLE = "About Chaitanya Stores | Pooja Samagri Shop, Sangmeshwar";
+const ABOUT_TITLE = "About Chaitanya Stores | Pooja Samagri Shop, Sangameshwar";
 const ABOUT_DESCRIPTION =
-  "Chaitanya Stores is a retail pooja samagri shop in Sangmeshwar, Ratnagiri, stocking agarbatti, dhoop, camphor, and pooja essentials from trusted brands. Browse online, then enquire or visit in person.";
+  "Chaitanya Stores is a retail pooja samagri shop in Sangameshwar, Ratnagiri, stocking agarbatti, dhoop, camphor, and pooja essentials from trusted brands. Browse online, then enquire or visit in person.";
 
 export const metadata: Metadata = {
   // `absolute` opts out of the root layout's `%s | Chaitanya Stores` title
@@ -34,12 +34,12 @@ export default async function AboutPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
       <h1 className="text-center font-display text-3xl text-maroon-dark sm:text-4xl">
-        About Chaitanya Stores, Sangmeshwar
+        About Chaitanya Stores, Sangameshwar
       </h1>
       <MandalaDivider className="my-8" />
       <div className="space-y-5 text-charcoal/80 leading-relaxed">
         <p>
-          Chaitanya Stores opened in Sangmeshwar about two years ago so local families wouldn&apos;t
+          Chaitanya Stores opened in Sangameshwar about two years ago so local families wouldn&apos;t
           have to travel all the way to Ratnagiri or Chiplun just to pick up agarbatti, dhoop, or
           pooja samagri. What started as a small shop has grown into a catalog spanning agarbatti,
           dhoop and dhoop sticks, sambrani/dhoop cones, camphor, and pooja thali essentials like

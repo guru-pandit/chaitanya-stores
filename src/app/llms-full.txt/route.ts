@@ -26,7 +26,7 @@ export async function GET() {
   ]);
 
   // Omit any missing part rather than emitting a dangling separator (e.g.
-  // "Contact:  ·  · Sangmeshwar…") — same convention SiteJsonLd follows.
+  // "Contact:  ·  · Sangameshwar…") — same convention SiteJsonLd follows.
   const contactParts = [primaryLocation.phone, primaryLocation.email, primaryLocation.address].filter(
     hasContactValue
   );

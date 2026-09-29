@@ -3,13 +3,13 @@ import { render, screen, within } from "@testing-library/react";
 import { FooterShopContacts, type FooterShopContact } from "./FooterShopContacts";
 import { CONTACT_COMING_SOON } from "@/lib/site-config";
 
-const sangmeshwar: FooterShopContact = {
+const sangameshwar: FooterShopContact = {
   id: "s1",
-  name: "Chaitanya Stores — Sangmeshwar",
-  address: "Main Road, Sangmeshwar, Ratnagiri 415611",
+  name: "Chaitanya Stores — Sangameshwar",
+  address: "Main Road, Sangameshwar, Ratnagiri 415611",
   phone: "+919876543210",
-  email: "sangmeshwar@chaitanyastores.in",
-  mapLink: "https://maps.app.goo.gl/sangmeshwar",
+  email: "sangameshwar@chaitanyastores.in",
+  mapLink: "https://maps.app.goo.gl/sangameshwar",
   isPrimary: true,
 };
 
@@ -25,9 +25,9 @@ const devrukh: FooterShopContact = {
 
 describe("FooterShopContacts", () => {
   it("renders name, phone and email for every shop, not just the primary one", () => {
-    render(<FooterShopContacts shops={[sangmeshwar, devrukh]} />);
+    render(<FooterShopContacts shops={[sangameshwar, devrukh]} />);
 
-    for (const shop of [sangmeshwar, devrukh]) {
+    for (const shop of [sangameshwar, devrukh]) {
       expect(screen.getByText(shop.name)).toBeInTheDocument();
       expect(screen.getByText(shop.phone)).toBeInTheDocument();
       expect(screen.getByText(shop.email)).toBeInTheDocument();
@@ -36,13 +36,13 @@ describe("FooterShopContacts", () => {
   });
 
   it("renders one list item per shop", () => {
-    render(<FooterShopContacts shops={[sangmeshwar, devrukh]} />);
+    render(<FooterShopContacts shops={[sangameshwar, devrukh]} />);
 
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
   });
 
   it("makes each shop's phone a tel: link and email a mailto: link", () => {
-    render(<FooterShopContacts shops={[sangmeshwar, devrukh]} />);
+    render(<FooterShopContacts shops={[sangameshwar, devrukh]} />);
 
     expect(screen.getByText(devrukh.phone).closest("a")).toHaveAttribute(
       "href",
@@ -55,15 +55,15 @@ describe("FooterShopContacts", () => {
   });
 
   it("marks the primary shop — and only the primary shop — with a Main badge", () => {
-    render(<FooterShopContacts shops={[sangmeshwar, devrukh]} />);
+    render(<FooterShopContacts shops={[sangameshwar, devrukh]} />);
 
     const badges = screen.getAllByText("Main");
     expect(badges).toHaveLength(1);
-    expect(screen.getByText(sangmeshwar.name).closest("li")).toContainElement(badges[0]);
+    expect(screen.getByText(sangameshwar.name).closest("li")).toContainElement(badges[0]);
   });
 
   it("omits the Main badge when there is only one shop to distinguish", () => {
-    render(<FooterShopContacts shops={[sangmeshwar]} />);
+    render(<FooterShopContacts shops={[sangameshwar]} />);
 
     expect(screen.queryByText("Main")).not.toBeInTheDocument();
   });
@@ -92,11 +92,11 @@ describe("FooterShopContacts", () => {
   });
 
   it('renders a "View on Map" link when a shop has a mapLink', () => {
-    render(<FooterShopContacts shops={[sangmeshwar]} />);
+    render(<FooterShopContacts shops={[sangameshwar]} />);
 
     expect(screen.getByText("View on Map").closest("a")).toHaveAttribute(
       "href",
-      sangmeshwar.mapLink
+      sangameshwar.mapLink
     );
   });
 

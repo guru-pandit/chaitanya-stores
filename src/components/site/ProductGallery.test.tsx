@@ -3,7 +3,7 @@ import { render, screen, fireEvent, within } from "@testing-library/react";
 import { ProductGallery } from "./ProductGallery";
 
 const IMAGES = ["/uploads/a.jpg", "/uploads/b.jpg", "/uploads/c.jpg"];
-const ALT = "Sandalwood Agarbatti Cycle at Chaitanya Stores Sangmeshwar";
+const ALT = "Sandalwood Agarbatti Cycle at Chaitanya Stores Sangameshwar";
 
 function renderGallery(images = IMAGES) {
   return render(<ProductGallery images={images} alt={ALT} />);

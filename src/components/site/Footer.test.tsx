@@ -14,7 +14,7 @@ const mockedGetAllShopLocations = vi.mocked(getAllShopLocations);
 function shopLocation(overrides: Partial<ShopLocation> & { id: string }): ShopLocation {
   return {
     name: "Chaitanya Stores",
-    address: "Main Road, Sangmeshwar",
+    address: "Main Road, Sangameshwar",
     phone: "+919876543210",
     whatsappNumber: "919876543210",
     email: "hello@chaitanyastores.in",
@@ -122,9 +122,9 @@ describe("Footer — shop contacts block", () => {
     mockedGetAllShopLocations.mockResolvedValue([
       shopLocation({
         id: "s1",
-        name: "Chaitanya Stores — Sangmeshwar",
+        name: "Chaitanya Stores — Sangameshwar",
         phone: "+919876543210",
-        email: "sangmeshwar@chaitanyastores.in",
+        email: "sangameshwar@chaitanyastores.in",
         isPrimary: true,
       }),
       shopLocation({
@@ -137,9 +137,9 @@ describe("Footer — shop contacts block", () => {
 
     await renderFooter();
 
-    expect(screen.getByText("Chaitanya Stores — Sangmeshwar")).toBeInTheDocument();
+    expect(screen.getByText("Chaitanya Stores — Sangameshwar")).toBeInTheDocument();
     expect(screen.getByText("+919876543210")).toBeInTheDocument();
-    expect(screen.getByText("sangmeshwar@chaitanyastores.in")).toBeInTheDocument();
+    expect(screen.getByText("sangameshwar@chaitanyastores.in")).toBeInTheDocument();
 
     // The regression this feature fixes: the second shop's phone and email
     // used to be dropped entirely — only the primary shop's were rendered.

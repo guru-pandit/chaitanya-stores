@@ -10,7 +10,7 @@ import { PaginationLinks } from "@/components/site/PaginationLinks";
 
 const PAGE_SIZE = 24;
 
-const CATALOG_TITLE = "Agarbatti, Dhoop & Camphor Catalog | Chaitanya Stores Sangmeshwar";
+const CATALOG_TITLE = "Agarbatti, Dhoop & Camphor Catalog | Chaitanya Stores Sangameshwar";
 const CATALOG_DESCRIPTION =
   "Browse agarbatti, dhoop, sambrani, camphor, and pooja thali essentials from trusted brands. Filter by category or brand and enquire via WhatsApp, email, or call.";
 
@@ -127,7 +127,7 @@ export default async function CatalogPage({
 
       <section className="mt-16 max-w-3xl border-t border-maroon/10 pt-10">
         <h2 className="font-display text-xl text-maroon-dark sm:text-2xl">
-          Pooja Samagri in Sangmeshwar, Ratnagiri
+          Pooja Samagri in Sangameshwar, Ratnagiri
         </h2>
         <p className="mt-3 text-charcoal/70 leading-relaxed">
           Chaitanya Stores stocks agarbatti (incense sticks), dhoop and dhoop sticks, sambrani/dhoop

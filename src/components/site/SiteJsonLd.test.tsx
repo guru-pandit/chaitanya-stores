@@ -29,7 +29,7 @@ describe("SiteJsonLd — Store node with full contact info", () => {
     mockGetPrimary.mockResolvedValue({
       id: "loc-1",
       name: "Chaitanya Stores",
-      address: "Main Road, Sangmeshwar",
+      address: "Main Road, Sangameshwar",
       phone: "+919999999999",
       whatsappNumber: "919999999999",
       email: "shop@example.com",
@@ -45,7 +45,7 @@ describe("SiteJsonLd — Store node with full contact info", () => {
     expect(store.email).toBe("shop@example.com");
     expect(store.address).toEqual({
       "@type": "PostalAddress",
-      streetAddress: "Main Road, Sangmeshwar",
+      streetAddress: "Main Road, Sangameshwar",
       addressCountry: "IN",
     });
   });

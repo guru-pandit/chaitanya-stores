@@ -13,9 +13,9 @@ import { getAllShopLocations, getPrimaryShopLocation } from "@/lib/shop-location
 import { ContactForm } from "@/components/site/ContactForm";
 import { ShopLocationsList } from "@/components/site/ShopLocationsList";
 
-const CONTACT_TITLE = "Contact Chaitanya Stores | Pooja Samagri Shop, Sangmeshwar";
+const CONTACT_TITLE = "Contact Chaitanya Stores | Pooja Samagri Shop, Sangameshwar";
 const CONTACT_DESCRIPTION =
-  "Reach Chaitanya Stores in Sangmeshwar via WhatsApp, email, or phone, or send a message directly. Bulk festival quantities welcome — prices and stock confirmed on enquiry.";
+  "Reach Chaitanya Stores in Sangameshwar via WhatsApp, email, or phone, or send a message directly. Bulk festival quantities welcome — prices and stock confirmed on enquiry.";
 
 export const metadata: Metadata = {
   // `absolute` opts out of the root layout's `%s | Chaitanya Stores` title
@@ -46,7 +46,7 @@ export default async function ContactPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
       <h1 className="font-display text-3xl text-maroon-dark sm:text-4xl">
-        Contact Chaitanya Stores, Sangmeshwar
+        Contact Chaitanya Stores, Sangameshwar
       </h1>
       <p className="mt-2 max-w-xl text-charcoal/70">
         Reach us directly to check price and stock, ask about a product, or plan a bulk order for a

@@ -41,7 +41,7 @@ describe("HomePage — hero CTA band (WhatsApp vs Get in Touch fallback)", () =>
       whatsappNumber: "919999999999",
       email: "shop@example.com",
       phone: "+919999999999",
-      address: "Sangmeshwar, Ratnagiri",
+      address: "Sangameshwar, Ratnagiri",
       name: "Chaitanya Stores",
       isPrimary: true,
     });
@@ -79,14 +79,14 @@ describe("HomePage — bottom CTA band address fallback", () => {
       whatsappNumber: "919999999999",
       email: "shop@example.com",
       phone: "+919999999999",
-      address: "Sangmeshwar, Ratnagiri",
+      address: "Sangameshwar, Ratnagiri",
       name: "Chaitanya Stores",
       isPrimary: true,
     });
 
     await renderHome();
 
-    expect(screen.getByText("Sangmeshwar, Ratnagiri")).toBeInTheDocument();
+    expect(screen.getByText("Sangameshwar, Ratnagiri")).toBeInTheDocument();
     expect(screen.queryByText(CONTACT_COMING_SOON)).not.toBeInTheDocument();
   });
 

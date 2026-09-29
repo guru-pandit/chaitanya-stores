@@ -3,7 +3,9 @@ import { Footer } from "@/components/site/Footer";
 import { SiteBackdrop } from "@/components/site/SiteBackdrop";
 import { SiteJsonLd } from "@/components/site/SiteJsonLd";
 import { FestivalBannerModal } from "@/components/site/FestivalBannerModal";
+import { BottomNav } from "@/components/site/BottomNav";
 import { getActiveFestivalBanner } from "@/lib/festival-banner";
+import { getPrimaryShopLocation } from "@/lib/shop-locations";
 
 // Every page under this layout reads live data via Prisma (Footer's shop
 // locations, this layout's festival banner) — forcing the whole subtree
@@ -17,7 +19,10 @@ import { getActiveFestivalBanner } from "@/lib/festival-banner";
 export const dynamic = "force-dynamic";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const banner = await getActiveFestivalBanner();
+  const [banner, primaryLocation] = await Promise.all([
+    getActiveFestivalBanner(),
+    getPrimaryShopLocation(),
+  ]);
 
   return (
     <>
@@ -30,6 +35,9 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />
+      {/* App-style mobile tab bar; hidden at sm and up (Header's top nav
+          takes over there). */}
+      <BottomNav whatsappNumber={primaryLocation.whatsappNumber} />
     </>
   );
 }

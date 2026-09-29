@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { MessageCircle } from "lucide-react";
+import { WhatsAppIcon } from "./SocialIcons";
 import { contactSchema, type ContactInput } from "@/lib/validations/contact";
 import { buildWhatsappLink, CONTACT_COMING_SOON, hasContactValue } from "@/lib/site-config";
 import { Button } from "@/components/ui/Button";
@@ -51,7 +51,7 @@ export function ContactForm({ whatsappNumber }: { whatsappNumber?: string | null
             rel="noopener noreferrer"
             className="mt-4 inline-flex items-center gap-2 rounded-full bg-terracotta px-5 py-2.5 text-sm font-medium text-cream transition-colors hover:bg-terracotta-dark"
           >
-            <MessageCircle size={16} /> Message us on WhatsApp
+            <WhatsAppIcon size={16} /> Message us on WhatsApp
           </a>
         ) : (
           <p className="mt-4 text-sm text-charcoal/50">{CONTACT_COMING_SOON}</p>

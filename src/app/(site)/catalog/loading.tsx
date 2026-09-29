@@ -6,7 +6,7 @@ export default function Loading() {
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
       <Skeleton className="h-9 w-64 max-w-full" />
       <Skeleton className="mt-3 h-4 w-96 max-w-full" />
-      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="mt-8 grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => (
           <ProductCardSkeleton key={i} />
         ))}

@@ -18,7 +18,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
 }
 ```
 
-**Push `'use client'` to the smallest leaf, not the whole component.** `Header` is a Server Component; only the pieces that truly need client state are client components: `NavLink` (needs `usePathname` for active-link styling), `MobileNavToggle`/`MobileNavPanel` (need the Zustand mobile-nav store), and `MobileNavAutoClose` (a render-nothing component that closes the mobile panel on any route change via `usePathname` + `useEffect` — handles link clicks *and* back/forward, which a scattered `onClick={close}` on every link wouldn't). This keeps the header's static shell (logo, layout, sticky wrapper) server-rendered — it's in the initial HTML with zero client JS required — while only ~4 small islands hydrate. Apply the same split whenever a page-level or section-level component only needs client behavior for one small piece of itself.
+**Push `'use client'` to the smallest leaf, not the whole component.** `Header` is a Server Component — its static shell (logo, layout, sticky wrapper, the desktop `<nav>` markup) is in the initial HTML with zero client JS. Only the pieces that truly need client state are client components: `NavLink` (needs `usePathname` for active-link styling on the desktop nav) and `BottomNav` (the mobile app-style tab bar — needs `usePathname` for the active tab and to hide its Enquire tab on product-detail routes). `BottomNav` is rendered from the `(site)` layout, not from `Header`, since it's fixed to the viewport rather than part of the header. Apply the same split whenever a page-level or section-level component only needs client behavior for one small piece of itself.
 
 ## React Query — Admin Dashboard Only
 ```ts

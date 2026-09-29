@@ -32,7 +32,7 @@ export default async function AboutPage() {
   const [locations, primary] = await Promise.all([getAllShopLocations(), getPrimaryShopLocation()]);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
       <h1 className="text-center font-display text-3xl text-maroon-dark sm:text-4xl">
         About Chaitanya Stores, Sangmeshwar
       </h1>

@@ -71,3 +71,32 @@ describe("EnquiryActions — no contact info configured at all", () => {
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 });
+
+describe("EnquiryActions — fullWidthOnMobile (layout-only prop)", () => {
+  it("keeps the same accessible names and hrefs as the default layout", () => {
+    render(<EnquiryActions {...full} productName="Sandalwood Agarbatti" fullWidthOnMobile />);
+
+    const whatsapp = screen.getByRole("link", { name: /whatsapp/i });
+    expect(whatsapp).toHaveAttribute(
+      "href",
+      "https://wa.me/919999999999?text=Hi%2C%20I'm%20interested%20in%20%22Sandalwood%20Agarbatti%22.%20Could%20you%20share%20more%20details%3F"
+    );
+    expect(screen.getByRole("link", { name: /email/i }).getAttribute("href")).toContain(
+      "mailto:shop@example.com"
+    );
+    expect(screen.getByRole("link", { name: /call/i })).toHaveAttribute("href", "tel:+919999999999");
+  });
+
+  it("applies the full-width mobile utility classes to each action", () => {
+    render(<EnquiryActions {...full} fullWidthOnMobile />);
+    for (const name of [/whatsapp/i, /email/i, /call/i]) {
+      expect(screen.getByRole("link", { name })).toHaveClass("w-full");
+    }
+  });
+
+  it("still renders the coming-soon note (no links) when no contact info is configured", () => {
+    render(<EnquiryActions whatsappNumber="" email="" phone="" fullWidthOnMobile />);
+    expect(screen.getByText(CONTACT_COMING_SOON)).toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  });
+});

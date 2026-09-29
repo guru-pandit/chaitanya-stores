@@ -59,6 +59,11 @@ jobs:
           NEXT_PUBLIC_BUSINESS_EMAIL: ${{ secrets.NEXT_PUBLIC_BUSINESS_EMAIL }}
           NEXT_PUBLIC_BUSINESS_ADDRESS: ${{ secrets.NEXT_PUBLIC_BUSINESS_ADDRESS }}
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          # Optional — must be a full https:// URL. An unset secret expands
+          # to "" and the footer just hides that icon; a non-https value is
+          # ignored the same way (src/lib/site-config.ts isConfiguredHttpsUrl).
+          NEXT_PUBLIC_INSTAGRAM_URL: ${{ secrets.NEXT_PUBLIC_INSTAGRAM_URL }}
+          NEXT_PUBLIC_FACEBOOK_URL: ${{ secrets.NEXT_PUBLIC_FACEBOOK_URL }}
           DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         with:
@@ -68,7 +73,7 @@ jobs:
           # appleboy/ssh-action exports exactly these names into the remote
           # shell below — nothing else from this job's env leaks over SSH,
           # and nothing here is ever printed (no `echo`/`set -x` on secrets).
-          envs: POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB,NEXTAUTH_SECRET,NEXTAUTH_URL,NEXT_PUBLIC_BUSINESS_PHONE,NEXT_PUBLIC_BUSINESS_WHATSAPP,NEXT_PUBLIC_BUSINESS_EMAIL,NEXT_PUBLIC_BUSINESS_ADDRESS,NEXT_PUBLIC_SITE_URL,DOMAIN_NAME,DEPLOY_PATH
+          envs: POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB,NEXTAUTH_SECRET,NEXTAUTH_URL,NEXT_PUBLIC_BUSINESS_PHONE,NEXT_PUBLIC_BUSINESS_WHATSAPP,NEXT_PUBLIC_BUSINESS_EMAIL,NEXT_PUBLIC_BUSINESS_ADDRESS,NEXT_PUBLIC_SITE_URL,NEXT_PUBLIC_INSTAGRAM_URL,NEXT_PUBLIC_FACEBOOK_URL,DOMAIN_NAME,DEPLOY_PATH
           script: |
             set -euo pipefail
             cd "${DEPLOY_PATH:-/opt/chaitanya-stores}"
@@ -87,6 +92,8 @@ jobs:
             NEXT_PUBLIC_BUSINESS_EMAIL=${NEXT_PUBLIC_BUSINESS_EMAIL}
             NEXT_PUBLIC_BUSINESS_ADDRESS=${NEXT_PUBLIC_BUSINESS_ADDRESS}
             NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
+            NEXT_PUBLIC_INSTAGRAM_URL=${NEXT_PUBLIC_INSTAGRAM_URL:-}
+            NEXT_PUBLIC_FACEBOOK_URL=${NEXT_PUBLIC_FACEBOOK_URL:-}
             DOMAIN_NAME=${DOMAIN_NAME}
             ENVEOF
             chmod 600 .env

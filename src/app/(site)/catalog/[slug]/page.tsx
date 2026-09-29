@@ -9,6 +9,7 @@ import { EnquiryActions } from "@/components/site/EnquiryActions";
 import { ProductJsonLd } from "@/components/site/ProductJsonLd";
 import { BreadcrumbJsonLd } from "@/components/site/BreadcrumbJsonLd";
 import { ProductGallery } from "@/components/site/ProductGallery";
+import { StickyEnquiryBar } from "@/components/site/StickyEnquiryBar";
 
 export async function generateMetadata({
   params,
@@ -70,7 +71,7 @@ export default async function ProductDetailPage({
   const sortedVariants = [...product.variants].sort((a, b) => a.price - b.price);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
+    <div className="mx-auto max-w-5xl px-4 py-12 pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+4.5rem)] sm:px-6 sm:pb-12">
       <ProductJsonLd product={product} images={images} />
       <BreadcrumbJsonLd
         items={[
@@ -88,7 +89,7 @@ export default async function ProductDetailPage({
         </Link>
       </nav>
 
-      <div className="grid gap-10 sm:grid-cols-2">
+      <div className="grid gap-8 sm:grid-cols-2 sm:gap-10">
         <div>
           <ProductGallery
             images={images}
@@ -151,7 +152,31 @@ export default async function ProductDetailPage({
               <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-maroon">
                 Available Options
               </h2>
-              <table className="w-full text-sm">
+
+              {/* Below sm the 3-column table is too cramped to read — show a
+                  stacked card per variant instead. */}
+              <ul className="flex flex-col gap-2 sm:hidden">
+                {sortedVariants.map((variant) => (
+                  <li
+                    key={variant.id}
+                    className="rounded-xl border border-maroon/10 bg-white/50 p-3 text-sm"
+                  >
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span className="font-medium text-charcoal">{variant.label}</span>
+                      <span className="text-charcoal">{formatPrice(variant.price)}</span>
+                    </div>
+                    <span
+                      className={`mt-1 block text-xs font-medium ${
+                        variant.inStock ? "text-green-700" : "text-charcoal/50"
+                      }`}
+                    >
+                      {variant.inStock ? "In Stock" : "Out of Stock"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <table className="hidden w-full text-sm sm:table">
                 <thead>
                   <tr className="border-b border-maroon/10 text-left text-charcoal/50">
                     <th className="py-2 font-medium">Weight / Quantity</th>
@@ -187,11 +212,19 @@ export default async function ProductDetailPage({
               whatsappNumber={primaryLocation.whatsappNumber}
               email={primaryLocation.email}
               phone={primaryLocation.phone}
+              fullWidthOnMobile
             />
             <p className="mt-3 text-xs text-charcoal/50">{siteConfig.productDisclaimer}</p>
           </div>
         </div>
       </div>
+
+      <StickyEnquiryBar
+        productName={product.name}
+        whatsappNumber={primaryLocation.whatsappNumber}
+        email={primaryLocation.email}
+        phone={primaryLocation.phone}
+      />
     </div>
   );
 }

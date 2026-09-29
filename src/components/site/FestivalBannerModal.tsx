@@ -66,7 +66,7 @@ export function FestivalBannerModal({
           type="button"
           onClick={close}
           aria-label="Close"
-          className="absolute -right-3 -top-3 rounded-full bg-white p-1.5 text-charcoal shadow-md hover:bg-cream-dark"
+          className="absolute -right-2 -top-2 rounded-full bg-white p-2 text-charcoal shadow-md hover:bg-cream-dark"
         >
           <X size={18} />
         </button>

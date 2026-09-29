@@ -4,6 +4,7 @@ import {
   buildMailtoLink,
   buildTelLink,
   hasContactValue,
+  isConfiguredHttpsUrl,
   CONTACT_COMING_SOON,
   navLinks,
   siteConfig,
@@ -82,6 +83,27 @@ describe("hasContactValue", () => {
 
   it("returns true for a real value with incidental surrounding whitespace", () => {
     expect(hasContactValue("  hello@example.com  ")).toBe(true);
+  });
+});
+
+describe("isConfiguredHttpsUrl", () => {
+  it("returns false for missing / empty / whitespace values", () => {
+    expect(isConfiguredHttpsUrl(undefined)).toBe(false);
+    expect(isConfiguredHttpsUrl(null)).toBe(false);
+    expect(isConfiguredHttpsUrl("")).toBe(false);
+    expect(isConfiguredHttpsUrl("   ")).toBe(false);
+  });
+
+  it("returns false for a non-https scheme or a scheme-less string", () => {
+    expect(isConfiguredHttpsUrl("http://instagram.com/x")).toBe(false);
+    expect(isConfiguredHttpsUrl("javascript:alert(1)")).toBe(false);
+    expect(isConfiguredHttpsUrl("instagram.com/x")).toBe(false);
+    expect(isConfiguredHttpsUrl("//instagram.com/x")).toBe(false);
+  });
+
+  it("returns true for an https URL (tolerating incidental surrounding whitespace)", () => {
+    expect(isConfiguredHttpsUrl("https://instagram.com/chaitanyastores")).toBe(true);
+    expect(isConfiguredHttpsUrl("  https://facebook.com/chaitanyastores  ")).toBe(true);
   });
 });
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { MessageCircle, Mail, Phone, MapPin, ExternalLink } from "lucide-react";
+import { Mail, Phone, MapPin, ExternalLink } from "lucide-react";
+import { WhatsAppIcon } from "@/components/site/SocialIcons";
 import {
   buildWhatsappLink,
   buildMailtoLink,
@@ -43,7 +44,7 @@ export default async function ContactPage() {
   const [locations, primary] = await Promise.all([getAllShopLocations(), getPrimaryShopLocation()]);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6">
+    <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
       <h1 className="font-display text-3xl text-maroon-dark sm:text-4xl">
         Contact Chaitanya Stores, Sangmeshwar
       </h1>
@@ -53,7 +54,7 @@ export default async function ContactPage() {
         is confirmed by us before you visit.
       </p>
 
-      <div className="mt-10 grid gap-10 sm:grid-cols-2">
+      <div className="mt-8 grid gap-8 sm:mt-10 sm:grid-cols-2 sm:gap-10">
         <div className="space-y-4">
           {hasContactValue(primary.whatsappNumber) ? (
             <a
@@ -62,7 +63,7 @@ export default async function ContactPage() {
               rel="noopener noreferrer"
               className="flex items-center gap-3 rounded-xl border border-maroon/10 bg-white/60 p-4 transition-shadow hover:shadow-md"
             >
-              <MessageCircle className="text-terracotta" size={22} />
+              <WhatsAppIcon className="text-terracotta" size={22} />
               <div>
                 <p className="text-sm font-semibold text-maroon-dark">WhatsApp — fastest reply</p>
                 <p className="text-sm text-charcoal/70">{primary.whatsappNumber}</p>
@@ -70,7 +71,7 @@ export default async function ContactPage() {
             </a>
           ) : (
             <div className="flex items-center gap-3 rounded-xl border border-maroon/10 bg-white/60 p-4">
-              <MessageCircle className="text-terracotta" size={22} />
+              <WhatsAppIcon className="text-terracotta" size={22} />
               <div>
                 <p className="text-sm font-semibold text-maroon-dark">WhatsApp — fastest reply</p>
                 <p className="text-sm text-charcoal/50">{CONTACT_COMING_SOON}</p>

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, within, fireEvent } from "@testing-library/react";
+import * as analytics from "@/lib/analytics";
 import { BottomNav } from "./BottomNav";
 import { buildWhatsappLink } from "@/lib/site-config";
 
@@ -109,5 +110,16 @@ describe("BottomNav — Enquire (WhatsApp) tab", () => {
     mockPathname = "/catalog";
     render(<BottomNav whatsappNumber={whatsapp} />);
     expect(screen.getByRole("link", { name: "Enquire on WhatsApp" })).toBeInTheDocument();
+  });
+});
+
+describe("BottomNav — analytics", () => {
+  it("fires click_whatsapp when the centre Enquire button is clicked", () => {
+    const spy = vi.spyOn(analytics, "trackWhatsappClick");
+    mockPathname = "/about";
+    render(<BottomNav whatsappNumber="919999999999" />);
+    fireEvent.click(screen.getByRole("link", { name: "Enquire on WhatsApp" }));
+    expect(spy).toHaveBeenCalledWith({ sourcePage: "/about" });
+    spy.mockRestore();
   });
 });

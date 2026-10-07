@@ -38,7 +38,7 @@ export default function AdminLoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-cream px-4">
       <div className="w-full max-w-sm rounded-2xl border border-maroon/10 bg-white/70 p-8 shadow-sm">
         <div className="mb-6 flex flex-col items-center text-center">
-          <Image src="/logo.png" alt="" width={40} height={40} className="mb-2" />
+          <Image src="/logo_dark.png" alt="Chaitanya Stores" width={150} height={50} priority className="mb-2 h-[50px] w-auto" />
           <h1 className="font-display text-2xl text-maroon-dark">Admin Login</h1>
           <p className="mt-1 text-sm text-charcoal/60">Chaitanya Stores Dashboard</p>
         </div>

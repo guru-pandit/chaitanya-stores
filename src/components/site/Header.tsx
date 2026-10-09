@@ -18,9 +18,8 @@ export function Header() {
     // "duplicate landmark label" check for no real benefit.
     <header className="sticky top-0 z-40 h-16 border-b border-maroon/10 bg-cream">
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.png" alt="" width={28} height={28} priority className="shrink-0" />
-          <span className="font-display text-xl text-maroon-dark">Chaitanya Stores</span>
+        <Link href="/" className="flex items-center" aria-label="Chaitanya Stores — Home">
+          <Image src="/logo_dark.png" alt="Chaitanya Stores" width={144} height={48} priority className="h-12 w-auto shrink-0" />
         </Link>
 
         <nav className="hidden items-center gap-8 sm:flex">

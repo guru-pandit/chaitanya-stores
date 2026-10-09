@@ -43,18 +43,15 @@ export async function Footer() {
         <MandalaDivider className="mb-8 text-gold/70" />
         <div className="grid gap-10 sm:grid-cols-2">
           <div className="flex flex-col gap-10">
-            <div>
-              <div className="flex items-center gap-2">
-                <Image src="/logo.png" alt="" width={26} height={26} className="shrink-0" />
-                <p className="font-display text-xl">{siteConfig.name}</p>
-              </div>
+            <div className="flex flex-col items-center text-center sm:items-start sm:text-left">
+              <Image src="/logo_light.png" alt={siteConfig.name} width={192} height={64} className="h-16 w-auto" />
               <p className="mt-2 text-sm text-cream/70">{siteConfig.tagline}</p>
               {/* Each icon appears only once its profile URL is configured
                   in siteConfig as a real https:// URL — the row disappears
                   entirely while both are still empty. */}
               {(isConfiguredHttpsUrl(siteConfig.instagramUrl) ||
                 isConfiguredHttpsUrl(siteConfig.facebookUrl)) && (
-                <div className="-ml-3 mt-2 flex items-center">
+                <div className="mt-2 flex items-center sm:-ml-3">
                   {isConfiguredHttpsUrl(siteConfig.instagramUrl) && (
                     <a
                       href={siteConfig.instagramUrl}

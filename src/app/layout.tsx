@@ -48,6 +48,9 @@ export const metadata: Metadata = {
   other: {
     "msapplication-config": "/browserconfig.xml",
   },
+  ...(process.env.NODE_ENV === "production"
+    ? { verification: { google: "nThz50uTYInjKVKIVMihzR5bIUBpy_1tvkXq1Snh0tg" } }
+    : {}),
 };
 
 export const viewport: Viewport = {

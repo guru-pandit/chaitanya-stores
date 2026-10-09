@@ -20,6 +20,7 @@ export const metadata: Metadata = {
     description: ABOUT_DESCRIPTION,
     type: "website",
     url: `${siteConfig.siteUrl}/about`,
+    images: ["/logo.png"],
   },
 };
 

@@ -1,7 +1,12 @@
-import { describe, it, expect } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { render, screen, within, fireEvent } from "@testing-library/react";
 import { FooterShopContacts, type FooterShopContact } from "./FooterShopContacts";
 import { CONTACT_COMING_SOON } from "@/lib/site-config";
+import * as analytics from "@/lib/analytics";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 const sangameshwar: FooterShopContact = {
   id: "s1",
@@ -104,5 +109,14 @@ describe("FooterShopContacts", () => {
     render(<FooterShopContacts shops={[devrukh]} />);
 
     expect(screen.queryByText("View on Map")).not.toBeInTheDocument();
+  });
+
+  it("fires click_call when a shop's phone link is clicked", () => {
+    const spy = vi.spyOn(analytics, "trackCallClick");
+    render(<FooterShopContacts shops={[devrukh]} />);
+
+    fireEvent.click(screen.getByText(devrukh.phone).closest("a")!);
+
+    expect(spy).toHaveBeenCalledWith(window.location.pathname);
   });
 });

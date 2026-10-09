@@ -6,6 +6,7 @@ import { Home, ShoppingBag, Info, Phone, type LucideIcon } from "lucide-react";
 import { buildWhatsappLink, hasContactValue, navLinks } from "@/lib/site-config";
 import { isProductDetailPath } from "@/lib/routes";
 import { WhatsAppIcon } from "./SocialIcons";
+import { trackWhatsappClick } from "@/lib/analytics";
 
 // Mobile-only bottom tab bar — replaces the hamburger menu on small screens
 // with an app-style persistent nav. Desktop keeps the top <nav> in Header.
@@ -69,6 +70,7 @@ export function BottomNav({ whatsappNumber }: { whatsappNumber?: string | null }
               href={buildWhatsappLink(enquiryNumber)}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => trackWhatsappClick({ sourcePage: pathname })}
               aria-label="Enquire on WhatsApp"
               className="flex w-full flex-col items-center justify-center gap-1 text-xs font-medium text-terracotta-dark"
             >

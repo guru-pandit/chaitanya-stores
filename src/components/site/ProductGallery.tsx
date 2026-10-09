@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
 import { UploadedImage } from "@/components/ui/UploadedImage";
+import { trackImageView } from "@/lib/analytics";
 
 // Below this, a horizontal drag reads as a tap or a vertical scroll rather
 // than a deliberate swipe.
@@ -16,12 +17,15 @@ const SWIPE_THRESHOLD_PX = 40;
 export function ProductGallery({
   images,
   alt,
+  productName,
 }: {
   images: string[];
   /** Base alt text from the page (name + brand + shop); each image past the
    *  first is suffixed with its position so screen-reader users can tell
    *  them apart instead of hearing the same string N times. */
   alt: string;
+  /** Used for the image_view analytics event only; falls back to `alt` when omitted. */
+  productName?: string;
 }) {
   const [index, setIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -114,7 +118,10 @@ export function ProductGallery({
     <div>
       <button
         type="button"
-        onClick={() => setLightboxOpen(true)}
+        onClick={() => {
+          setLightboxOpen(true);
+          trackImageView({ productName: productName ?? alt, imageIndex: index });
+        }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         aria-label={`${alt} — open full screen`}

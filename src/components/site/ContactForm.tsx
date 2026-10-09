@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/form/TextField";
 import { TextareaField } from "@/components/ui/form/TextareaField";
 import { toast } from "@/lib/toast";
+import { trackWhatsappClick } from "@/lib/analytics";
 import { apiFetch, ApiError } from "@/lib/api-client";
 import { useApiFormErrors } from "@/hooks/useApiFormErrors";
 
@@ -49,6 +50,7 @@ export function ContactForm({ whatsappNumber }: { whatsappNumber?: string | null
             href={buildWhatsappLink(whatsappNumber)}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackWhatsappClick({ sourcePage: window.location.pathname })}
             className="mt-4 inline-flex items-center gap-2 rounded-full bg-terracotta px-5 py-2.5 text-sm font-medium text-cream transition-colors hover:bg-terracotta-dark"
           >
             <WhatsAppIcon size={16} /> Message us on WhatsApp

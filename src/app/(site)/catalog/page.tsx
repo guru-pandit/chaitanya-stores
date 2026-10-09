@@ -25,6 +25,7 @@ export const metadata: Metadata = {
     description: CATALOG_DESCRIPTION,
     type: "website",
     url: `${siteConfig.siteUrl}/catalog`,
+    images: ["/logo.png"],
   },
 };
 

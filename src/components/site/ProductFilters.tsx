@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import type { Category } from "@/generated/prisma/client";
 import { useEffect, useState } from "react";
 import { Select } from "@/components/ui/Select";
+import { trackSearch, trackFilterCategory } from "@/lib/analytics";
 
 const SEARCH_DEBOUNCE_MS = 400;
 
@@ -33,6 +34,13 @@ export function ProductFilters({
       else params.delete(key);
     });
     const url = `${pathname}?${params.toString()}`;
+
+    if (next.q) trackSearch(next.q);
+    if (next.category) {
+      const categoryName = categories.find((c) => c.slug === next.category)?.name ?? next.category;
+      trackFilterCategory(categoryName);
+    }
+
     if (options?.replace) router.replace(url);
     else router.push(url);
   }

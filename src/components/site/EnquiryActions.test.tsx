@@ -1,7 +1,12 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { EnquiryActions } from "./EnquiryActions";
 import { CONTACT_COMING_SOON } from "@/lib/site-config";
+import * as analytics from "@/lib/analytics";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 const full = {
   whatsappNumber: "919999999999",
@@ -53,6 +58,26 @@ describe("EnquiryActions — partial contact info (per-channel fallback)", () =>
     expect(screen.queryByRole("link", { name: /call/i })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /whatsapp/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /email/i })).toBeInTheDocument();
+  });
+});
+
+describe("EnquiryActions — analytics", () => {
+  it("fires click_whatsapp with the product name when the WhatsApp link is clicked", () => {
+    const spy = vi.spyOn(analytics, "trackWhatsappClick");
+    render(<EnquiryActions {...full} productName="Sandalwood Agarbatti" />);
+
+    fireEvent.click(screen.getByRole("link", { name: /whatsapp/i }));
+
+    expect(spy).toHaveBeenCalledWith({ sourcePage: window.location.pathname, productName: "Sandalwood Agarbatti" });
+  });
+
+  it("fires click_call when the Call link is clicked", () => {
+    const spy = vi.spyOn(analytics, "trackCallClick");
+    render(<EnquiryActions {...full} />);
+
+    fireEvent.click(screen.getByRole("link", { name: /call/i }));
+
+    expect(spy).toHaveBeenCalledWith(window.location.pathname);
   });
 });
 

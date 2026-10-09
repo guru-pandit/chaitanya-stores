@@ -1,5 +1,6 @@
 import { Phone, Mail } from "lucide-react";
 import { WhatsAppIcon } from "./SocialIcons";
+import { TrackedLink } from "./TrackedLink";
 import {
   buildMailtoLink,
   buildTelLink,
@@ -64,22 +65,27 @@ export function StickyEnquiryBar({
   return (
     <div className="fixed inset-x-0 bottom-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom))] z-30 border-y border-maroon/15 bg-cream/95 px-3 py-2 backdrop-blur sm:hidden">
       <div className="mx-auto flex max-w-md items-center gap-2">
-        <a
+        <TrackedLink
+          track={
+            primary.slot === "whatsapp" ? "whatsapp" : primary.slot === "phone" ? "call" : undefined
+          }
+          productName={productName}
           href={primary.href}
           {...(primary.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
           className="flex flex-1 items-center justify-center gap-2 rounded-full bg-terracotta px-4 py-3 text-sm font-semibold text-cream transition-colors hover:bg-terracotta-dark"
         >
           {primaryIcon} {primary.label}
-        </a>
+        </TrackedLink>
 
         {primary.slot !== "phone" && hasContactValue(phone) && (
-          <a
+          <TrackedLink
+            track="call"
             href={buildTelLink(phone)}
             aria-label="Call the shop"
             className="flex shrink-0 items-center justify-center rounded-full border border-maroon/30 p-3 text-maroon transition-colors hover:bg-maroon/5"
           >
             <Phone size={18} aria-hidden="true" />
-          </a>
+          </TrackedLink>
         )}
         {primary.slot !== "email" && hasContactValue(email) && (
           <a

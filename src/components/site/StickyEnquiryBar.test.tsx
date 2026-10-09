@@ -1,5 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
+import * as analytics from "@/lib/analytics";
 import { StickyEnquiryBar } from "./StickyEnquiryBar";
 import { buildWhatsappLink, buildMailtoLink, buildTelLink } from "@/lib/site-config";
 
@@ -104,5 +105,32 @@ describe("StickyEnquiryBar — product name encoding", () => {
     const href = screen.getByRole("link", { name: "Email the shop" }).getAttribute("href")!;
     expect(href).toContain(`subject=${encodeURIComponent(`Enquiry: ${productName}`)}`);
     expect(href).toContain(encodeURIComponent(productName));
+  });
+});
+
+describe("StickyEnquiryBar — analytics", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("fires click_whatsapp with the product name from the primary button", () => {
+    const spy = vi.spyOn(analytics, "trackWhatsappClick");
+    render(<StickyEnquiryBar productName={productName} {...contacts} />);
+    fireEvent.click(screen.getByRole("link", { name: "Enquire on WhatsApp" }));
+    expect(spy).toHaveBeenCalledWith({ sourcePage: window.location.pathname, productName });
+  });
+
+  it("fires click_call from the secondary Call icon", () => {
+    const spy = vi.spyOn(analytics, "trackCallClick");
+    render(<StickyEnquiryBar productName={productName} {...contacts} />);
+    fireEvent.click(screen.getByRole("link", { name: "Call the shop" }));
+    expect(spy).toHaveBeenCalledWith(window.location.pathname);
+  });
+
+  it("fires no conversion event when Email is the primary action", () => {
+    const wa = vi.spyOn(analytics, "trackWhatsappClick");
+    const call = vi.spyOn(analytics, "trackCallClick");
+    render(<StickyEnquiryBar productName={productName} email={contacts.email} />);
+    fireEvent.click(screen.getByRole("link", { name: "Email the shop" }));
+    expect(wa).not.toHaveBeenCalled();
+    expect(call).not.toHaveBeenCalled();
   });
 });

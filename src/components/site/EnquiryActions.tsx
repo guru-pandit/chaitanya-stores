@@ -1,6 +1,9 @@
+"use client";
+
 import { Mail, Phone } from "lucide-react";
 import { buildMailtoLink, buildTelLink, buildWhatsappLink, CONTACT_COMING_SOON, hasContactValue } from "@/lib/site-config";
 import { WhatsAppIcon } from "./SocialIcons";
+import { trackWhatsappClick, trackCallClick } from "@/lib/analytics";
 
 export function EnquiryActions({
   whatsappNumber,
@@ -48,6 +51,7 @@ export function EnquiryActions({
           href={buildWhatsappLink(whatsappNumber, productName)}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackWhatsappClick({ sourcePage: window.location.pathname, productName })}
           className={`inline-flex items-center gap-2 rounded-full bg-terracotta px-5 py-2.5 text-sm font-medium text-cream transition-colors hover:bg-terracotta-dark ${itemClasses}`}
         >
           <WhatsAppIcon size={16} /> WhatsApp
@@ -66,6 +70,7 @@ export function EnquiryActions({
       {hasPhone ? (
         <a
           href={buildTelLink(phone)}
+          onClick={() => trackCallClick(window.location.pathname)}
           className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-colors ${callClasses} ${itemClasses}`}
         >
           <Phone size={16} /> Call

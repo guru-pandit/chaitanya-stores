@@ -29,7 +29,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         }`}
       >
         <div className="flex items-center gap-2 border-b border-maroon/10 px-5 py-5">
-          <Image src="/logo.png" alt="" width={24} height={24} className="shrink-0" />
+          <Image src="/logo_dark.png" alt="Chaitanya Stores" width={96} height={32} className="h-8 w-auto shrink-0" />
           <span className="font-display text-lg text-maroon-dark">Admin</span>
         </div>
         <nav className="flex flex-1 flex-col gap-1 p-3">

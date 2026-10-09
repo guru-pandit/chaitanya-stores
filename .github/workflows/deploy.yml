@@ -121,13 +121,15 @@ jobs:
             # didn't exist yet) on 2026-08-22.
             docker compose --profile tools run --rm --build migrate
 
-            # Build+recreate the app; db/nginx are only touched if their own
-            # config changed. Never `-v`, never `down` — volumes are untouched.
-            docker compose up -d --build db web nginx
+            # Build+recreate the app and db. Never `-v`, never `down` — volumes
+            # are untouched. nginx is handled separately below.
+            docker compose up -d --build db web
 
-            # nginx caches the `web` hostname's resolved IP for the life of
-            # the worker process, so it keeps proxying to the old container
-            # after `web` is recreated above until reloaded.
-            docker compose exec nginx nginx -s reload
+            # Always force-recreate nginx so docker-entrypoint re-runs envsubst
+            # on the template files and picks up any CSP / config changes.
+            # Simply reloading (`nginx -s reload`) only re-reads the already-
+            # processed conf inside the running container — it does NOT
+            # re-process templates — so config-only changes are silently missed.
+            docker compose up -d --force-recreate nginx
 
             docker image prune -f

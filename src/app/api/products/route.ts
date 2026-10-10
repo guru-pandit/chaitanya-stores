@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   const where = {
     ...(categoryId ? { categoryId } : {}),
     ...(brand ? { brand } : {}),
-    ...(q ? { name: { contains: q } } : {}),
+    ...(q ? { name: { contains: q, mode: "insensitive" as const } } : {}),
   };
 
   const [items, total] = await Promise.all([

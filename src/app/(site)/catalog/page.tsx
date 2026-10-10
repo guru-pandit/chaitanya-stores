@@ -42,7 +42,7 @@ export default async function CatalogPage({
     isHidden: false,
     ...(category ? { category: { slug: category } } : {}),
     ...(brand ? { brand } : {}),
-    ...(q ? { name: { contains: q } } : {}),
+    ...(q ? { name: { contains: q, mode: "insensitive" as const } } : {}),
   };
 
   const [products, total, categories, brandRows, primaryLocation] = await Promise.all([

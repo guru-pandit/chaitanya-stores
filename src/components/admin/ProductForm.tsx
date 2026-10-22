@@ -57,6 +57,7 @@ export function ProductForm({
           productType: product.productType ?? "",
           sku: product.sku ?? "",
           price: product.price,
+          discountedPrice: product.discountedPrice,
           images: parseImages(product.images),
           inStock: product.inStock,
           featured: product.featured,
@@ -77,6 +78,7 @@ export function ProductForm({
           productType: "",
           sku: "",
           price: null,
+          discountedPrice: null,
           images: [],
           inStock: true,
           featured: false,
@@ -260,6 +262,28 @@ export function ProductForm({
             render={({ field }) => (
               <input
                 id="price"
+                type="number"
+                value={field.value ?? ""}
+                onChange={(e) =>
+                  field.onChange(e.target.value === "" ? null : Number(e.target.value))
+                }
+                className={fieldInputClasses}
+              />
+            )}
+          />
+        </FormField>
+        <FormField
+          label="Discounted Price (in paise, optional)"
+          htmlFor="discountedPrice"
+          error={errors.discountedPrice?.message}
+          hint="Leave blank to show the regular price only"
+        >
+          <Controller
+            control={control}
+            name="discountedPrice"
+            render={({ field }) => (
+              <input
+                id="discountedPrice"
                 type="number"
                 value={field.value ?? ""}
                 onChange={(e) =>

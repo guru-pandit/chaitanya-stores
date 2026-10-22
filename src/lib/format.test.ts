@@ -8,6 +8,7 @@ import {
   slugify,
   buildSlug,
   buildSkuPrefix,
+  discountPercent,
 } from "./format";
 
 describe("toDateInputValue", () => {
@@ -47,6 +48,36 @@ describe("formatPrice", () => {
     // 12050 paise = ₹120.50 -> rounds to ₹121 (Intl rounds half-to-even/away depending on engine,
     // but there must be no decimal point in the output either way)
     expect(formatPrice(12050)).not.toMatch(/\./);
+  });
+});
+
+describe("discountPercent", () => {
+  it("returns the rounded percentage off when discountedPrice is lower than price", () => {
+    expect(discountPercent(10000, 7500)).toBe(25);
+  });
+
+  it("rounds to the nearest whole percent", () => {
+    expect(discountPercent(12000, 10000)).toBe(17); // 16.67% -> 17
+  });
+
+  it("returns null when price is null", () => {
+    expect(discountPercent(null, 7500)).toBeNull();
+  });
+
+  it("returns null when discountedPrice is null", () => {
+    expect(discountPercent(10000, null)).toBeNull();
+  });
+
+  it("returns null when discountedPrice is zero", () => {
+    expect(discountPercent(10000, 0)).toBeNull();
+  });
+
+  it("returns null when discountedPrice equals price", () => {
+    expect(discountPercent(10000, 10000)).toBeNull();
+  });
+
+  it("returns null when discountedPrice is greater than price", () => {
+    expect(discountPercent(10000, 12000)).toBeNull();
   });
 });
 

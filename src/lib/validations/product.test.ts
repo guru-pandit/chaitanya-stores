@@ -11,6 +11,7 @@ const valid: ProductInput = {
   productType: "Masala Sticks",
   sku: "CYC-INC-001",
   price: 12000,
+  discountedPrice: null,
   images: [],
   inStock: true,
   featured: false,
@@ -171,6 +172,50 @@ describe("productSchema — price", () => {
 
   it("accepts the smallest positive integer price", () => {
     expect(productSchema.safeParse({ ...valid, price: 1 }).success).toBe(true);
+  });
+});
+
+describe("productSchema — discountedPrice", () => {
+  it("accepts a null discountedPrice", () => {
+    expect(productSchema.safeParse({ ...valid, discountedPrice: null }).success).toBe(true);
+  });
+
+  it("accepts discountedPrice omitted entirely", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- destructured only to exclude the field from the parsed object
+    const { discountedPrice: _dp, ...rest } = valid;
+    expect(productSchema.safeParse(rest).success).toBe(true);
+  });
+
+  it("rejects zero", () => {
+    expect(productSchema.safeParse({ ...valid, discountedPrice: 0 }).success).toBe(false);
+  });
+
+  it("rejects a negative discountedPrice", () => {
+    expect(productSchema.safeParse({ ...valid, discountedPrice: -1 }).success).toBe(false);
+  });
+
+  it("rejects a non-integer discountedPrice", () => {
+    expect(productSchema.safeParse({ ...valid, discountedPrice: 100.5 }).success).toBe(false);
+  });
+
+  it("accepts a discountedPrice less than price", () => {
+    const result = productSchema.safeParse({ ...valid, price: 12000, discountedPrice: 9000 });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects a discountedPrice equal to price", () => {
+    const result = productSchema.safeParse({ ...valid, price: 12000, discountedPrice: 12000 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a discountedPrice greater than price", () => {
+    const result = productSchema.safeParse({ ...valid, price: 12000, discountedPrice: 15000 });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts a discountedPrice when price is null (no regular price set) — nothing to compare against", () => {
+    const result = productSchema.safeParse({ ...valid, price: null, discountedPrice: 9000 });
+    expect(result.success).toBe(true);
   });
 });
 
@@ -397,6 +442,7 @@ describe("toProductData — images / weight / variants exclusion", () => {
     expect(data.brand).toBe(valid.brand);
     expect(data.sku).toBe(valid.sku);
     expect(data.price).toBe(valid.price);
+    expect(data.discountedPrice).toBe(valid.discountedPrice);
     expect(data.inStock).toBe(valid.inStock);
     expect(data.featured).toBe(valid.featured);
     expect(data.isHidden).toBe(valid.isHidden);

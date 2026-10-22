@@ -9,27 +9,33 @@ export const productVariantSchema = z.object({
 
 export type ProductVariantInput = z.infer<typeof productVariantSchema>;
 
-export const productSchema = z.object({
-  name: z.string().min(1, "Name is required").max(150),
-  slug: z
-    .string()
-    .min(1, "Slug is required")
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be lowercase, hyphen-separated"),
-  description: z.string().max(2000).optional().or(z.literal("")),
-  brand: z.string().min(1, "Brand is required").max(100),
-  weight: z.string().max(50).optional().or(z.literal("")),
-  productType: z.string().max(50).optional().or(z.literal("")),
-  sku: z.string().min(1, "SKU is required").max(50),
-  price: z.number().int().positive().optional().nullable(),
-  images: z
-    .array(uploadPathSchema())
-    .max(MAX_PRODUCT_IMAGES, `A product can have at most ${MAX_PRODUCT_IMAGES} images`),
-  inStock: z.boolean(),
-  featured: z.boolean(),
-  isHidden: z.boolean(),
-  categoryId: z.string().min(1, "Category is required"),
-  variants: z.array(productVariantSchema),
-});
+export const productSchema = z
+  .object({
+    name: z.string().min(1, "Name is required").max(150),
+    slug: z
+      .string()
+      .min(1, "Slug is required")
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be lowercase, hyphen-separated"),
+    description: z.string().max(2000).optional().or(z.literal("")),
+    brand: z.string().min(1, "Brand is required").max(100),
+    weight: z.string().max(50).optional().or(z.literal("")),
+    productType: z.string().max(50).optional().or(z.literal("")),
+    sku: z.string().min(1, "SKU is required").max(50),
+    price: z.number().int().positive().optional().nullable(),
+    discountedPrice: z.number().int().positive().optional().nullable(),
+    images: z
+      .array(uploadPathSchema())
+      .max(MAX_PRODUCT_IMAGES, `A product can have at most ${MAX_PRODUCT_IMAGES} images`),
+    inStock: z.boolean(),
+    featured: z.boolean(),
+    isHidden: z.boolean(),
+    categoryId: z.string().min(1, "Category is required"),
+    variants: z.array(productVariantSchema),
+  })
+  .refine((data) => !data.price || !data.discountedPrice || data.discountedPrice < data.price, {
+    message: "Discounted price must be less than the regular price",
+    path: ["discountedPrice"],
+  });
 
 export type ProductInput = z.infer<typeof productSchema>;
 

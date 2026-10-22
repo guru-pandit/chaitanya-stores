@@ -8,7 +8,7 @@ import { useCategories } from "@/hooks/categories/useCategories";
 import { useBrands } from "@/hooks/products/useBrands";
 import { useAdminProductFiltersStore } from "@/store/adminProductFiltersStore";
 import { useDeleteWithConfirm } from "@/hooks/useDeleteWithConfirm";
-import { formatPrice, formatVariantPrice } from "@/lib/format";
+import { formatPrice, formatVariantPrice, discountPercent } from "@/lib/format";
 import { LinkButton } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { DataTable, type DataTableColumn } from "@/components/ui/DataTable";
@@ -88,11 +88,24 @@ export default function AdminProductsPage() {
     },
     {
       header: "Price",
-      cell: (product) => (
-        <span className="text-charcoal/70">
-          {product.variants.length > 0 ? formatVariantPrice(product.variants) : formatPrice(product.price)}
-        </span>
-      ),
+      cell: (product) => {
+        if (product.variants.length > 0) {
+          return <span className="text-charcoal/70">{formatVariantPrice(product.variants)}</span>;
+        }
+        const percent = discountPercent(product.price, product.discountedPrice);
+        if (percent == null) {
+          return <span className="text-charcoal/70">{formatPrice(product.price)}</span>;
+        }
+        return (
+          <span className="flex flex-wrap items-baseline gap-1.5">
+            <span className="font-medium text-green-700">{formatPrice(product.discountedPrice)}</span>
+            <span className="text-xs text-charcoal/40 line-through">{formatPrice(product.price)}</span>
+            <span className="rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-800">
+              {percent}% off
+            </span>
+          </span>
+        );
+      },
     },
     {
       header: "Status",

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { formatPrice, formatVariantPrice, parseImages } from "@/lib/format";
+import { formatPrice, formatVariantPrice, parseImages, discountPercent } from "@/lib/format";
 import { siteConfig } from "@/lib/site-config";
 import { getPrimaryShopLocation } from "@/lib/shop-locations";
 import { EnquiryActions } from "@/components/site/EnquiryActions";
@@ -70,6 +70,7 @@ export default async function ProductDetailPage({
   const images = parseImages(product.images);
   const hasVariants = product.variants.length > 0;
   const sortedVariants = [...product.variants].sort((a, b) => a.price - b.price);
+  const percent = hasVariants ? null : discountPercent(product.price, product.discountedPrice);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+4.5rem)] sm:px-6 sm:pb-12">
@@ -116,9 +117,23 @@ export default async function ProductDetailPage({
           >
             {product.brand}
           </Link>
-          <p className="mt-2 text-lg font-medium text-charcoal">
-            {hasVariants ? formatVariantPrice(product.variants) : formatPrice(product.price)}
-          </p>
+          {percent != null ? (
+            <p className="mt-2 flex flex-wrap items-baseline gap-2">
+              <span className="text-lg font-semibold text-green-700">
+                {formatPrice(product.discountedPrice)}
+              </span>
+              <span className="text-sm text-charcoal/40 line-through">
+                {formatPrice(product.price)}
+              </span>
+              <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">
+                {percent}% off
+              </span>
+            </p>
+          ) : (
+            <p className="mt-2 text-lg font-medium text-charcoal">
+              {hasVariants ? formatVariantPrice(product.variants) : formatPrice(product.price)}
+            </p>
+          )}
           <p
             className={`mt-1 text-sm font-medium ${
               product.inStock ? "text-green-700" : "text-charcoal/50"

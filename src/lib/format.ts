@@ -7,6 +7,20 @@ export function formatPrice(paise: number | null | undefined): string {
   }).format(paise / 100);
 }
 
+// Returns the rounded discount percentage, or null when there's no real
+// discount to show — `productSchema`'s refine already rejects a stored
+// discountedPrice >= price, but this guards call sites (e.g. a variant
+// product that never had a discountedPrice to begin with) too.
+export function discountPercent(
+  price: number | null | undefined,
+  discountedPrice: number | null | undefined
+): number | null {
+  if (price == null || discountedPrice == null || discountedPrice <= 0 || discountedPrice >= price) {
+    return null;
+  }
+  return Math.round(100 - (discountedPrice / price) * 100);
+}
+
 export function variantPriceRange(variants: { price: number }[]): { min: number; max: number } {
   const prices = variants.map((v) => v.price);
   return { min: Math.min(...prices), max: Math.max(...prices) };

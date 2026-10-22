@@ -41,6 +41,7 @@ const baseProduct: Product = {
   productType: "Masala Sticks",
   sku: "CYC-INC-001",
   price: 12000,
+  discountedPrice: null,
   images: "[]",
   inStock: true,
   featured: false,
@@ -161,6 +162,67 @@ describe("ProductForm — Hidden from website field", () => {
 
     await waitFor(() => expect(handleSubmit).toHaveBeenCalled());
     expect(handleSubmit.mock.calls[0][0]).toMatchObject({ isHidden: true });
+  });
+});
+
+describe("ProductForm — Discounted Price field", () => {
+  beforeEach(() => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ items: [category], total: 1 }), { status: 200 })
+      )
+    );
+  });
+
+  function getDiscountedPriceInput() {
+    return screen.getByLabelText(/^Discounted Price/i) as HTMLInputElement;
+  }
+
+  it("defaults to empty when creating a new product", () => {
+    renderForm(<ProductForm onSubmit={vi.fn()} isSubmitting={false} />);
+
+    expect(getDiscountedPriceInput().value).toBe("");
+  });
+
+  it("prefills from an existing product's discountedPrice in edit mode", async () => {
+    renderForm(
+      <ProductForm
+        product={{ ...baseProduct, discountedPrice: 9000 }}
+        onSubmit={vi.fn()}
+        isSubmitting={false}
+      />
+    );
+
+    await waitFor(() => expect(getDiscountedPriceInput().value).toBe("9000"));
+  });
+
+  it("submits a discountedPrice typed by the admin that is less than price", async () => {
+    const handleSubmit = vi.fn();
+    renderForm(<ProductForm product={baseProduct} onSubmit={handleSubmit} isSubmitting={false} />);
+
+    await waitFor(() => expect(getTypeInput().value).toBe("Masala Sticks"));
+
+    fireEvent.change(getDiscountedPriceInput(), { target: { value: "9000" } });
+    fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
+
+    await waitFor(() => expect(handleSubmit).toHaveBeenCalled());
+    expect(handleSubmit.mock.calls[0][0]).toMatchObject({ discountedPrice: 9000 });
+  });
+
+  it("shows a validation error and does not submit when discountedPrice is not less than price", async () => {
+    const handleSubmit = vi.fn();
+    renderForm(<ProductForm product={baseProduct} onSubmit={handleSubmit} isSubmitting={false} />);
+
+    await waitFor(() => expect(getTypeInput().value).toBe("Masala Sticks"));
+
+    fireEvent.change(getDiscountedPriceInput(), { target: { value: "15000" } });
+    fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
+
+    await waitFor(() =>
+      expect(screen.getByText(/discounted price must be less than the regular price/i)).toBeInTheDocument()
+    );
+    expect(handleSubmit).not.toHaveBeenCalled();
   });
 });
 

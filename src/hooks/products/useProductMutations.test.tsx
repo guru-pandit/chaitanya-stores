@@ -108,6 +108,7 @@ describe("useToggleProductHidden", () => {
     productType: null,
     sku: "CYC-INC-001",
     price: 12000,
+    discountedPrice: null,
     images: JSON.stringify(["/uploads/a.jpg"]),
     inStock: true,
     featured: false,

@@ -46,7 +46,7 @@ export default async function HomePage() {
       take: 8,
       orderBy: { createdAt: "desc" },
     }),
-    prisma.category.findMany({ orderBy: { name: "asc" }, take: 6 }),
+    prisma.category.findMany({ orderBy: { name: "asc" } }),
     prisma.siteSettings.findFirst(),
     getPrimaryShopLocation(),
   ]);
@@ -146,16 +146,20 @@ export default async function HomePage() {
             <h2 className="mb-6 font-display text-2xl text-maroon-dark sm:mb-8 sm:text-3xl">
               Shop by Category
             </h2>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
               {categories.map((category) => (
                 <Link
                   key={category.id}
                   href={`/categories/${category.slug}`}
-                  className="group flex items-center justify-center rounded-2xl border border-maroon/10 bg-white/60 p-4 text-center transition-shadow hover:shadow-lg sm:p-6"
+                  className="group flex flex-col items-start justify-center rounded-2xl border border-maroon/10 bg-white/60 p-4 transition-shadow hover:shadow-lg sm:p-6"
                 >
                   <p className="font-display text-base text-maroon-dark group-hover:text-terracotta sm:text-lg">
                     {category.name}
                   </p>
+                  <span className="mt-2 flex items-center gap-1 text-xs text-charcoal/40 transition-colors group-hover:text-terracotta">
+                    Shop
+                    <span className="translate-x-0 transition-transform group-hover:translate-x-1">→</span>
+                  </span>
                 </Link>
               ))}
             </div>

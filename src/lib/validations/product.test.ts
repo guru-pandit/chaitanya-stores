@@ -368,6 +368,45 @@ describe("productVariantSchema", () => {
   it("rejects a non-boolean inStock", () => {
     expect(productVariantSchema.safeParse({ ...validVariant, inStock: "true" }).success).toBe(false);
   });
+
+  describe("productVariantSchema — discountedPrice", () => {
+    it("accepts null discountedPrice", () => {
+      expect(productVariantSchema.safeParse({ ...validVariant, discountedPrice: null }).success).toBe(true);
+    });
+
+    it("accepts discountedPrice omitted entirely", () => {
+      expect(productVariantSchema.safeParse(validVariant).success).toBe(true);
+    });
+
+    it("accepts a valid discountedPrice strictly less than price", () => {
+      expect(productVariantSchema.safeParse({ ...validVariant, discountedPrice: 10000 }).success).toBe(true);
+    });
+
+    it("rejects 0 for discountedPrice", () => {
+      expect(productVariantSchema.safeParse({ ...validVariant, discountedPrice: 0 }).success).toBe(false);
+    });
+
+    it("rejects a negative discountedPrice", () => {
+      expect(productVariantSchema.safeParse({ ...validVariant, discountedPrice: -1 }).success).toBe(false);
+    });
+
+    it("rejects a discountedPrice equal to price", () => {
+      expect(productVariantSchema.safeParse({ ...validVariant, discountedPrice: 12000 }).success).toBe(false);
+    });
+
+    it("rejects a discountedPrice greater than price", () => {
+      expect(productVariantSchema.safeParse({ ...validVariant, discountedPrice: 15000 }).success).toBe(false);
+    });
+
+    it("error is on the discountedPrice path when discountedPrice >= price", () => {
+      const result = productVariantSchema.safeParse({ ...validVariant, discountedPrice: 15000 });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const fieldErrors = result.error.flatten().fieldErrors;
+        expect(fieldErrors.discountedPrice).toBeDefined();
+      }
+    });
+  });
 });
 
 describe("productSchema — productType", () => {

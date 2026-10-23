@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Product, Category, ProductVariant } from "@/generated/prisma/client";
-import { formatPrice, formatVariantPrice, parseImages, discountPercent } from "@/lib/format";
+import { formatPrice, formatVariantPrice, parseImages, discountPercent, maxDiscountPercent } from "@/lib/format";
 import { UploadedImage } from "@/components/ui/UploadedImage";
 
 export function ProductCard({
@@ -11,7 +11,9 @@ export function ProductCard({
   const images = parseImages(product.images);
   const image = images[0];
   const hasVariants = product.variants.length > 0;
-  const percent = hasVariants ? null : discountPercent(product.price, product.discountedPrice);
+  const percent = hasVariants
+    ? maxDiscountPercent(product.variants)
+    : discountPercent(product.price, product.discountedPrice);
 
   return (
     <Link
@@ -56,13 +58,17 @@ export function ProductCard({
           {percent != null ? (
             <p className="flex flex-wrap items-baseline gap-1.5">
               <span className="text-sm font-semibold text-green-700">
-                {formatPrice(product.discountedPrice)}
+                {hasVariants
+                  ? formatVariantPrice(product.variants)
+                  : formatPrice(product.discountedPrice)}
               </span>
-              <span className="text-xs text-charcoal/40 line-through">
-                {formatPrice(product.price)}
-              </span>
+              {!hasVariants && (
+                <span className="text-xs text-charcoal/40 line-through">
+                  {formatPrice(product.price)}
+                </span>
+              )}
               <span className="rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-800">
-                {percent}% off
+                {hasVariants ? `Up to ${percent}% off` : `${percent}% off`}
               </span>
             </p>
           ) : (

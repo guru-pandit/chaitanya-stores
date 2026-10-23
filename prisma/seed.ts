@@ -52,7 +52,7 @@ async function main() {
       variants: {
         create: [
           { label: "50g", price: 6000, inStock: true },
-          { label: "100g", price: 12000, inStock: true },
+          { label: "100g", price: 12000, discountedPrice: 10000, inStock: true },
           { label: "250g", price: 28000, inStock: true },
         ],
       },

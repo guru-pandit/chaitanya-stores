@@ -9,6 +9,8 @@ import {
   buildSlug,
   buildSkuPrefix,
   discountPercent,
+  effectivePrice,
+  maxDiscountPercent,
 } from "./format";
 
 describe("toDateInputValue", () => {
@@ -81,6 +83,63 @@ describe("discountPercent", () => {
   });
 });
 
+describe("effectivePrice", () => {
+  it("returns discountedPrice when there is a genuine discount", () => {
+    expect(effectivePrice(10000, 7500)).toBe(7500);
+  });
+
+  it("returns price when discountedPrice is null", () => {
+    expect(effectivePrice(10000, null)).toBe(10000);
+  });
+
+  it("returns price when discountedPrice is undefined", () => {
+    expect(effectivePrice(10000, undefined)).toBe(10000);
+  });
+
+  it("returns price when discountedPrice equals price (no real discount)", () => {
+    expect(effectivePrice(10000, 10000)).toBe(10000);
+  });
+
+  it("returns price when discountedPrice is greater than price", () => {
+    expect(effectivePrice(10000, 12000)).toBe(10000);
+  });
+
+  it("returns null when price is null (Contact for price)", () => {
+    expect(effectivePrice(null, null)).toBeNull();
+  });
+});
+
+describe("maxDiscountPercent", () => {
+  it("returns null when no variant has a discount", () => {
+    expect(maxDiscountPercent([{ price: 10000 }, { price: 20000 }])).toBeNull();
+  });
+
+  it("returns null when discountedPrice is null on all variants", () => {
+    expect(maxDiscountPercent([{ price: 10000, discountedPrice: null }, { price: 20000, discountedPrice: null }])).toBeNull();
+  });
+
+  it("returns the highest discount percent when one variant has a discount", () => {
+    const result = maxDiscountPercent([
+      { price: 10000, discountedPrice: 7500 },  // 25%
+      { price: 20000 },
+    ]);
+    expect(result).toBe(25);
+  });
+
+  it("returns the highest discount percent across multiple discounted variants", () => {
+    const result = maxDiscountPercent([
+      { price: 10000, discountedPrice: 9000 },   // 10%
+      { price: 20000, discountedPrice: 14000 },  // 30%
+      { price: 5000, discountedPrice: 4500 },    // 10%
+    ]);
+    expect(result).toBe(30);
+  });
+
+  it("ignores variants where discountedPrice equals price", () => {
+    expect(maxDiscountPercent([{ price: 10000, discountedPrice: 10000 }])).toBeNull();
+  });
+});
+
 describe("variantPriceRange", () => {
   it("returns the same value for min and max when all variants share one price", () => {
     const range = variantPriceRange([{ price: 100 }, { price: 100 }]);
@@ -95,6 +154,29 @@ describe("variantPriceRange", () => {
   it("handles a single variant", () => {
     expect(variantPriceRange([{ price: 500 }])).toEqual({ min: 500, max: 500 });
   });
+
+  it("uses effective (discounted) prices when discountedPrice is set", () => {
+    // 100g: regular 12000, discounted 10000; 50g: no discount 6000
+    const range = variantPriceRange([
+      { price: 12000, discountedPrice: 10000 },
+      { price: 6000 },
+    ]);
+    expect(range).toEqual({ min: 6000, max: 10000 });
+  });
+
+  it("falls back to regular price when discountedPrice is null", () => {
+    const range = variantPriceRange([
+      { price: 12000, discountedPrice: null },
+      { price: 6000 },
+    ]);
+    expect(range).toEqual({ min: 6000, max: 12000 });
+  });
+
+  it("single discounted variant returns effective price for both min and max", () => {
+    // Ensures effectivePrice is used even when there is only one variant
+    const range = variantPriceRange([{ price: 12000, discountedPrice: 10000 }]);
+    expect(range).toEqual({ min: 10000, max: 10000 });
+  });
 });
 
 describe("formatVariantPrice", () => {
@@ -105,6 +187,15 @@ describe("formatVariantPrice", () => {
   it("formats a min–max range when prices differ", () => {
     const result = formatVariantPrice([{ price: 10000 }, { price: 20000 }]);
     expect(result).toBe(`${formatPrice(10000)} – ${formatPrice(20000)}`);
+  });
+
+  it("uses effective prices when discountedPrice is set", () => {
+    // 100g: regular 20000, discounted 16000; 50g: regular 10000, no discount
+    const result = formatVariantPrice([
+      { price: 20000, discountedPrice: 16000 },
+      { price: 10000 },
+    ]);
+    expect(result).toBe(`${formatPrice(10000)} – ${formatPrice(16000)}`);
   });
 });
 

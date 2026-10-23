@@ -125,7 +125,7 @@ describe("useToggleProductHidden", () => {
       createdAt: new Date("2026-01-01"),
       updatedAt: new Date("2026-01-01"),
     },
-    variants: [{ id: "v1", label: "100g", price: 12000, inStock: true, productId: "p1", createdAt: new Date("2026-01-01"), updatedAt: new Date("2026-01-01") }],
+    variants: [{ id: "v1", label: "100g", price: 12000, discountedPrice: 10000, inStock: true, productId: "p1", createdAt: new Date("2026-01-01"), updatedAt: new Date("2026-01-01") }],
   };
 
   it("PATCHes the full product payload with isHidden inverted and invalidates the products cache", async () => {
@@ -142,8 +142,25 @@ describe("useToggleProductHidden", () => {
     const body = JSON.parse(vi.mocked(fetch).mock.calls[0][1]!.body as string);
     expect(body.isHidden).toBe(true);
     expect(body.images).toEqual(["/uploads/a.jpg"]);
-    expect(body.variants).toEqual([{ label: "100g", price: 12000, inStock: true }]);
+    expect(body.variants).toEqual([{ label: "100g", price: 12000, discountedPrice: 10000, inStock: true }]);
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["products"] });
+  });
+
+  it("includes variant discountedPrice in the PATCH body to prevent silent data loss on toggle", async () => {
+    const productWithDiscountedVariant: ProductWithCategory = {
+      ...product,
+      variants: [{ id: "v1", label: "100g", price: 12000, discountedPrice: 10000, inStock: true, productId: "p1", createdAt: new Date("2026-01-01"), updatedAt: new Date("2026-01-01") }],
+    };
+    vi.mocked(fetch).mockResolvedValueOnce(jsonResponse(200, { ...productWithDiscountedVariant, isHidden: true }));
+    const queryClient = new QueryClient();
+
+    const { result } = renderHook(() => useToggleProductHidden(), { wrapper: makeWrapper(queryClient) });
+    result.current.mutate(productWithDiscountedVariant);
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    const body = JSON.parse(vi.mocked(fetch).mock.calls[0][1]!.body as string);
+    expect(body.variants[0].discountedPrice).toBe(10000);
   });
 
   it("flips isHidden: true back to false when un-hiding", async () => {

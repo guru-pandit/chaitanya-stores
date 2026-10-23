@@ -66,6 +66,7 @@ export function ProductForm({
           variants: (product.variants ?? []).map((v) => ({
             label: v.label,
             price: v.price,
+            discountedPrice: v.discountedPrice ?? null,
             inStock: v.inStock,
           })),
         }
@@ -276,7 +277,7 @@ export function ProductForm({
           label="Discounted Price (in paise, optional)"
           htmlFor="discountedPrice"
           error={errors.discountedPrice?.message}
-          hint="Leave blank to show the regular price only"
+          hint="Used only when the product has no variants — leave blank to show the regular price only"
         >
           <Controller
             control={control}
@@ -302,20 +303,21 @@ export function ProductForm({
         </p>
         <div className="rounded-lg border border-maroon/10">
           {variantFields.length > 0 && (
-            <div className="grid grid-cols-[1fr_1fr_auto_auto] items-center gap-3 border-b border-maroon/10 bg-cream-dark/40 px-3 py-2 text-xs font-medium text-charcoal/60">
+            <div className="grid grid-cols-[1fr_1fr_1fr_auto_auto] items-center gap-3 border-b border-maroon/10 bg-cream-dark/40 px-3 py-2 text-xs font-medium text-charcoal/60">
               <span>
                 Weight / Quantity <span className="text-red-700">*</span>
               </span>
               <span>
                 Price (in paise) <span className="text-red-700">*</span>
               </span>
+              <span>Discounted Price (in paise, optional)</span>
               <span>In Stock</span>
               <span />
             </div>
           )}
           {variantFields.map((field, index) => (
             <div key={field.id} className="border-b border-maroon/10 px-3 py-2 last:border-0">
-              <div className="grid grid-cols-[1fr_1fr_auto_auto] items-start gap-3">
+              <div className="grid grid-cols-[1fr_1fr_1fr_auto_auto] items-start gap-3">
                 <div>
                   <input
                     aria-label="Weight / Quantity"
@@ -339,6 +341,30 @@ export function ProductForm({
                   {errors.variants?.[index]?.price && (
                     <p className="mt-1 text-xs text-red-700">
                       {errors.variants[index]?.price?.message}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <Controller
+                    control={control}
+                    name={`variants.${index}.discountedPrice`}
+                    render={({ field: discField }) => (
+                      <input
+                        aria-label="Discounted price (in paise)"
+                        type="number"
+                        min={1}
+                        step={1}
+                        value={discField.value ?? ""}
+                        onChange={(e) =>
+                          discField.onChange(e.target.value === "" ? null : Number(e.target.value))
+                        }
+                        className={fieldInputClasses}
+                      />
+                    )}
+                  />
+                  {errors.variants?.[index]?.discountedPrice && (
+                    <p className="mt-1 text-xs text-red-700">
+                      {errors.variants[index]?.discountedPrice?.message}
                     </p>
                   )}
                 </div>
@@ -374,7 +400,7 @@ export function ProductForm({
           type="button"
           variant="ghost"
           className="mt-3"
-          onClick={() => appendVariant({ label: "", price: 0, inStock: true })}
+          onClick={() => appendVariant({ label: "", price: 0, discountedPrice: null, inStock: true })}
         >
           <Plus size={16} /> Add Variant
         </Button>

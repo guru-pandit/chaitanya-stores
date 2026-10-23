@@ -1,11 +1,20 @@
 import { z } from "zod";
 import { uploadPathSchema, MAX_PRODUCT_IMAGES } from "@/lib/validations/uploadPath";
 
-export const productVariantSchema = z.object({
-  label: z.string().min(1, "Label is required").max(50),
-  price: z.number().int().positive("Price must be greater than 0"),
-  inStock: z.boolean(),
-});
+export const productVariantSchema = z
+  .object({
+    label: z.string().min(1, "Label is required").max(50),
+    price: z.number().int().positive("Price must be greater than 0"),
+    discountedPrice: z.number().int().positive("Discounted price must be greater than 0").optional().nullable(),
+    inStock: z.boolean(),
+  })
+  .refine(
+    (data) => !data.discountedPrice || data.discountedPrice < data.price,
+    {
+      message: "Discounted price must be less than the regular price",
+      path: ["discountedPrice"],
+    }
+  );
 
 export type ProductVariantInput = z.infer<typeof productVariantSchema>;
 

@@ -123,8 +123,8 @@ describe("CatalogPage — search query shapes", () => {
         { name: { contains: "150", mode: "insensitive" } },
         { weight: { contains: "150", mode: "insensitive" } },
         { variants: { some: { label: { contains: "150", mode: "insensitive" } } } },
-        { price: 150 },
-        { variants: { some: { price: 150 } } },
+        { price: 15000 },
+        { variants: { some: { price: 15000 } } },
       ])
     );
     // discountedPrice does not exist in this branch's schema — must not be queried

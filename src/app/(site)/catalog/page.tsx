@@ -52,8 +52,8 @@ export default async function CatalogPage({
             { variants: { some: { label: { contains: q, mode: "insensitive" as const } } } },
             ...(numericQ !== null
               ? [
-                  { price: numericQ },
-                  { variants: { some: { price: numericQ } } },
+                  { price: numericQ * 100 },
+                  { variants: { some: { price: numericQ * 100 } } },
                 ]
               : []),
           ],

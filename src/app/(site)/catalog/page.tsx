@@ -49,8 +49,14 @@ export default async function CatalogPage({
           OR: [
             { name: { contains: q, mode: "insensitive" as const } },
             { weight: { contains: q, mode: "insensitive" as const } },
+            { variants: { some: { label: { contains: q, mode: "insensitive" as const } } } },
             ...(numericQ !== null
-              ? [{ price: numericQ }, { discountedPrice: numericQ }]
+              ? [
+                  { price: numericQ },
+                  { discountedPrice: numericQ },
+                  { variants: { some: { price: numericQ } } },
+                  { variants: { some: { discountedPrice: numericQ } } },
+                ]
               : []),
           ],
         }

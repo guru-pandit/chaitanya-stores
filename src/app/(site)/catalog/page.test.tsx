@@ -93,7 +93,7 @@ describe("CatalogPage — search query shapes", () => {
     });
   });
 
-  it("builds an OR query across name and weight for a text search", async () => {
+  it("builds an OR query across name, weight, and variant label for a text search", async () => {
     mockPrisma.product.findMany.mockResolvedValue([]);
     mockPrisma.product.count.mockResolvedValue(0);
 
@@ -104,13 +104,14 @@ describe("CatalogPage — search query shapes", () => {
       expect.arrayContaining([
         { name: { contains: "100g", mode: "insensitive" } },
         { weight: { contains: "100g", mode: "insensitive" } },
+        { variants: { some: { label: { contains: "100g", mode: "insensitive" } } } },
       ])
     );
     // no price clause for a non-numeric query
     expect(whereArg.OR.some((c: Record<string, unknown>) => "price" in c)).toBe(false);
   });
 
-  it("includes price and discountedPrice in OR when search is a plain number", async () => {
+  it("includes product and variant price/discountedPrice in OR when search is a plain number", async () => {
     mockPrisma.product.findMany.mockResolvedValue([]);
     mockPrisma.product.count.mockResolvedValue(0);
 
@@ -121,8 +122,11 @@ describe("CatalogPage — search query shapes", () => {
       expect.arrayContaining([
         { name: { contains: "150", mode: "insensitive" } },
         { weight: { contains: "150", mode: "insensitive" } },
+        { variants: { some: { label: { contains: "150", mode: "insensitive" } } } },
         { price: 150 },
         { discountedPrice: 150 },
+        { variants: { some: { price: 150 } } },
+        { variants: { some: { discountedPrice: 150 } } },
       ])
     );
   });

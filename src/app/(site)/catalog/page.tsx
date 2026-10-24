@@ -53,9 +53,7 @@ export default async function CatalogPage({
             ...(numericQ !== null
               ? [
                   { price: numericQ },
-                  { discountedPrice: numericQ },
                   { variants: { some: { price: numericQ } } },
-                  { variants: { some: { discountedPrice: numericQ } } },
                 ]
               : []),
           ],

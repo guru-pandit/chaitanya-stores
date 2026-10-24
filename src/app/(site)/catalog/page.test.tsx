@@ -111,7 +111,7 @@ describe("CatalogPage — search query shapes", () => {
     expect(whereArg.OR.some((c: Record<string, unknown>) => "price" in c)).toBe(false);
   });
 
-  it("includes product and variant price/discountedPrice in OR when search is a plain number", async () => {
+  it("includes product and variant price in OR when search is a plain number", async () => {
     mockPrisma.product.findMany.mockResolvedValue([]);
     mockPrisma.product.count.mockResolvedValue(0);
 
@@ -124,11 +124,11 @@ describe("CatalogPage — search query shapes", () => {
         { weight: { contains: "150", mode: "insensitive" } },
         { variants: { some: { label: { contains: "150", mode: "insensitive" } } } },
         { price: 150 },
-        { discountedPrice: 150 },
         { variants: { some: { price: 150 } } },
-        { variants: { some: { discountedPrice: 150 } } },
       ])
     );
+    // discountedPrice does not exist in this branch's schema — must not be queried
+    expect(whereArg.OR.some((c: Record<string, unknown>) => "discountedPrice" in c)).toBe(false);
   });
 
   it("applies category and brand filters alongside the OR search", async () => {

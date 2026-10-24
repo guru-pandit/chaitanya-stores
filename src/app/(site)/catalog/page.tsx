@@ -38,11 +38,27 @@ export default async function CatalogPage({
   const requestedPage = Number(pageParam);
   const page = Number.isFinite(requestedPage) && requestedPage >= 1 ? Math.floor(requestedPage) : 1;
 
+  const numericQ = q && q.trim() !== "" && Number.isFinite(Number(q)) ? Number(q) : null;
+
   const where = {
     isHidden: false,
     ...(category ? { category: { slug: category } } : {}),
     ...(brand ? { brand } : {}),
-    ...(q ? { name: { contains: q, mode: "insensitive" as const } } : {}),
+    ...(q
+      ? {
+          OR: [
+            { name: { contains: q, mode: "insensitive" as const } },
+            { weight: { contains: q, mode: "insensitive" as const } },
+            { variants: { some: { label: { contains: q, mode: "insensitive" as const } } } },
+            ...(numericQ !== null
+              ? [
+                  { price: numericQ * 100 },
+                  { variants: { some: { price: numericQ * 100 } } },
+                ]
+              : []),
+          ],
+        }
+      : {}),
   };
 
   const [products, total, categories, brandRows, primaryLocation] = await Promise.all([

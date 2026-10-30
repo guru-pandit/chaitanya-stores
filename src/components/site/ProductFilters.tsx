@@ -74,7 +74,7 @@ export function ProductFilters({
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search the catalog..."
+          placeholder="Search by name, weight (e.g. 100g), or price..."
           aria-label="Search the catalog"
           className="w-full rounded-full border border-maroon/20 bg-white/70 py-3 pl-9 pr-4 text-sm outline-none focus:border-terracotta sm:py-2.5"
         />

@@ -41,7 +41,7 @@ export const productSchema = z
     categoryId: z.string().min(1, "Category is required"),
     variants: z.array(productVariantSchema),
   })
-  .refine((data) => !data.price || !data.discountedPrice || data.discountedPrice < data.price, {
+  .refine((data) => !data.discountedPrice || (!!data.price && data.discountedPrice < data.price), {
     message: "Discounted price must be less than the regular price",
     path: ["discountedPrice"],
   });
@@ -57,6 +57,9 @@ export function toProductData(input: ProductInput) {
   const { images, weight, productType, variants: _variants, ...rest } = input;
   return {
     ...rest,
+    // Product-level discount is ignored on the public site when variants exist
+    // (each variant carries its own), so don't persist a stale one.
+    discountedPrice: input.variants.length > 0 ? null : rest.discountedPrice,
     weight: weight ? weight : null,
     productType: productType ? productType : null,
     images: JSON.stringify(images),

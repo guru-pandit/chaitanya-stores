@@ -213,9 +213,23 @@ describe("productSchema — discountedPrice", () => {
     expect(result.success).toBe(false);
   });
 
-  it("accepts a discountedPrice when price is null (no regular price set) — nothing to compare against", () => {
+  it("rejects a discountedPrice when price is null — the public site would show 'Contact for price'", () => {
     const result = productSchema.safeParse({ ...valid, price: null, discountedPrice: 9000 });
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
+  });
+
+  it("toProductData clears a product-level discountedPrice when variants exist", () => {
+    const data = toProductData({
+      ...valid,
+      price: 12000,
+      discountedPrice: 9000,
+      variants: [{ label: "100g", price: 12000, discountedPrice: null, inStock: true }],
+    });
+    expect(data.discountedPrice).toBeNull();
+  });
+
+  it("toProductData keeps discountedPrice when there are no variants", () => {
+    expect(toProductData({ ...valid, price: 12000, discountedPrice: 9000 }).discountedPrice).toBe(9000);
   });
 });
 

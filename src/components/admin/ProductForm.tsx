@@ -130,9 +130,11 @@ export function ProductForm({
     let superseded = false;
 
     const timeout = setTimeout(async () => {
+      if (skuEditedManually.current) return;
       try {
         const { sku } = await generateSku(brand, categoryId, controller.signal);
-        if (!superseded) setValue("sku", sku);
+        // The user may have typed a SKU while the request was in flight.
+        if (!superseded && !skuEditedManually.current) setValue("sku", sku);
       } catch {
         // Generation failed (network hiccup) or this run was aborted — the
         // user can still type a SKU by hand.

@@ -23,8 +23,17 @@ export function isConfiguredHttpsUrl(value: string | null | undefined): value is
   return hasContactValue(value) && /^https:\/\//i.test(value.trim());
 }
 
+const BRAND_NAME = "Kokanvedh";
+// The shop's current trading name while the move to the Kokanvedh brand is
+// in progress. Drop this (and nameWithShop's suffix) once the shop is renamed.
+const SHOP_NAME = "Chaitanya Sugandhalay";
+
 export const siteConfig = {
-  name: "Kokanvedh",
+  name: BRAND_NAME,
+  shopName: SHOP_NAME,
+  // For body copy where visitors who know the shop by its old name need to
+  // recognise it: "Kokanvedh (Chaitanya Sugandhalay)".
+  nameWithShop: `${BRAND_NAME} (${SHOP_NAME})`,
   tagline: "Agarbatti, dhoop & pooja samagri from trusted brands in Sangameshwar.",
   // Kept to ~160 chars — the sitewide default meta/OG/Twitter description
   // (see src/app/layout.tsx), so length matters for search snippet display.

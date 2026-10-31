@@ -45,7 +45,7 @@ export default async function ContactPage() {
         Contact Kokanvedh, Sangameshwar
       </h1>
       <p className="mt-2 max-w-xl text-charcoal/70">
-        Reach us directly to check price and stock, ask about a product, or plan a bulk order for a
+        {siteConfig.nameWithShop} — reach us directly to check price and stock, ask about a product, or plan a bulk order for a
         festival — we reply personally. This is a catalog site, not an online store, so every order
         is confirmed by us before you visit.
       </p>

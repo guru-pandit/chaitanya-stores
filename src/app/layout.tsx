@@ -19,14 +19,14 @@ const workSans = Work_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.siteUrl),
   title: {
-    default: "Chaitanya Stores — Incense & Pooja Essentials",
-    template: "%s | Chaitanya Stores",
+    default: `${siteConfig.name} — Incense & Pooja Essentials`,
+    template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
   openGraph: {
     type: "website",
     siteName: siteConfig.name,
-    title: "Chaitanya Stores — Incense & Pooja Essentials",
+    title: `${siteConfig.name} — Incense & Pooja Essentials`,
     description: siteConfig.description,
     url: siteConfig.siteUrl,
     // Default WhatsApp/social share thumbnail for any page that doesn't set
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Chaitanya Stores — Incense & Pooja Essentials",
+    title: `${siteConfig.name} — Incense & Pooja Essentials`,
     description: siteConfig.description,
     images: ["/logo.png"],
   },

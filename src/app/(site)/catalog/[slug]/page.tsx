@@ -103,7 +103,7 @@ export default async function ProductDetailPage({
         <div>
           <ProductGallery
             images={images}
-            alt={`${product.name} ${product.brand} at Chaitanya Stores Sangameshwar`}
+            alt={`${product.name} ${product.brand} at Kokanvedh Sangameshwar`}
             productName={product.name}
           />
         </div>

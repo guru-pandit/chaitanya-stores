@@ -44,7 +44,7 @@ export async function Footer() {
         <div className="grid gap-10 sm:grid-cols-2">
           <div className="flex flex-col gap-10">
             <div className="flex flex-col items-center text-center sm:items-start sm:text-left">
-              <Image src="/logo_light.png" alt={siteConfig.name} width={192} height={64} className="h-16 w-auto" />
+              <Image src="/logo_light.png" alt={siteConfig.name} width={134} height={64} className="h-16 w-auto" />
               <p className="mt-2 text-sm text-cream/70">{siteConfig.tagline}</p>
               {/* Each icon appears only once its profile URL is configured
                   in siteConfig as a real https:// URL — the row disappears

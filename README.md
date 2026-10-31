@@ -1,4 +1,4 @@
-# Chaitanya Stores
+# Kokanvedh
 
 Marketing + catalog website for a retail business selling incense sticks (agarbatti) and pooja
 materials. Visitors browse the catalog and enquire via WhatsApp, email, or call — there's no
@@ -188,13 +188,13 @@ Do this once, before the first deploy.
     SSH key for this.
 11. **DNS**: point your domain's `A` record at the VPS's public IP — either via Hostinger hPanel's
     DNS zone editor (if the domain is also on Hostinger) or your registrar's DNS if registered
-    elsewhere — and wait for it to propagate (`dig +short chaitanystores.com`) before the next
+    elsewhere — and wait for it to propagate (`dig +short kokanvedh.com`) before the next
     step.
 12. **Issue the first TLS certificate**:
     ```bash
     cd /opt/chaitanya-stores
     cp .env.example .env   # fill in POSTGRES_*, NEXTAUTH_*, NEXT_PUBLIC_*, DOMAIN_NAME
-    DOMAIN_NAME=chaitanystores.com LETSENCRYPT_EMAIL=you@chaitanystores.com ./scripts/init-letsencrypt.sh
+    DOMAIN_NAME=kokanvedh.com LETSENCRYPT_EMAIL=you@kokanvedh.com ./scripts/init-letsencrypt.sh
     ```
     This is the one-time bootstrap described in `scripts/init-letsencrypt.sh`'s own comments — it
     starts the full stack and gets nginx a real Let's Encrypt certificate.
@@ -220,11 +220,11 @@ and masked in logs; Variables are plaintext):
 | `POSTGRES_PASSWORD` | Strong, randomly generated (`openssl rand -base64 32`) |
 | `POSTGRES_DB` | e.g. `chaitanya_stores` |
 | `NEXTAUTH_SECRET` | Randomly generated (`openssl rand -base64 32`) — different from your dev value |
-| `NEXTAUTH_URL` | `https://chaitanystores.com` |
+| `NEXTAUTH_URL` | `https://kokanvedh.com` |
 | `NEXT_PUBLIC_BUSINESS_PHONE` / `_WHATSAPP` / `_EMAIL` / `_ADDRESS` | Real business contact details |
-| `NEXT_PUBLIC_SITE_URL` | `https://chaitanystores.com` |
+| `NEXT_PUBLIC_SITE_URL` | `https://kokanvedh.com` |
 | `NEXT_PUBLIC_INSTAGRAM_URL` / `NEXT_PUBLIC_FACEBOOK_URL` | Optional — full `https://` social profile URLs. Skip until the profiles exist; the footer hides an icon whose value is blank or not https |
-| `DOMAIN_NAME` | `chaitanystores.com` (must match what you issued the cert for) |
+| `DOMAIN_NAME` | `kokanvedh.com` (must match what you issued the cert for) |
 
 Fork-triggered PRs never get access to these — only pushes to `main` in this repo do. Rotate
 `SSH_KEY` and `POSTGRES_PASSWORD` periodically (e.g. every 6–12 months, or immediately if you

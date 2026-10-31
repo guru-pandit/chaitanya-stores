@@ -13,12 +13,12 @@ import { MandalaDivider } from "@/components/site/MandalaDivider";
 import { HeroSlideshow } from "@/components/site/HeroSlideshow";
 import { EmptyState } from "@/components/ui/EmptyState";
 
-const HOME_TITLE = "Pooja Samagri & Agarbatti Shop in Sangameshwar | Chaitanya Stores";
+const HOME_TITLE = "Pooja Samagri & Agarbatti Shop in Sangameshwar | Kokanvedh";
 const HOME_DESCRIPTION =
-  "Chaitanya Stores in Sangameshwar stocks agarbatti, dhoop, camphor & pooja samagri from trusted brands — Satya, Janak, Manohar, Anil & Forest. Browse the catalog and enquire via WhatsApp, email, or call.";
+  "Kokanvedh in Sangameshwar stocks agarbatti, dhoop, camphor & pooja samagri from trusted brands — Satya, Janak, Manohar, Anil & Forest. Browse the catalog and enquire via WhatsApp, email, or call.";
 
 export const metadata: Metadata = {
-  // `absolute` opts out of the root layout's `%s | Chaitanya Stores` title
+  // `absolute` opts out of the root layout's `%s | Kokanvedh` title
   // template — this exact string already carries its own suffix.
   title: { absolute: HOME_TITLE },
   description: HOME_DESCRIPTION,
@@ -169,7 +169,7 @@ export default async function HomePage() {
 
       <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
         <h2 className="mb-6 text-center font-display text-2xl text-maroon-dark sm:mb-8 sm:text-3xl">
-          Why Shop at Chaitanya Stores
+          Why Shop at Kokanvedh
         </h2>
         <div className="grid gap-6 sm:grid-cols-3 sm:gap-8">
           <div className="flex flex-col items-center text-center">

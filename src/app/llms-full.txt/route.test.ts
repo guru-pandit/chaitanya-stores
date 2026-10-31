@@ -18,7 +18,7 @@ beforeEach(() => {
   mockGetPrimaryShopLocation.mockReset();
   mockGetPrimaryShopLocation.mockResolvedValue({
     phone: "+919999999999",
-    email: "hello@chaitanyastores.example",
+    email: "hello@kokanvedh.example",
     address: "Pune, Maharashtra, India",
   });
 });

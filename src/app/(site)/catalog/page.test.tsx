@@ -69,7 +69,7 @@ describe("CatalogPage — happy path", () => {
       email: "shop@example.com",
       phone: "+919999999999",
       address: "Sangameshwar",
-      name: "Chaitanya Stores",
+      name: "Kokanvedh",
       isPrimary: true,
     });
 
@@ -88,7 +88,7 @@ describe("CatalogPage — search query shapes", () => {
       email: "shop@example.com",
       phone: "+919999999999",
       address: "Sangameshwar",
-      name: "Chaitanya Stores",
+      name: "Kokanvedh",
       isPrimary: true,
     });
   });
@@ -153,7 +153,7 @@ describe("CatalogPage — empty state", () => {
       email: "shop@example.com",
       phone: "+919999999999",
       address: "Sangameshwar",
-      name: "Chaitanya Stores",
+      name: "Kokanvedh",
       isPrimary: true,
     });
 
@@ -171,7 +171,7 @@ describe("CatalogPage — empty state", () => {
       email: "",
       phone: "",
       address: "",
-      name: "Chaitanya Stores",
+      name: "Kokanvedh",
       isPrimary: true,
     });
 

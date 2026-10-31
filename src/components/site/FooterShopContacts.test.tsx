@@ -10,20 +10,20 @@ afterEach(() => {
 
 const sangameshwar: FooterShopContact = {
   id: "s1",
-  name: "Chaitanya Stores — Sangameshwar",
+  name: "Kokanvedh — Sangameshwar",
   address: "Main Road, Sangameshwar, Ratnagiri 415611",
   phone: "+919876543210",
-  email: "sangameshwar@chaitanyastores.in",
+  email: "sangameshwar@kokanvedh.in",
   mapLink: "https://maps.app.goo.gl/sangameshwar",
   isPrimary: true,
 };
 
 const devrukh: FooterShopContact = {
   id: "s2",
-  name: "Chaitanya Stores — Devrukh",
+  name: "Kokanvedh — Devrukh",
   address: "Market Yard, Devrukh, Ratnagiri 415804",
   phone: "+919812345678",
-  email: "devrukh@chaitanyastores.in",
+  email: "devrukh@kokanvedh.in",
   mapLink: null,
   isPrimary: false,
 };

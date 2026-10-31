@@ -42,7 +42,7 @@ describe("HomePage — hero CTA band (WhatsApp vs Get in Touch fallback)", () =>
       email: "shop@example.com",
       phone: "+919999999999",
       address: "Sangameshwar, Ratnagiri",
-      name: "Chaitanya Stores",
+      name: "Kokanvedh",
       isPrimary: true,
     });
 
@@ -60,7 +60,7 @@ describe("HomePage — hero CTA band (WhatsApp vs Get in Touch fallback)", () =>
       email: "",
       phone: "",
       address: "",
-      name: "Chaitanya Stores",
+      name: "Kokanvedh",
       isPrimary: true,
     });
 
@@ -80,7 +80,7 @@ describe("HomePage — bottom CTA band address fallback", () => {
       email: "shop@example.com",
       phone: "+919999999999",
       address: "Sangameshwar, Ratnagiri",
-      name: "Chaitanya Stores",
+      name: "Kokanvedh",
       isPrimary: true,
     });
 
@@ -97,7 +97,7 @@ describe("HomePage — bottom CTA band address fallback", () => {
       email: "",
       phone: "",
       address: "",
-      name: "Chaitanya Stores",
+      name: "Kokanvedh",
       isPrimary: true,
     });
 
@@ -117,7 +117,7 @@ describe("HomePage — featured products empty state", () => {
       email: "",
       phone: "",
       address: "",
-      name: "Chaitanya Stores",
+      name: "Kokanvedh",
       isPrimary: true,
     });
 

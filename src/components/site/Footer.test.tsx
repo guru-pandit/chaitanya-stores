@@ -13,11 +13,11 @@ const mockedGetAllShopLocations = vi.mocked(getAllShopLocations);
 
 function shopLocation(overrides: Partial<ShopLocation> & { id: string }): ShopLocation {
   return {
-    name: "Chaitanya Stores",
+    name: "Kokanvedh",
     address: "Main Road, Sangameshwar",
     phone: "+919876543210",
     whatsappNumber: "919876543210",
-    email: "hello@chaitanyastores.in",
+    email: "hello@kokanvedh.in",
     mapLink: null,
     isPrimary: false,
     createdAt: new Date("2026-01-01"),
@@ -76,21 +76,21 @@ describe("Footer — social icons (conditional on configured URLs)", () => {
   });
 
   it("renders only the Instagram icon when only that URL is set", async () => {
-    siteConfig.instagramUrl = "https://instagram.com/chaitanyastores";
+    siteConfig.instagramUrl = "https://instagram.com/kokanvedh";
     siteConfig.facebookUrl = "   ";
 
     await renderFooter();
 
     expect(screen.getByRole("link", { name: /instagram/i })).toHaveAttribute(
       "href",
-      "https://instagram.com/chaitanyastores"
+      "https://instagram.com/kokanvedh"
     );
     expect(screen.queryByRole("link", { name: /facebook/i })).not.toBeInTheDocument();
   });
 
   it("renders both icons when both URLs are set", async () => {
-    siteConfig.instagramUrl = "https://instagram.com/chaitanyastores";
-    siteConfig.facebookUrl = "https://facebook.com/chaitanyastores";
+    siteConfig.instagramUrl = "https://instagram.com/kokanvedh";
+    siteConfig.facebookUrl = "https://facebook.com/kokanvedh";
 
     await renderFooter();
 
@@ -100,7 +100,7 @@ describe("Footer — social icons (conditional on configured URLs)", () => {
 
   it("ignores a configured value that is not an https:// URL (fails closed)", async () => {
     siteConfig.instagramUrl = "javascript:alert(1)";
-    siteConfig.facebookUrl = "instagram.com/chaitanyastores"; // no scheme
+    siteConfig.facebookUrl = "instagram.com/kokanvedh"; // no scheme
 
     await renderFooter();
 
@@ -122,36 +122,36 @@ describe("Footer — shop contacts block", () => {
     mockedGetAllShopLocations.mockResolvedValue([
       shopLocation({
         id: "s1",
-        name: "Chaitanya Stores — Sangameshwar",
+        name: "Kokanvedh — Sangameshwar",
         phone: "+919876543210",
-        email: "sangameshwar@chaitanyastores.in",
+        email: "sangameshwar@kokanvedh.in",
         isPrimary: true,
       }),
       shopLocation({
         id: "s2",
-        name: "Chaitanya Stores — Devrukh",
+        name: "Kokanvedh — Devrukh",
         phone: "+919812345678",
-        email: "devrukh@chaitanyastores.in",
+        email: "devrukh@kokanvedh.in",
       }),
     ]);
 
     await renderFooter();
 
-    expect(screen.getByText("Chaitanya Stores — Sangameshwar")).toBeInTheDocument();
+    expect(screen.getByText("Kokanvedh — Sangameshwar")).toBeInTheDocument();
     expect(screen.getByText("+919876543210")).toBeInTheDocument();
-    expect(screen.getByText("sangameshwar@chaitanyastores.in")).toBeInTheDocument();
+    expect(screen.getByText("sangameshwar@kokanvedh.in")).toBeInTheDocument();
 
     // The regression this feature fixes: the second shop's phone and email
     // used to be dropped entirely — only the primary shop's were rendered.
-    expect(screen.getByText("Chaitanya Stores — Devrukh")).toBeInTheDocument();
+    expect(screen.getByText("Kokanvedh — Devrukh")).toBeInTheDocument();
     expect(screen.getByText("+919812345678")).toBeInTheDocument();
-    expect(screen.getByText("devrukh@chaitanyastores.in")).toBeInTheDocument();
+    expect(screen.getByText("devrukh@kokanvedh.in")).toBeInTheDocument();
   });
 
   it('uses the "Our Shops" heading once there is more than one location', async () => {
     mockedGetAllShopLocations.mockResolvedValue([
       shopLocation({ id: "s1", isPrimary: true }),
-      shopLocation({ id: "s2", name: "Chaitanya Stores — Devrukh" }),
+      shopLocation({ id: "s2", name: "Kokanvedh — Devrukh" }),
     ]);
 
     await renderFooter();

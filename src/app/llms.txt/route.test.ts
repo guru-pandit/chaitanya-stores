@@ -20,7 +20,7 @@ describe("GET /llms.txt", () => {
     const body = await res.text();
 
     expect(res.headers.get("Content-Type")).toContain("text/markdown");
-    expect(body).toContain("# Chaitanya Stores");
+    expect(body).toContain("# Kokanvedh");
     expect(body).toContain("/catalog");
     expect(body).toContain("/llms-full.txt");
     expect(body).toContain("/sitemap.xml");

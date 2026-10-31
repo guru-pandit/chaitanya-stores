@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hasContactValue, siteConfig } from "@/lib/site-config";
-import { formatPrice, formatVariantPrice } from "@/lib/format";
+import { formatPrice, formatVariantPrice, effectivePrice } from "@/lib/format";
 import { getPrimaryShopLocation } from "@/lib/shop-locations";
 
 // The "full" counterpart to /llms.txt (llmstxt.org) — same site overview,
@@ -60,7 +60,9 @@ export async function GET() {
 
     for (const product of category.products) {
       const hasVariants = product.variants.length > 0;
-      const price = hasVariants ? formatVariantPrice(product.variants) : formatPrice(product.price);
+      const price = hasVariants
+        ? formatVariantPrice(product.variants)
+        : formatPrice(effectivePrice(product.price, product.discountedPrice));
       const stock = hasVariants
         ? product.variants.some((v) => v.inStock)
           ? "In Stock"

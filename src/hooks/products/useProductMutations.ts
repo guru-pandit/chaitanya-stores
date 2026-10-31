@@ -50,6 +50,7 @@ export const useToggleProductHidden = () => {
           variants: product.variants.map((v) => ({
             label: v.label,
             price: v.price,
+            discountedPrice: v.discountedPrice ?? null,
             inStock: v.inStock,
           })),
         } satisfies ProductInput),

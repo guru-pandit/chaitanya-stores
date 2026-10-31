@@ -28,7 +28,7 @@ describe("SiteJsonLd — Store node with full contact info", () => {
     mockGetPrimary.mockReset();
     mockGetPrimary.mockResolvedValue({
       id: "loc-1",
-      name: "Chaitanya Stores",
+      name: "Kokanvedh",
       address: "Main Road, Sangameshwar",
       phone: "+919999999999",
       whatsappNumber: "919999999999",
@@ -66,7 +66,7 @@ describe("SiteJsonLd — missing contact info (no ShopLocation configured)", () 
     mockGetPrimary.mockReset();
     mockGetPrimary.mockResolvedValue({
       id: null,
-      name: "Chaitanya Stores",
+      name: "Kokanvedh",
       address: "",
       phone: "",
       whatsappNumber: "",
@@ -109,7 +109,7 @@ describe("SiteJsonLd — partial contact info", () => {
     mockGetPrimary.mockReset();
     mockGetPrimary.mockResolvedValue({
       id: "loc-1",
-      name: "Chaitanya Stores",
+      name: "Kokanvedh",
       address: "",
       phone: "+919999999999",
       whatsappNumber: "919999999999",

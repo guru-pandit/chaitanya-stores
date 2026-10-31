@@ -24,38 +24,40 @@ model Category {
 }
 
 model Product {
-  id          String           @id @default(cuid())
-  name        String
-  slug        String           @unique
-  description String?
-  brand       String
-  weight      String?
-  productType String?
-  sku         String           @unique
-  price       Int?
-  images      String           @default("[]")
-  inStock     Boolean          @default(true)
-  featured    Boolean          @default(false)
-  isHidden    Boolean          @default(false)
-  category    Category         @relation(fields: [categoryId], references: [id])
-  categoryId  String
-  variants    ProductVariant[]
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id              String           @id @default(cuid())
+  name            String
+  slug            String           @unique
+  description     String?
+  brand           String
+  weight          String?
+  productType     String?
+  sku             String           @unique
+  price           Int?
+  discountedPrice Int?
+  images          String           @default("[]")
+  inStock         Boolean          @default(true)
+  featured        Boolean          @default(false)
+  isHidden        Boolean          @default(false)
+  category        Category         @relation(fields: [categoryId], references: [id])
+  categoryId      String
+  variants        ProductVariant[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 
   @@index([categoryId])
   @@index([brand])
 }
 
 model ProductVariant {
-  id        String   @id @default(cuid())
-  label     String
-  price     Int
-  inStock   Boolean  @default(true)
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @default(cuid())
+  label           String
+  price           Int
+  discountedPrice Int?
+  inStock         Boolean  @default(true)
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@index([productId])
 }

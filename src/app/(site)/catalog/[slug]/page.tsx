@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { formatPrice, formatVariantPrice, parseImages } from "@/lib/format";
+import { formatPrice, formatVariantPrice, parseImages, discountPercent, effectivePrice, maxDiscountPercent } from "@/lib/format";
 import { siteConfig } from "@/lib/site-config";
 import { getPrimaryShopLocation } from "@/lib/shop-locations";
 import { EnquiryActions } from "@/components/site/EnquiryActions";
@@ -69,7 +69,12 @@ export default async function ProductDetailPage({
 
   const images = parseImages(product.images);
   const hasVariants = product.variants.length > 0;
-  const sortedVariants = [...product.variants].sort((a, b) => a.price - b.price);
+  const sortedVariants = [...product.variants].sort(
+    (a, b) => (effectivePrice(a.price, a.discountedPrice) ?? a.price) - (effectivePrice(b.price, b.discountedPrice) ?? b.price)
+  );
+  const percent = hasVariants
+    ? maxDiscountPercent(product.variants)
+    : discountPercent(product.price, product.discountedPrice);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+4.5rem)] sm:px-6 sm:pb-12">
@@ -98,7 +103,7 @@ export default async function ProductDetailPage({
         <div>
           <ProductGallery
             images={images}
-            alt={`${product.name} ${product.brand} at Chaitanya Stores Sangameshwar`}
+            alt={`${product.name} ${product.brand} at Kokanvedh Sangameshwar`}
             productName={product.name}
           />
         </div>
@@ -116,9 +121,34 @@ export default async function ProductDetailPage({
           >
             {product.brand}
           </Link>
-          <p className="mt-2 text-lg font-medium text-charcoal">
-            {hasVariants ? formatVariantPrice(product.variants) : formatPrice(product.price)}
-          </p>
+          {hasVariants ? (
+            <p className="mt-2 flex flex-wrap items-baseline gap-2">
+              <span className="text-lg font-medium text-charcoal">
+                {formatVariantPrice(product.variants)}
+              </span>
+              {percent != null && (
+                <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">
+                  Up to {percent}% off
+                </span>
+              )}
+            </p>
+          ) : percent != null ? (
+            <p className="mt-2 flex flex-wrap items-baseline gap-2">
+              <span className="text-lg font-semibold text-green-700">
+                {formatPrice(product.discountedPrice)}
+              </span>
+              <span className="text-sm text-charcoal/40 line-through">
+                {formatPrice(product.price)}
+              </span>
+              <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">
+                {percent}% off
+              </span>
+            </p>
+          ) : (
+            <p className="mt-2 text-lg font-medium text-charcoal">
+              {formatPrice(product.price)}
+            </p>
+          )}
           <p
             className={`mt-1 text-sm font-medium ${
               product.inStock ? "text-green-700" : "text-charcoal/50"
@@ -162,24 +192,41 @@ export default async function ProductDetailPage({
               {/* Below sm the 3-column table is too cramped to read — show a
                   stacked card per variant instead. */}
               <ul className="flex flex-col gap-2 sm:hidden">
-                {sortedVariants.map((variant) => (
-                  <li
-                    key={variant.id}
-                    className="rounded-xl border border-maroon/10 bg-white/50 p-3 text-sm"
-                  >
-                    <div className="flex items-baseline justify-between gap-3">
-                      <span className="font-medium text-charcoal">{variant.label}</span>
-                      <span className="text-charcoal">{formatPrice(variant.price)}</span>
-                    </div>
-                    <span
-                      className={`mt-1 block text-xs font-medium ${
-                        variant.inStock ? "text-green-700" : "text-charcoal/50"
-                      }`}
+                {sortedVariants.map((variant) => {
+                  const variantPercent = discountPercent(variant.price, variant.discountedPrice);
+                  return (
+                    <li
+                      key={variant.id}
+                      className="rounded-xl border border-maroon/10 bg-white/50 p-3 text-sm"
                     >
-                      {variant.inStock ? "In Stock" : "Out of Stock"}
-                    </span>
-                  </li>
-                ))}
+                      <div className="flex items-baseline justify-between gap-3">
+                        <span className="font-medium text-charcoal">{variant.label}</span>
+                        {variantPercent != null ? (
+                          <span className="flex flex-wrap items-baseline gap-1.5">
+                            <span className="font-semibold text-green-700">
+                              {formatPrice(variant.discountedPrice)}
+                            </span>
+                            <span className="text-xs text-charcoal/40 line-through">
+                              {formatPrice(variant.price)}
+                            </span>
+                            <span className="rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-800">
+                              {variantPercent}% off
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="text-charcoal">{formatPrice(variant.price)}</span>
+                        )}
+                      </div>
+                      <span
+                        className={`mt-1 block text-xs font-medium ${
+                          variant.inStock ? "text-green-700" : "text-charcoal/50"
+                        }`}
+                      >
+                        {variant.inStock ? "In Stock" : "Out of Stock"}
+                      </span>
+                    </li>
+                  );
+                })}
               </ul>
 
               <table className="hidden w-full text-sm sm:table">
@@ -191,19 +238,38 @@ export default async function ProductDetailPage({
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedVariants.map((variant) => (
-                    <tr key={variant.id} className="border-b border-maroon/5 last:border-0">
-                      <td className="py-2 text-charcoal">{variant.label}</td>
-                      <td className="py-2 text-charcoal">{formatPrice(variant.price)}</td>
-                      <td
-                        className={`py-2 font-medium ${
-                          variant.inStock ? "text-green-700" : "text-charcoal/50"
-                        }`}
-                      >
-                        {variant.inStock ? "In Stock" : "Out of Stock"}
-                      </td>
-                    </tr>
-                  ))}
+                  {sortedVariants.map((variant) => {
+                    const variantPercent = discountPercent(variant.price, variant.discountedPrice);
+                    return (
+                      <tr key={variant.id} className="border-b border-maroon/5 last:border-0">
+                        <td className="py-2 text-charcoal">{variant.label}</td>
+                        <td className="py-2">
+                          {variantPercent != null ? (
+                            <span className="flex flex-wrap items-baseline gap-1.5">
+                              <span className="font-semibold text-green-700">
+                                {formatPrice(variant.discountedPrice)}
+                              </span>
+                              <span className="text-xs text-charcoal/40 line-through">
+                                {formatPrice(variant.price)}
+                              </span>
+                              <span className="rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-800">
+                                {variantPercent}% off
+                              </span>
+                            </span>
+                          ) : (
+                            <span className="text-charcoal">{formatPrice(variant.price)}</span>
+                          )}
+                        </td>
+                        <td
+                          className={`py-2 font-medium ${
+                            variant.inStock ? "text-green-700" : "text-charcoal/50"
+                          }`}
+                        >
+                          {variant.inStock ? "In Stock" : "Out of Stock"}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

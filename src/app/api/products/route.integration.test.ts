@@ -149,6 +149,39 @@ describe("POST /api/products (integration)", () => {
     expect(created.variants).toHaveLength(2);
   });
 
+  it("creates a variant with discountedPrice and round-trips it through GET", async () => {
+    const body = validProductBody({
+      variants: [
+        { label: "100g", price: 12000, discountedPrice: 9000, inStock: true },
+        { label: "50g", price: 6000, inStock: true },
+      ],
+    });
+    const createRes = await apiJson("/api/products", body);
+    expect(createRes.status).toBe(201);
+    const created = await createRes.json();
+    createdIds.push(created.id);
+
+    const discountedVariant = created.variants.find(
+      (v: { label: string }) => v.label === "100g"
+    );
+    expect(discountedVariant?.discountedPrice).toBe(9000);
+
+    const undiscountedVariant = created.variants.find(
+      (v: { label: string }) => v.label === "50g"
+    );
+    expect(undiscountedVariant?.discountedPrice).toBeNull();
+  });
+
+  it("returns 400 when a variant discountedPrice is not less than its price", async () => {
+    const body = validProductBody({
+      variants: [
+        { label: "100g", price: 12000, discountedPrice: 15000, inStock: true },
+      ],
+    });
+    const res = await apiJson("/api/products", body);
+    expect(res.status).toBe(400);
+  });
+
   it("returns 409 when the slug is already in use", async () => {
     const body = validProductBody();
     const first = await apiJson("/api/products", body);

@@ -10,12 +10,12 @@ import { PaginationLinks } from "@/components/site/PaginationLinks";
 
 const PAGE_SIZE = 24;
 
-const CATALOG_TITLE = "Agarbatti, Dhoop & Camphor Catalog | Chaitanya Stores Sangameshwar";
+const CATALOG_TITLE = "Agarbatti, Dhoop & Camphor Catalog | Kokanvedh Sangameshwar";
 const CATALOG_DESCRIPTION =
   "Browse agarbatti, dhoop, sambrani, camphor, and pooja thali essentials from trusted brands. Filter by category or brand and enquire via WhatsApp, email, or call.";
 
 export const metadata: Metadata = {
-  // `absolute` opts out of the root layout's `%s | Chaitanya Stores` title
+  // `absolute` opts out of the root layout's `%s | Kokanvedh` title
   // template — this exact string already carries its own suffix.
   title: { absolute: CATALOG_TITLE },
   description: CATALOG_DESCRIPTION,
@@ -147,7 +147,7 @@ export default async function CatalogPage({
           Pooja Samagri in Sangameshwar, Ratnagiri
         </h2>
         <p className="mt-3 text-charcoal/70 leading-relaxed">
-          Chaitanya Stores stocks agarbatti (incense sticks), dhoop and dhoop sticks, sambrani/dhoop
+          Kokanvedh stocks agarbatti (incense sticks), dhoop and dhoop sticks, sambrani/dhoop
           cones, camphor (tablets and cups), and pooja thali essentials like kumkum and chandan from
           trusted brands including Satya, Janak, Manohar, Anil, and Forest. Whether you need items for
           daily pooja, festivals, havan, or satyanarayan pooja, browse the catalog above and reach out

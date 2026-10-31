@@ -11,6 +11,7 @@ const valid: ProductInput = {
   productType: "Masala Sticks",
   sku: "CYC-INC-001",
   price: 12000,
+  discountedPrice: null,
   images: [],
   inStock: true,
   featured: false,
@@ -174,6 +175,64 @@ describe("productSchema — price", () => {
   });
 });
 
+describe("productSchema — discountedPrice", () => {
+  it("accepts a null discountedPrice", () => {
+    expect(productSchema.safeParse({ ...valid, discountedPrice: null }).success).toBe(true);
+  });
+
+  it("accepts discountedPrice omitted entirely", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- destructured only to exclude the field from the parsed object
+    const { discountedPrice: _dp, ...rest } = valid;
+    expect(productSchema.safeParse(rest).success).toBe(true);
+  });
+
+  it("rejects zero", () => {
+    expect(productSchema.safeParse({ ...valid, discountedPrice: 0 }).success).toBe(false);
+  });
+
+  it("rejects a negative discountedPrice", () => {
+    expect(productSchema.safeParse({ ...valid, discountedPrice: -1 }).success).toBe(false);
+  });
+
+  it("rejects a non-integer discountedPrice", () => {
+    expect(productSchema.safeParse({ ...valid, discountedPrice: 100.5 }).success).toBe(false);
+  });
+
+  it("accepts a discountedPrice less than price", () => {
+    const result = productSchema.safeParse({ ...valid, price: 12000, discountedPrice: 9000 });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects a discountedPrice equal to price", () => {
+    const result = productSchema.safeParse({ ...valid, price: 12000, discountedPrice: 12000 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a discountedPrice greater than price", () => {
+    const result = productSchema.safeParse({ ...valid, price: 12000, discountedPrice: 15000 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a discountedPrice when price is null — the public site would show 'Contact for price'", () => {
+    const result = productSchema.safeParse({ ...valid, price: null, discountedPrice: 9000 });
+    expect(result.success).toBe(false);
+  });
+
+  it("toProductData clears a product-level discountedPrice when variants exist", () => {
+    const data = toProductData({
+      ...valid,
+      price: 12000,
+      discountedPrice: 9000,
+      variants: [{ label: "100g", price: 12000, discountedPrice: null, inStock: true }],
+    });
+    expect(data.discountedPrice).toBeNull();
+  });
+
+  it("toProductData keeps discountedPrice when there are no variants", () => {
+    expect(toProductData({ ...valid, price: 12000, discountedPrice: 9000 }).discountedPrice).toBe(9000);
+  });
+});
+
 describe("productSchema — images", () => {
   it("rejects a missing images field", () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- destructured only to exclude the field from the parsed object
@@ -323,6 +382,45 @@ describe("productVariantSchema", () => {
   it("rejects a non-boolean inStock", () => {
     expect(productVariantSchema.safeParse({ ...validVariant, inStock: "true" }).success).toBe(false);
   });
+
+  describe("productVariantSchema — discountedPrice", () => {
+    it("accepts null discountedPrice", () => {
+      expect(productVariantSchema.safeParse({ ...validVariant, discountedPrice: null }).success).toBe(true);
+    });
+
+    it("accepts discountedPrice omitted entirely", () => {
+      expect(productVariantSchema.safeParse(validVariant).success).toBe(true);
+    });
+
+    it("accepts a valid discountedPrice strictly less than price", () => {
+      expect(productVariantSchema.safeParse({ ...validVariant, discountedPrice: 10000 }).success).toBe(true);
+    });
+
+    it("rejects 0 for discountedPrice", () => {
+      expect(productVariantSchema.safeParse({ ...validVariant, discountedPrice: 0 }).success).toBe(false);
+    });
+
+    it("rejects a negative discountedPrice", () => {
+      expect(productVariantSchema.safeParse({ ...validVariant, discountedPrice: -1 }).success).toBe(false);
+    });
+
+    it("rejects a discountedPrice equal to price", () => {
+      expect(productVariantSchema.safeParse({ ...validVariant, discountedPrice: 12000 }).success).toBe(false);
+    });
+
+    it("rejects a discountedPrice greater than price", () => {
+      expect(productVariantSchema.safeParse({ ...validVariant, discountedPrice: 15000 }).success).toBe(false);
+    });
+
+    it("error is on the discountedPrice path when discountedPrice >= price", () => {
+      const result = productVariantSchema.safeParse({ ...validVariant, discountedPrice: 15000 });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const fieldErrors = result.error.flatten().fieldErrors;
+        expect(fieldErrors.discountedPrice).toBeDefined();
+      }
+    });
+  });
 });
 
 describe("productSchema — productType", () => {
@@ -397,6 +495,7 @@ describe("toProductData — images / weight / variants exclusion", () => {
     expect(data.brand).toBe(valid.brand);
     expect(data.sku).toBe(valid.sku);
     expect(data.price).toBe(valid.price);
+    expect(data.discountedPrice).toBe(valid.discountedPrice);
     expect(data.inStock).toBe(valid.inStock);
     expect(data.featured).toBe(valid.featured);
     expect(data.isHidden).toBe(valid.isHidden);

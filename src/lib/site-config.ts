@@ -24,12 +24,12 @@ export function isConfiguredHttpsUrl(value: string | null | undefined): value is
 }
 
 export const siteConfig = {
-  name: "Chaitanya Stores",
+  name: "Kokanvedh",
   tagline: "Agarbatti, dhoop & pooja samagri from trusted brands in Sangameshwar.",
   // Kept to ~160 chars — the sitewide default meta/OG/Twitter description
   // (see src/app/layout.tsx), so length matters for search snippet display.
   description:
-    "Chaitanya Stores: agarbatti, dhoop, camphor & pooja samagri from trusted brands like Satya, Janak, Manohar, Anil & Forest. Browse the catalog and enquire via WhatsApp, email, or call.",
+    "Kokanvedh: agarbatti, dhoop, camphor & pooja samagri from trusted brands like Satya, Janak, Manohar, Anil & Forest. Browse the catalog and enquire via WhatsApp, email, or call.",
   phone: process.env.NEXT_PUBLIC_BUSINESS_PHONE ?? "",
   whatsappNumber: process.env.NEXT_PUBLIC_BUSINESS_WHATSAPP ?? "",
   email: process.env.NEXT_PUBLIC_BUSINESS_EMAIL ?? "",

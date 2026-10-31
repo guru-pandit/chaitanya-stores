@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Product, Category, ProductVariant } from "@/generated/prisma/client";
-import { formatPrice, formatVariantPrice, parseImages } from "@/lib/format";
+import { formatPrice, formatVariantPrice, parseImages, discountPercent, maxDiscountPercent } from "@/lib/format";
 import { UploadedImage } from "@/components/ui/UploadedImage";
 
 export function ProductCard({
@@ -11,6 +11,9 @@ export function ProductCard({
   const images = parseImages(product.images);
   const image = images[0];
   const hasVariants = product.variants.length > 0;
+  const percent = hasVariants
+    ? maxDiscountPercent(product.variants)
+    : discountPercent(product.price, product.discountedPrice);
 
   return (
     <Link
@@ -21,7 +24,7 @@ export function ProductCard({
         {image ? (
           <UploadedImage
             src={image}
-            alt={`${product.name} ${product.brand} at Chaitanya Stores Sangameshwar`}
+            alt={`${product.name} ${product.brand} at Kokanvedh Sangameshwar`}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
@@ -52,9 +55,27 @@ export function ProductCard({
           {product.name}
         </h3>
         <div className="mt-auto flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5 pt-2">
-          <p className="text-sm font-medium text-charcoal">
-            {hasVariants ? formatVariantPrice(product.variants) : formatPrice(product.price)}
-          </p>
+          {percent != null ? (
+            <p className="flex flex-wrap items-baseline gap-1.5">
+              <span className="text-sm font-semibold text-green-700">
+                {hasVariants
+                  ? formatVariantPrice(product.variants)
+                  : formatPrice(product.discountedPrice)}
+              </span>
+              {!hasVariants && (
+                <span className="text-xs text-charcoal/40 line-through">
+                  {formatPrice(product.price)}
+                </span>
+              )}
+              <span className="rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-800">
+                {hasVariants ? `Up to ${percent}% off` : `${percent}% off`}
+              </span>
+            </p>
+          ) : (
+            <p className="text-sm font-medium text-charcoal">
+              {hasVariants ? formatVariantPrice(product.variants) : formatPrice(product.price)}
+            </p>
+          )}
           {hasVariants ? (
             <p className="shrink-0 text-xs text-charcoal/50">{product.variants.length} options</p>
           ) : (

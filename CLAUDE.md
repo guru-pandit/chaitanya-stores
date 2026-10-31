@@ -1,4 +1,4 @@
-# Project: Chaitanya Stores
+# Project: Kokanvedh
 
 Marketing + catalog website for a retail business selling **incense sticks (agarbatti) and pooja materials**, built to expand into more product categories over time.
 

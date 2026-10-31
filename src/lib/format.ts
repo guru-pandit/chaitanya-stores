@@ -7,12 +7,48 @@ export function formatPrice(paise: number | null | undefined): string {
   }).format(paise / 100);
 }
 
-export function variantPriceRange(variants: { price: number }[]): { min: number; max: number } {
-  const prices = variants.map((v) => v.price);
+// Returns the rounded discount percentage, or null when there's no real
+// discount to show — `productSchema`'s refine already rejects a stored
+// discountedPrice >= price, but this guards call sites (e.g. a variant
+// product that never had a discountedPrice to begin with) too.
+export function discountPercent(
+  price: number | null | undefined,
+  discountedPrice: number | null | undefined
+): number | null {
+  if (price == null || discountedPrice == null || discountedPrice <= 0 || discountedPrice >= price) {
+    return null;
+  }
+  return Math.round(100 - (discountedPrice / price) * 100);
+}
+
+// Returns the effective selling price — `discountedPrice` when there is a
+// genuine discount, otherwise `price`. Mirrors the logic in `discountPercent`.
+export function effectivePrice(
+  price: number | null | undefined,
+  discountedPrice: number | null | undefined
+): number | null | undefined {
+  return discountPercent(price, discountedPrice) !== null ? discountedPrice : price;
+}
+
+// Returns the highest discount percentage across all variants, or null when
+// no variant has a genuine discount.
+export function maxDiscountPercent(
+  variants: { price: number; discountedPrice?: number | null }[]
+): number | null {
+  const percents = variants
+    .map((v) => discountPercent(v.price, v.discountedPrice))
+    .filter((p): p is number => p !== null);
+  return percents.length > 0 ? Math.max(...percents) : null;
+}
+
+export function variantPriceRange(
+  variants: { price: number; discountedPrice?: number | null }[]
+): { min: number; max: number } {
+  const prices = variants.map((v) => effectivePrice(v.price, v.discountedPrice) ?? v.price);
   return { min: Math.min(...prices), max: Math.max(...prices) };
 }
 
-export function formatVariantPrice(variants: { price: number }[]): string {
+export function formatVariantPrice(variants: { price: number; discountedPrice?: number | null }[]): string {
   const { min, max } = variantPriceRange(variants);
   return min === max ? formatPrice(min) : `${formatPrice(min)} – ${formatPrice(max)}`;
 }

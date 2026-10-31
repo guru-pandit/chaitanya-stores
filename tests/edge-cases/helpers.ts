@@ -5,7 +5,7 @@
 // instance if needed; defaults to the local audit server.
 export const BASE_URL = process.env.TEST_BASE_URL ?? "http://localhost:3100";
 
-const ADMIN_EMAIL = process.env.AUDIT_ADMIN_EMAIL ?? "audit-admin@chaitanyastores.example";
+const ADMIN_EMAIL = process.env.AUDIT_ADMIN_EMAIL ?? "audit-admin@kokanvedh.example";
 const ADMIN_PASSWORD = process.env.AUDIT_ADMIN_PASSWORD ?? "AuditPass!2026Test";
 
 /**

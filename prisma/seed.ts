@@ -52,7 +52,7 @@ async function main() {
       variants: {
         create: [
           { label: "50g", price: 6000, inStock: true },
-          { label: "100g", price: 12000, inStock: true },
+          { label: "100g", price: 12000, discountedPrice: 10000, inStock: true },
           { label: "250g", price: 28000, inStock: true },
         ],
       },
@@ -87,7 +87,7 @@ async function main() {
       name: "Brass Diya Set (Pair)",
       slug: "brass-diya-set-pair",
       description: "Traditional brass diyas, pair, for daily aarti and festivals.",
-      brand: "Chaitanya Stores",
+      brand: "Kokanvedh",
       weight: "2 pieces",
       sku: "CS-DIYA-PAIR",
       price: 45000,
@@ -100,7 +100,7 @@ async function main() {
       name: "Kumkum & Chandan Box",
       slug: "kumkum-chandan-box",
       description: "Set of kumkum, chandan, and haldi in a compact box.",
-      brand: "Chaitanya Stores",
+      brand: "Kokanvedh",
       weight: "3 x 25g",
       sku: "CS-KCBOX-75",
       price: null,
@@ -158,7 +158,7 @@ async function main() {
     });
   }
 
-  const adminEmail = process.env.SEED_ADMIN_EMAIL ?? "admin@chaitanyastores.example";
+  const adminEmail = process.env.SEED_ADMIN_EMAIL ?? "admin@kokanvedh.example";
   const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "changeme123";
   const hashedPassword = await bcrypt.hash(adminPassword, 10);
 

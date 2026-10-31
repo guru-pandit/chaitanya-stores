@@ -44,7 +44,7 @@ flowchart TD
 ```
 
 Key point: WhatsApp/Email/Call are **exit points** — the site never tracks what happens after the
-tap. The only enquiry Chaitanya Stores can see server-side is a contact-form submission
+tap. The only enquiry Kokanvedh can see server-side is a contact-form submission
 (logged to `Enquiry`, if that optional feature is enabled).
 
 ---

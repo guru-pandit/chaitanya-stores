@@ -38,6 +38,27 @@ server {
     }
 }
 
+# ---- Legacy domains: permanent redirect to the canonical ${DOMAIN_NAME} ----
+# Old brand domain + extra domains. Kept alive (DNS + the shared "legacy"
+# certificate, see README) so old links, Google results and HSTS-cached
+# browsers land on the new site. Names are literal on purpose: they're
+# not secrets and are not expected to change.
+server {
+    listen 80;
+    listen [::]:80;
+    server_name chaitanyastores.com www.chaitanyastores.com
+                kokanvedh.in www.kokanvedh.in
+                kokanvedh.online www.kokanvedh.online;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://${DOMAIN_NAME}$request_uri;
+    }
+}
+
 # ---- HTTPS: the real application ----
 server {
     listen 443 ssl;
@@ -154,4 +175,25 @@ server {
         limit_req zone=api_limit burst=20 nodelay;
         proxy_pass http://web:3000;
     }
+}
+
+# ---- HTTPS for legacy domains: redirect only, no app ----
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name chaitanyastores.com www.chaitanyastores.com
+                kokanvedh.in www.kokanvedh.in
+                kokanvedh.online www.kokanvedh.online;
+
+    ssl_certificate     /etc/letsencrypt/live/legacy/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/legacy/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_tickets off;
+
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+
+    return 301 https://${DOMAIN_NAME}$request_uri;
 }

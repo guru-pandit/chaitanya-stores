@@ -61,22 +61,22 @@ describe("verifyCsrf", () => {
   });
 
   it("allows a request from the configured NEXT_PUBLIC_SITE_URL host even if it differs from the request host", () => {
-    process.env.NEXT_PUBLIC_SITE_URL = "https://chaitanyastores.example";
-    expect(verifyCsrf(requestWith({ origin: "https://chaitanyastores.example" }))).toBeNull();
+    process.env.NEXT_PUBLIC_SITE_URL = "https://kokanvedh.example";
+    expect(verifyCsrf(requestWith({ origin: "https://kokanvedh.example" }))).toBeNull();
   });
 
   it("allows the www-variant of the configured NEXT_PUBLIC_SITE_URL host", () => {
-    process.env.NEXT_PUBLIC_SITE_URL = "https://chaitanyastores.example";
-    expect(verifyCsrf(requestWith({ origin: "https://www.chaitanyastores.example" }))).toBeNull();
+    process.env.NEXT_PUBLIC_SITE_URL = "https://kokanvedh.example";
+    expect(verifyCsrf(requestWith({ origin: "https://www.kokanvedh.example" }))).toBeNull();
   });
 
   it("allows the bare-domain variant when NEXT_PUBLIC_SITE_URL is configured with www", () => {
-    process.env.NEXT_PUBLIC_SITE_URL = "https://www.chaitanyastores.example";
-    expect(verifyCsrf(requestWith({ origin: "https://chaitanyastores.example" }))).toBeNull();
+    process.env.NEXT_PUBLIC_SITE_URL = "https://www.kokanvedh.example";
+    expect(verifyCsrf(requestWith({ origin: "https://kokanvedh.example" }))).toBeNull();
   });
 
   it("still rejects a genuinely unrelated origin even with NEXT_PUBLIC_SITE_URL configured", () => {
-    process.env.NEXT_PUBLIC_SITE_URL = "https://chaitanyastores.example";
+    process.env.NEXT_PUBLIC_SITE_URL = "https://kokanvedh.example";
     const res = verifyCsrf(requestWith({ origin: "https://attacker.example" }));
     expect(res).not.toBeNull();
     expect(res!.status).toBe(403);
@@ -91,7 +91,7 @@ describe("verifyCsrf", () => {
   it("trusts the Host header even when the request URL's own host would be wrong (standalone-build shape)", () => {
     const req = new NextRequest("http://0.0.0.0:3000/api/products", {
       method: "POST",
-      headers: { host: "chaitanyastores.com", origin: "https://chaitanyastores.com" },
+      headers: { host: "kokanvedh.com", origin: "https://kokanvedh.com" },
     });
     expect(verifyCsrf(req)).toBeNull();
   });

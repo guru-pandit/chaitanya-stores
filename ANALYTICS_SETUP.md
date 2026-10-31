@@ -1,4 +1,4 @@
-# Analytics & SEO Setup — Chaitanya Stores
+# Analytics & SEO Setup — Kokanvedh
 
 This document explains how visitor tracking works on the website, how to finish setting it up, and
 how to read the numbers once it's live. It's written for the shop owner / whoever manages the

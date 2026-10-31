@@ -6,7 +6,7 @@ import type { ShopLocation } from "@/generated/prisma/client";
 
 const location = {
   id: "loc-1",
-  name: "Chaitanya Stores",
+  name: "Kokanvedh",
   address: "Main Road, Sangmeshwar",
   phone: "+919876543210",
   email: "shop@example.com",

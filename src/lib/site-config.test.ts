@@ -102,8 +102,8 @@ describe("isConfiguredHttpsUrl", () => {
   });
 
   it("returns true for an https URL (tolerating incidental surrounding whitespace)", () => {
-    expect(isConfiguredHttpsUrl("https://instagram.com/chaitanyastores")).toBe(true);
-    expect(isConfiguredHttpsUrl("  https://facebook.com/chaitanyastores  ")).toBe(true);
+    expect(isConfiguredHttpsUrl("https://instagram.com/kokanvedh")).toBe(true);
+    expect(isConfiguredHttpsUrl("  https://facebook.com/kokanvedh  ")).toBe(true);
   });
 });
 
@@ -122,7 +122,7 @@ describe("siteConfig — contact fields have no fabricated fallback", () => {
     expect(siteConfig.whatsappNumber === "" || hasContactValue(siteConfig.whatsappNumber)).toBe(true);
     expect(siteConfig.email === "" || hasContactValue(siteConfig.email)).toBe(true);
     expect(siteConfig.phone).not.toBe("+919999999999");
-    expect(siteConfig.email).not.toBe("hello@chaitanyastores.example");
+    expect(siteConfig.email).not.toBe("hello@kokanvedh.example");
   });
 
   it("falls back to a real coarse region for address, not a fabricated city with no shop presence", () => {

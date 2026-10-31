@@ -31,7 +31,7 @@ const fullLocation = {
   email: "shop@example.com",
   phone: "+919999999999",
   address: "Main Road, Sangameshwar",
-  name: "Chaitanya Stores",
+  name: "Kokanvedh",
   isPrimary: true,
   createdAt: new Date("2026-01-01"),
   updatedAt: new Date("2026-01-01"),
@@ -124,7 +124,7 @@ describe("ContactPage — no ShopLocation rows in the DB at all", () => {
   it("still renders without crashing, falling back to siteConfig-derived contact values", async () => {
     await renderContact([], primaryFallback);
 
-    expect(screen.getByRole("heading", { name: /contact chaitanya stores/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /contact kokanvedh/i })).toBeInTheDocument();
     // "Visit the Shop" locations section is only rendered when locations exist.
     expect(screen.queryByRole("heading", { name: /visit the shop/i })).not.toBeInTheDocument();
   });

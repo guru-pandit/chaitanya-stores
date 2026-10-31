@@ -16,7 +16,7 @@ vi.mock("@/lib/prisma", () => ({
 vi.mock("@/lib/shop-locations", () => ({
   getPrimaryShopLocation: vi.fn().mockResolvedValue({
     id: "loc-1",
-    name: "Chaitanya Stores",
+    name: "Kokanvedh",
     address: "123 Main St",
     phone: "+919999999999",
     whatsappNumber: "+919999999999",

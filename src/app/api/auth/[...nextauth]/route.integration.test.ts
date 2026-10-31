@@ -8,7 +8,7 @@ import { TEST_BASE_URL } from "@/test/apiIntegrationHelpers";
 // src/lib/login-throttle.ts's 5-attempt lockout for the shared admin email,
 // which every other *.integration.test.ts file's beforeAll depends on
 // against this same long-running dev server process.
-const ADMIN_EMAIL = process.env.AUDIT_ADMIN_EMAIL ?? "audit-admin@chaitanyastores.example";
+const ADMIN_EMAIL = process.env.AUDIT_ADMIN_EMAIL ?? "audit-admin@kokanvedh.example";
 const ADMIN_PASSWORD = process.env.AUDIT_ADMIN_PASSWORD ?? "AuditPass!2026Test";
 
 async function getCsrf() {

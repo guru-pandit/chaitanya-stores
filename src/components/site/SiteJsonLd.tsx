@@ -13,6 +13,8 @@ export async function SiteJsonLd() {
     "@context": "https://schema.org",
     "@type": "Store",
     name: siteConfig.name,
+    // Lets search engines connect the new brand to the shop's current name.
+    ...(siteConfig.shopName ? { alternateName: siteConfig.shopName } : {}),
     description: siteConfig.description,
     url: siteConfig.siteUrl,
     image: `${siteConfig.siteUrl}/logo.png`,

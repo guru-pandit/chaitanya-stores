@@ -147,7 +147,7 @@ export default async function CatalogPage({
           Pooja Samagri in Sangameshwar, Ratnagiri
         </h2>
         <p className="mt-3 text-charcoal/70 leading-relaxed">
-          Kokanvedh stocks agarbatti (incense sticks), dhoop and dhoop sticks, sambrani/dhoop
+          {siteConfig.nameWithShop} stocks agarbatti (incense sticks), dhoop and dhoop sticks, sambrani/dhoop
           cones, camphor (tablets and cups), and pooja thali essentials like kumkum and chandan from
           trusted brands including Satya, Janak, Manohar, Anil, and Forest. Whether you need items for
           daily pooja, festivals, havan, or satyanarayan pooja, browse the catalog above and reach out

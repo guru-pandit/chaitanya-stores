@@ -62,3 +62,16 @@ describe("shopLocationSchema — mapLink", () => {
     expect(result.success).toBe(false);
   });
 });
+
+describe("shopLocationSchema — whatsappNumber format", () => {
+  it.each(["7776088638", "+919999999999", "91 99999 99999", "91-9999999999", "91999999999a"])(
+    "rejects %s (wa.me needs digits only, with country code)",
+    (whatsappNumber) => {
+      expect(shopLocationSchema.safeParse({ ...valid, whatsappNumber }).success).toBe(false);
+    }
+  );
+
+  it("accepts a 12-digit number with country code", () => {
+    expect(shopLocationSchema.safeParse({ ...valid, whatsappNumber: "917776088638" }).success).toBe(true);
+  });
+});

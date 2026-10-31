@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import ProductDetailPage from "./page";
+import ProductDetailPage, { generateMetadata } from "./page";
 import { prisma } from "@/lib/prisma";
 import { siteConfig } from "@/lib/site-config";
 import type { ProductVariant } from "@/generated/prisma/client";
@@ -157,5 +157,25 @@ describe("ProductDetailPage — productType & disclaimer", () => {
     await renderPage({ productType: null });
 
     expect(screen.getByText(siteConfig.productDisclaimer)).toBeInTheDocument();
+  });
+});
+
+describe("ProductDetailPage — generateMetadata description", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it.each(["", "   "])("falls back to a generated description when the stored description is %j", async (description) => {
+    mockPrisma.product.findFirst.mockResolvedValueOnce({ ...baseProduct, description });
+    const meta = await generateMetadata({ params: Promise.resolve({ slug: "sandalwood-agarbatti" }) });
+    expect(meta.description).toBe(
+      `Sandalwood Agarbatti by Cycle — Agarbatti from ${siteConfig.name}.`
+    );
+  });
+
+  it("uses the stored description when present", async () => {
+    mockPrisma.product.findFirst.mockResolvedValueOnce({ ...baseProduct });
+    const meta = await generateMetadata({ params: Promise.resolve({ slug: "sandalwood-agarbatti" }) });
+    expect(meta.description).toBe("Long-lasting sandalwood fragrance");
   });
 });

@@ -7,7 +7,7 @@ import { ShopLocationsList } from "@/components/site/ShopLocationsList";
 
 const ABOUT_TITLE = "About Kokanvedh | Pooja Samagri Shop, Sangameshwar";
 const ABOUT_DESCRIPTION =
-  "Kokanvedh is a retail pooja samagri shop in Sangameshwar, Ratnagiri, stocking agarbatti, dhoop, camphor, and pooja essentials from trusted brands. Browse online, then enquire or visit in person.";
+  `${siteConfig.nameWithShop} is a new pooja samagri shop in Sangameshwar, Ratnagiri, stocking agarbatti, dhoop, camphor, and pooja essentials from trusted brands. Browse online, then enquire or visit in person.`;
 
 export const metadata: Metadata = {
   // `absolute` opts out of the root layout's `%s | Kokanvedh` title
@@ -40,9 +40,9 @@ export default async function AboutPage() {
       <MandalaDivider className="my-8" />
       <div className="space-y-5 text-charcoal/80 leading-relaxed">
         <p>
-          Kokanvedh opened in Sangameshwar about two years ago so local families wouldn&apos;t
-          have to travel all the way to Ratnagiri or Chiplun just to pick up agarbatti, dhoop, or
-          pooja samagri. What started as a small shop has grown into a catalog spanning agarbatti,
+          {siteConfig.nameWithShop} is a new pooja samagri shop in Sangameshwar, started so local families can find
+          agarbatti, dhoop, and pooja samagri close to home instead of travelling to Ratnagiri or
+          Chiplun. We&apos;re just getting started and building our range step by step — agarbatti,
           dhoop and dhoop sticks, sambrani/dhoop cones, camphor, and pooja thali essentials like
           kumkum and chandan.
         </p>

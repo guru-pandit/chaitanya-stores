@@ -146,3 +146,11 @@ describe("siteConfig — product disclaimer & policies", () => {
     }
   });
 });
+
+describe("siteConfig brand names", () => {
+  it("pairs the brand with the shop's current trading name for body copy", () => {
+    expect(siteConfig.name).toBe("Kokanvedh");
+    expect(siteConfig.shopName).toBe("Chaitanya Sugandhalay");
+    expect(siteConfig.nameWithShop).toBe("Kokanvedh (Chaitanya Sugandhalay)");
+  });
+});

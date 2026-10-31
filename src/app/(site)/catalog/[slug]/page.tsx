@@ -29,7 +29,7 @@ export async function generateMetadata({
 
   const images = parseImages(product.images);
   const description =
-    product.description ??
+    product.description?.trim() ||
     `${product.name} by ${product.brand} — ${product.category.name} from ${siteConfig.name}.`;
 
   return {

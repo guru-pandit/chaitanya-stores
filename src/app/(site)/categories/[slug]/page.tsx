@@ -18,7 +18,7 @@ export async function generateMetadata({
   if (!category) return { title: "Category Not Found", robots: { index: false, follow: false } };
 
   const description =
-    category.description ?? `Browse ${category.name} products from Kokanvedh.`;
+    category.description?.trim() || `Browse ${category.name} products from Kokanvedh.`;
 
   return {
     title: category.name,
